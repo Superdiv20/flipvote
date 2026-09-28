@@ -11,7 +11,7 @@
       "schematics": {},
       "root": "",
       "sourceRoot": "src",
-      "prefix": "app",
+      "prefix": "flipvote",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
