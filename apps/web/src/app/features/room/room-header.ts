@@ -4,13 +4,15 @@ import { lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers } from '@ng
 import type { RoomState } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
+import type { Account } from '../../core/account';
 import type { Theme } from '../../core/theme';
+import { AccountMenu } from './account-menu';
 import { Logo } from './logo';
 import { ParticipantList } from './participant-list';
 
 @Component({
   selector: 'flipvote-room-header',
-  imports: [HlmButtonImports, HlmPopoverImports, NgIcon, Logo, ParticipantList],
+  imports: [HlmButtonImports, HlmPopoverImports, NgIcon, Logo, ParticipantList, AccountMenu],
   providers: [provideIcons({ lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers })],
   host: {
     class: 'flex h-16 shrink-0 items-center gap-4 px-6 shadow-[inset_0_-1px_0_var(--border)]',
@@ -64,6 +66,14 @@ import { ParticipantList } from './participant-list';
       <ng-icon [name]="copied() ? 'lucideCheck' : 'lucideLink'" data-icon="inline-start" />
       <span aria-live="polite">{{ copied() ? 'Link copied' : 'Invite' }}</span>
     </button>
+    <div class="bg-border h-5 w-px" aria-hidden="true"></div>
+    <flipvote-account-menu
+      [account]="account()"
+      [guestName]="guestName()"
+      (openSettings)="openSettings.emit()"
+      (signIn)="signIn.emit()"
+      (signOut)="signOut.emit()"
+    />
   `,
 })
 export class RoomHeader {
@@ -76,7 +86,12 @@ export class RoomHeader {
   readonly flipped = input.required<boolean>();
   readonly votedCount = input.required<number>();
   readonly theme = input.required<Theme>();
+  readonly account = input.required<Account | null>();
+  readonly guestName = input.required<string>();
   readonly toggleTheme = output();
+  readonly openSettings = output();
+  readonly signIn = output();
+  readonly signOut = output();
 
   protected readonly copied = signal(false);
   private resetCopied?: ReturnType<typeof setTimeout>;

@@ -1,12 +1,5 @@
-import {
-  Component,
-  computed,
-  DOCUMENT,
-  inject,
-  linkedSignal,
-  signal,
-  untracked,
-} from '@angular/core';
+import { Component, computed, inject, linkedSignal, signal, untracked } from '@angular/core';
+import { AccountService } from '../../core/account';
 import { ThemeService } from '../../core/theme';
 import { CardHand } from './card-hand';
 import { IssueDrawer } from './issues/issue-drawer';
@@ -29,7 +22,11 @@ import { RoomStore } from './+store/room-store';
       [flipped]="store.flipped()"
       [votedCount]="store.votedCount()"
       [theme]="theme.theme()"
+      [account]="account.account()"
+      [guestName]="selfName()"
       (toggleTheme)="theme.toggle()"
+      (signIn)="account.signIn()"
+      (signOut)="account.signOut()"
     />
     <div class="flex min-h-0 flex-1">
       <flipvote-issue-drawer
@@ -89,6 +86,11 @@ import { RoomStore } from './+store/room-store';
 export class RoomPage {
   protected readonly store = inject(RoomStore);
   protected readonly theme = inject(ThemeService);
+  protected readonly account = inject(AccountService);
+
+  protected readonly selfName = computed(
+    () => this.store.participants().find((p) => p.id === this.store.selfId)?.name ?? 'Guest',
+  );
 
   protected readonly results = computed(() => {
     const results = this.store.results();
@@ -101,10 +103,8 @@ export class RoomPage {
     computation: (results, previous) => results ?? previous?.value ?? null,
   });
 
-  /** What the user last chose by hand. Narrow screens start with the rail, since the panel covers the table there. */
-  private readonly collapsedByUser = signal(
-    inject(DOCUMENT).defaultView?.matchMedia?.('(width < 64rem)').matches ?? false,
-  );
+  /** What the user last chose by hand. Starts collapsed, so the table has the room until someone opens the issues. */
+  private readonly collapsedByUser = signal(true);
 
   /** Collapses to the rail when the cards flip, and returns to the user's choice on the next round. */
   protected readonly drawerCollapsed = linkedSignal({

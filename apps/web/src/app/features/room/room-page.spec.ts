@@ -13,8 +13,14 @@ describe('RoomPage', () => {
     return { store: TestBed.inject(RoomStore), page };
   }
 
-  it('collapses the issue drawer on flip and reopens it on the next round', () => {
+  it('starts with the issue drawer collapsed', () => {
+    const { page } = setup();
+    expect(page.drawerCollapsed()).toBe(true);
+  });
+
+  it('collapses the opened drawer on flip and reopens it on the next round', () => {
     const { store, page } = setup();
+    page.toggleDrawer();
     expect(page.drawerCollapsed()).toBe(false);
     store.vote('5');
     store.flip();
@@ -25,6 +31,7 @@ describe('RoomPage', () => {
 
   it('stays collapsed after the round when the user collapsed it by hand', () => {
     const { store, page } = setup();
+    page.toggleDrawer();
     page.toggleDrawer();
     store.vote('5');
     store.flip();
