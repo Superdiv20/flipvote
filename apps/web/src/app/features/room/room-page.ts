@@ -15,7 +15,10 @@ import { RoomStore } from './+store/room-store';
     <flipvote-room-header
       [roomName]="store.roomName()"
       [topic]="store.topic()"
-      [participantCount]="store.participants().length"
+      [participants]="store.participants()"
+      [selfId]="store.selfId"
+      [flipped]="store.flipped()"
+      [votedCount]="store.votedCount()"
       [theme]="theme.theme()"
       (toggleTheme)="theme.toggle()"
     />

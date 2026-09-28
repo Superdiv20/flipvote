@@ -1,13 +1,16 @@
 import { Component, DOCUMENT, inject, input, output, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers } from '@ng-icons/lucide';
+import type { RoomState } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmPopoverImports } from '@spartan-ng/helm/popover';
 import type { Theme } from '../../core/theme';
 import { Logo } from './logo';
+import { ParticipantList } from './participant-list';
 
 @Component({
   selector: 'flipvote-room-header',
-  imports: [HlmButtonImports, NgIcon, Logo],
+  imports: [HlmButtonImports, HlmPopoverImports, NgIcon, Logo, ParticipantList],
   providers: [provideIcons({ lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers })],
   host: {
     class: 'flex h-16 shrink-0 items-center gap-4 px-6 shadow-[inset_0_-1px_0_var(--border)]',
@@ -19,14 +22,35 @@ import { Logo } from './logo';
       <span class="text-muted-foreground truncate text-xs font-medium">{{ roomName() }}</span>
       <h1 class="truncate text-sm font-semibold">{{ topic() }}</h1>
     </div>
-    <div
-      class="bg-muted flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium max-sm:ml-auto"
-      [attr.aria-label]="participantCount() + ' participants'"
-      role="status"
-    >
-      <ng-icon name="lucideUsers" class="text-base" aria-hidden="true" />
-      <span aria-hidden="true">{{ participantCount() }}</span>
-    </div>
+    <hlm-popover class="max-sm:ml-auto" align="end" sideOffset="8">
+      <button
+        hlmPopoverTrigger
+        hlmBtn
+        variant="secondary"
+        class="gap-1.5 px-2.5"
+        [attr.aria-label]="participants().length + ' participants, show list'"
+      >
+        <ng-icon name="lucideUsers" aria-hidden="true" />
+        <span aria-hidden="true">{{ participants().length }}</span>
+      </button>
+      <hlm-popover-content *hlmPopoverPortal class="w-72 gap-3 p-3">
+        <hlm-popover-header class="px-1">
+          <h2 hlmPopoverTitle>Participants</h2>
+          <p hlmPopoverDescription class="text-xs">
+            {{
+              flipped()
+                ? 'Cards revealed'
+                : votedCount() + ' of ' + participants().length + ' voted'
+            }}
+          </p>
+        </hlm-popover-header>
+        <flipvote-participant-list
+          [participants]="participants()"
+          [selfId]="selfId()"
+          [flipped]="flipped()"
+        />
+      </hlm-popover-content>
+    </hlm-popover>
     <button
       hlmBtn
       variant="ghost"
@@ -47,7 +71,10 @@ export class RoomHeader {
 
   readonly roomName = input.required<string>();
   readonly topic = input.required<string>();
-  readonly participantCount = input.required<number>();
+  readonly participants = input.required<RoomState['participants']>();
+  readonly selfId = input.required<string>();
+  readonly flipped = input.required<boolean>();
+  readonly votedCount = input.required<number>();
   readonly theme = input.required<Theme>();
   readonly toggleTheme = output();
 
