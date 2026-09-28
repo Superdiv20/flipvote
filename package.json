@@ -1,0 +1,10 @@
+{
+  "name": "flipvote",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun --filter '*' dev",
+    "dev:server": "bun --filter @flipvote/server dev",
+    "dev:web": "bun --filter @flipvote/web dev"
+  }
+}
