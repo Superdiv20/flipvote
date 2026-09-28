@@ -3,7 +3,7 @@ import type { RoomState } from '@flipvote/protocol';
 import { FIBONACCI_DECK } from '../deck-types';
 import { summarizeVotes } from '../results';
 import { MOCK_CURRENT_ISSUE_ID, MOCK_ISSUES, MOCK_ROOM, SELF_ID } from '../../../shared/mock-room';
-import { type Issue, issueLabel, parseIssueLines } from '../issues/issue-types';
+import { type Issue, type IssueDetails, issueLabel, parseIssueLines } from '../issues/issue-types';
 
 const MOCK_VOTES: Record<string, string> = { maya: '5', priya: '8', leo: '5' };
 
@@ -90,6 +90,21 @@ export class RoomStore {
     if (!added.length) return;
     this.issues.update((issues) => [...issues, ...added]);
     if (this.currentIssueId() === null) this.currentIssueId.set(added[0].id);
+  }
+
+  /** Adds an issue from the full dialog. A leading tracker key in the title is split off like in quick add. */
+  createIssue(details: IssueDetails): void {
+    const [parsed] = parseIssueLines(details.title);
+    if (!parsed) return;
+    const issue: Issue = { ...details, ...parsed, id: `new-${++this.nextIssueId}` };
+    this.issues.update((issues) => [...issues, issue]);
+    if (this.currentIssueId() === null) this.currentIssueId.set(issue.id);
+  }
+
+  updateIssue(id: string, details: IssueDetails): void {
+    this.issues.update((issues) =>
+      issues.map((issue) => (issue.id === id ? { ...issue, ...details } : issue)),
+    );
   }
 
   private nextOpenIssue(afterId: string): string | null {

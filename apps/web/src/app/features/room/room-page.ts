@@ -39,6 +39,8 @@ import { RoomStore } from './+store/room-store';
         (toggle)="toggleDrawer()"
         (select)="store.selectIssue($event)"
         (add)="store.addIssues($event)"
+        (create)="store.createIssue($event)"
+        (update)="store.updateIssue($event.id, $event.details)"
       />
       <main class="flex min-w-0 flex-1 flex-col">
         <!-- The results slide in right beside the table while the drawer closes on the left, so the table keeps its size. -->

@@ -52,4 +52,31 @@ describe('RoomPage', () => {
       { key: undefined, title: 'Second one' },
     ]);
   });
+
+  it('edits an issue from the dialog and keeps its key and estimate', () => {
+    const { store } = setup();
+    store.updateIssue('atl-209', {
+      title: 'New title',
+      link: 'https://example.com',
+      description: 'Notes',
+    });
+    expect(store.issues().find((i) => i.id === 'atl-209')).toEqual({
+      id: 'atl-209',
+      key: 'ATL-209',
+      title: 'New title',
+      link: 'https://example.com',
+      description: 'Notes',
+      estimate: '5',
+    });
+  });
+
+  it('creates an issue from the dialog and splits off a tracker key', () => {
+    const { store } = setup();
+    store.createIssue({ title: 'ATL-400 Dialog issue', description: 'Details' });
+    expect(store.issues().at(-1)).toMatchObject({
+      key: 'ATL-400',
+      title: 'Dialog issue',
+      description: 'Details',
+    });
+  });
 });

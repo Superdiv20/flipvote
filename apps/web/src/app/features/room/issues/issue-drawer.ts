@@ -1,11 +1,13 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideChevronsLeft } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { AddIssueDialog, type AddIssueDialogContext } from './add-issue-dialog';
 import { AddIssueField } from './add-issue-field';
 import { IssueList } from './issue-list';
 import { IssueRail } from './issue-rail';
-import type { Issue } from './issue-types';
+import type { Issue, IssueDetails } from './issue-types';
 
 /**
  * Issues docked on the left, 300px wide or collapsed to a 56px rail. From `lg` up it pushes the
@@ -18,15 +20,15 @@ import type { Issue } from './issue-types';
   host: {
     class:
       'relative shrink-0 transition-[width] duration-220 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
-    '[class]': "collapsed() ? 'w-14' : 'w-14 lg:w-75'",
+    '[class]': "collapsed() ? 'w-14' : 'w-14 lg:w-85'",
   },
   template: `
     <div
       class="bg-background absolute inset-y-0 left-0 z-20 overflow-hidden shadow-[inset_-1px_0_0_var(--border)] transition-[width,box-shadow] duration-220 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none"
-      [class]="collapsed() ? 'w-14' : 'w-75 max-lg:shadow-float'"
+      [class]="collapsed() ? 'w-14' : 'w-85 max-lg:shadow-float'"
     >
       <section
-        class="absolute inset-y-0 left-0 flex w-75 flex-col transition-opacity duration-180 ease-out motion-reduce:transition-none"
+        class="absolute inset-y-0 left-0 flex w-85 flex-col transition-opacity duration-180 ease-out motion-reduce:transition-none"
         [class]="collapsed() ? 'opacity-0' : 'opacity-100'"
         [inert]="collapsed()"
         aria-labelledby="issues-title"
@@ -55,10 +57,13 @@ import type { Issue } from './issue-types';
           [issues]="issues()"
           [currentId]="currentId()"
           (select)="select.emit($event)"
+          (open)="openIssue($event)"
+          (remove)="remove.emit($event)"
         />
         <flipvote-add-issue-field
           class="px-4 pt-3 pb-4 shadow-[inset_0_1px_0_var(--border)]"
           (add)="add.emit($event)"
+          (create)="create.emit($event)"
         />
       </section>
       <flipvote-issue-rail
@@ -82,4 +87,21 @@ export class IssueDrawer {
   readonly toggle = output();
   readonly select = output<string>();
   readonly add = output<string>();
+  readonly create = output<IssueDetails>();
+  readonly update = output<{ id: string; details: IssueDetails }>();
+  readonly remove = output<string>();
+
+  private readonly dialog = inject(HlmDialogService);
+
+  protected openIssue(issue: Issue): void {
+    const { title, link, description } = issue;
+    this.dialog
+      .open<IssueDetails, AddIssueDialogContext>(AddIssueDialog, {
+        context: { issue: { title, link, description } },
+        contentClass: 'w-[min(28rem,calc(100vw-2rem))]',
+      })
+      .closed$.subscribe((details) => {
+        if (details) this.update.emit({ id: issue.id, details });
+      });
+  }
 }

@@ -5,8 +5,9 @@ import { form, FormField } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideArrowRight, lucidePlus } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmDialogService } from '../../../../../libs/ui/dialog/src/lib/hlm-dialog.service';
-import { AddIssueDialog } from './add-issue-dialog';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { AddIssueDialog, type AddIssueDialogContext } from './add-issue-dialog';
+import type { IssueDetails } from './issue-types';
 
 /** Adds an issue on Enter; pasting several lines adds one issue per line. */
 @Component({
@@ -58,6 +59,8 @@ import { AddIssueDialog } from './add-issue-dialog';
 export class AddIssueField {
   private readonly _hlmDialogService = inject(HlmDialogService);
   readonly add = output<string>();
+  /** An issue filled in through the full dialog. */
+  readonly create = output<IssueDetails>();
 
   protected readonly _model = signal({
     title: '',
@@ -66,10 +69,17 @@ export class AddIssueField {
   public readonly quickIssueForm = form(this._model);
 
   public openAddIssueDialog() {
-    this._hlmDialogService.open(AddIssueDialog, {
-      context: {
-        title: this.quickIssueForm.title().value(),
+    const dialog = this._hlmDialogService.open<IssueDetails, AddIssueDialogContext>(
+      AddIssueDialog,
+      {
+        context: { title: this.quickIssueForm.title().value() },
+        contentClass: 'w-[min(28rem,calc(100vw-2rem))]',
       },
+    );
+    dialog.closed$.subscribe((details) => {
+      if (!details) return;
+      this.create.emit(details);
+      this.quickIssueForm.title().value.set('');
     });
   }
 
