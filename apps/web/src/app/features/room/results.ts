@@ -6,6 +6,8 @@ export interface VoteResults {
   distribution: { value: string; count: number }[];
   /** The shared value when at least two people voted and all agree. */
   consensus: string | null;
+  /** Most common numeric vote, the higher one on a tie. `null` when nobody picked a number. */
+  estimate: string | null;
 }
 
 export function summarizeVotes(votes: readonly string[], deck: readonly string[]): VoteResults {
@@ -25,5 +27,16 @@ export function summarizeVotes(votes: readonly string[], deck: readonly string[]
 
   const consensus = votes.length >= 2 && counts.size === 1 ? votes[0] : null;
 
-  return { count: votes.length, average, distribution, consensus };
+  let estimate: { value: string; count: number } | null = null;
+  for (const row of distribution) {
+    if (Number.isFinite(Number(row.value)) && row.count >= (estimate?.count ?? 0)) estimate = row;
+  }
+
+  return {
+    count: votes.length,
+    average,
+    distribution,
+    consensus,
+    estimate: estimate?.value ?? null,
+  };
 }

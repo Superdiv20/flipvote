@@ -14,14 +14,20 @@ import { cardLabel, COFFEE } from './deck-types';
       <ng-icon name="lucideCoffee" [size]="iconSize()" aria-hidden="true" />
       <span class="sr-only">{{ label() }}</span>
     } @else {
-      <span [class]="value().length > 1 ? 'text-[22px]' : 'text-[26px]'">{{ value() }}</span>
+      <span [class]="textClass()">{{ value() }}</span>
     }
   `,
 })
 export class CardValue {
   readonly value = input.required<string>();
   readonly iconSize = input('24px');
+  readonly size = input<'md' | 'sm'>('md');
 
   protected readonly isCoffee = computed(() => this.value() === COFFEE);
   protected readonly label = computed(() => cardLabel(this.value()));
+  protected readonly textClass = computed(() => {
+    const long = this.value().length > 1;
+    if (this.size() === 'sm') return long ? 'text-[17px]' : 'text-xl';
+    return long ? 'text-[22px]' : 'text-[26px]';
+  });
 }

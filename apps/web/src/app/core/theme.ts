@@ -34,7 +34,7 @@ export class ThemeService {
     } catch {
       // Fall through to the system preference.
     }
-    return this.document.defaultView?.matchMedia('(prefers-color-scheme: dark)').matches
+    return this.document.defaultView?.matchMedia?.('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light';
   }

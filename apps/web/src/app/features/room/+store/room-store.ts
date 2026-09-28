@@ -2,7 +2,8 @@ import { computed, Service, signal } from '@angular/core';
 import type { RoomState } from '@flipvote/protocol';
 import { FIBONACCI_DECK } from '../deck-types';
 import { summarizeVotes } from '../results';
-import { MOCK_ROOM, SELF_ID } from '../../../shared/mock-room';
+import { MOCK_CURRENT_ISSUE_ID, MOCK_ISSUES, MOCK_ROOM, SELF_ID } from '../../../shared/mock-room';
+import { type Issue, issueLabel, parseIssueLines } from '../issues/issue-types';
 
 const MOCK_VOTES: Record<string, string> = { maya: '5', priya: '8', leo: '5' };
 
@@ -11,7 +12,17 @@ export class RoomStore {
   readonly selfId = SELF_ID;
   readonly deck = FIBONACCI_DECK;
   readonly roomName = signal('Atlas · Sprint 42 planning');
-  readonly topic = signal('ATL-214 Bulk export for invoices');
+
+  readonly issues = signal<Issue[]>(MOCK_ISSUES);
+  readonly currentIssueId = signal<string | null>(MOCK_CURRENT_ISSUE_ID);
+  readonly currentIssue = computed(
+    () => this.issues().find((issue) => issue.id === this.currentIssueId()) ?? null,
+  );
+  readonly topic = computed(() => {
+    const issue = this.currentIssue();
+    return issue ? issueLabel(issue) : null;
+  });
+  private nextIssueId = 0;
 
   private readonly room = signal<RoomState>(MOCK_ROOM);
   readonly myVote = signal<string | null>(null);
@@ -50,7 +61,45 @@ export class RoomStore {
     }));
   }
 
+  /** Starts a new round. A finished round records its estimate and moves on to the next open issue. */
   reset(): void {
+    const estimate = this.results()?.estimate;
+    const current = this.currentIssueId();
+    if (estimate && current) {
+      this.issues.update((issues) =>
+        issues.map((issue) => (issue.id === current ? { ...issue, estimate } : issue)),
+      );
+      this.currentIssueId.set(this.nextOpenIssue(current));
+    }
+    this.clearRound();
+  }
+
+  /** Switches the table to another issue and starts a fresh round on it. */
+  selectIssue(id: string): void {
+    if (id === this.currentIssueId()) return;
+    this.currentIssueId.set(id);
+    this.clearRound();
+  }
+
+  /** Adds one issue per line. The first one becomes current when nothing is being estimated. */
+  addIssues(text: string): void {
+    const added = parseIssueLines(text).map((issue) => ({
+      ...issue,
+      id: `new-${++this.nextIssueId}`,
+    }));
+    if (!added.length) return;
+    this.issues.update((issues) => [...issues, ...added]);
+    if (this.currentIssueId() === null) this.currentIssueId.set(added[0].id);
+  }
+
+  private nextOpenIssue(afterId: string): string | null {
+    const issues = this.issues();
+    const index = issues.findIndex((issue) => issue.id === afterId);
+    const open = (issue: Issue) => issue.estimate === undefined;
+    return (issues.slice(index + 1).find(open) ?? issues.find(open))?.id ?? null;
+  }
+
+  private clearRound(): void {
     this.myVote.set(null);
     this.room.update((room) => ({
       ...room,

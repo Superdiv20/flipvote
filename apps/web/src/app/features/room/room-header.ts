@@ -20,7 +20,7 @@ import { ParticipantList } from './participant-list';
     <div class="bg-border h-5 w-px max-sm:hidden" aria-hidden="true"></div>
     <div class="flex min-w-0 flex-1 flex-col max-sm:hidden">
       <span class="text-muted-foreground truncate text-xs font-medium">{{ roomName() }}</span>
-      <h1 class="truncate text-sm font-semibold">{{ topic() }}</h1>
+      <h1 class="truncate text-sm font-semibold">{{ topic() ?? 'No issue selected' }}</h1>
     </div>
     <hlm-popover class="max-sm:ml-auto" align="end" sideOffset="8">
       <button
@@ -70,7 +70,7 @@ export class RoomHeader {
   private readonly document = inject(DOCUMENT);
 
   readonly roomName = input.required<string>();
-  readonly topic = input.required<string>();
+  readonly topic = input.required<string | null>();
   readonly participants = input.required<RoomState['participants']>();
   readonly selfId = input.required<string>();
   readonly flipped = input.required<boolean>();
