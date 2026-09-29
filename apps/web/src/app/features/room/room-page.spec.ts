@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { type ClientMessage, DECKS } from '@flipvote/protocol';
 import { RoomStore } from './+store/room-store';
 import { RoomPage } from './room-page';
 
@@ -109,5 +110,16 @@ describe('RoomPage', () => {
     store.flip();
     expect(store.participants().find((p) => p.id === 'maya')?.vote).toBe('5');
     expect(store.results()?.voteCount).toBe(4);
+  });
+
+  it('switches to another deck from the shared list and starts a new round', () => {
+    const { store } = setup();
+    store.vote('5');
+    (store as unknown as { send: (m: ClientMessage) => void }).send({
+      type: 'setDeck',
+      deckId: 't-shirt',
+    });
+    expect(store.deck()).toEqual(DECKS['t-shirt'].cards);
+    expect(store.myVote()).toBeNull();
   });
 });

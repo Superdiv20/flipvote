@@ -2,7 +2,7 @@ import { Component, computed, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePartyPopper } from '@ng-icons/lucide';
 import { CardValue } from '../hand/card-value';
-import { cardLabel } from '../hand/deck-types';
+import { cardLabel } from '../hand/card-label';
 import type { RoundResult } from '@flipvote/protocol';
 
 @Component({

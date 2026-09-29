@@ -1,11 +1,12 @@
-import type {
-  CardValue,
-  ClientMessage,
-  ErrorCode,
-  Issue,
-  RoomState,
-  RoundResult,
-  ServerMessage,
+import {
+  type CardValue,
+  DECKS,
+  type ClientMessage,
+  type ErrorCode,
+  type Issue,
+  type RoomState,
+  type RoundResult,
+  type ServerMessage,
 } from '@flipvote/protocol';
 
 /**
@@ -122,6 +123,10 @@ export class MockRoomServer {
         };
         return null;
       case 'setDeck':
+        if (!isFacilitator) return facilitatorOnly;
+        this.room = { ...this.room, deck: DECKS[message.deckId] };
+        this.newRound();
+        return null;
       case 'setSpectator':
       case 'transferFacilitator':
         // No UI sends these yet.

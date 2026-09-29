@@ -4,7 +4,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck } from '@ng-icons/lucide';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 import { CardValue } from '../hand/card-value';
-import { cardLabel } from '../hand/deck-types';
+import { cardLabel } from '../hand/card-label';
 
 /** Everyone in the room with their voting status, or their card once revealed. */
 @Component({

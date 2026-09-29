@@ -1,6 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 import { CardValue } from './card-value';
-import { cardLabel } from './deck-types';
+import { cardLabel } from './card-label';
 
 /** The deck in front of the current user. Picking a card votes, picking it again withdraws. */
 @Component({

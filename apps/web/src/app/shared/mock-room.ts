@@ -1,14 +1,8 @@
 // Mock room until the socket is wired up, in the shape the server sends it.
 
-import type { CardValue, Deck, Issue, RoomState } from '@flipvote/protocol';
+import { type CardValue, DECKS, type Issue, type RoomState } from '@flipvote/protocol';
 
 export const SELF_ID = 'jonas';
-
-export const MOCK_DECK: Deck = {
-  id: 'fibonacci',
-  name: 'Fibonacci',
-  cards: ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', 'coffee'],
-};
 
 export const MOCK_ISSUES: Issue[] = [
   { id: 'atl-209', key: 'ATL-209', title: 'Invoice PDF template refresh', estimate: '5' },
@@ -33,7 +27,7 @@ export const MOCK_ISSUES: Issue[] = [
 export const MOCK_ROOM: RoomState = {
   id: 'demo',
   name: 'Atlas · Sprint 42 planning',
-  deck: MOCK_DECK,
+  deck: DECKS.fibonacci,
   phase: 'voting',
   facilitatorId: SELF_ID,
   participants: [
