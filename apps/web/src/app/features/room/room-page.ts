@@ -1,12 +1,12 @@
 import { Component, computed, inject, linkedSignal, signal, untracked } from '@angular/core';
 import { AccountService } from '../../core/account';
 import { ThemeService } from '../../core/theme';
-import { CardHand } from './card-hand';
+import { CardHand } from './hand/card-hand';
 import { IssueDrawer } from './issues/issue-drawer';
-import { PokerTable } from './poker-table';
-import type { VoteResults } from './results';
-import { ResultsPanel } from './results-panel';
-import { RoomHeader } from './room-header';
+import { PokerTable } from './table/poker-table';
+import type { VoteResults } from './results/results';
+import { ResultsPanel } from './results/results-panel';
+import { RoomHeader } from './header/room-header';
 import { RoomStore } from './+store/room-store';
 
 @Component({

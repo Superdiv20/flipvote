@@ -86,4 +86,20 @@ describe('RoomPage', () => {
       description: 'Details',
     });
   });
+
+  it('selects an issue when its row in the list is clicked', async () => {
+    TestBed.configureTestingModule({ imports: [RoomPage], providers: [RoomStore] });
+    const fixture = TestBed.createComponent(RoomPage);
+    await fixture.whenStable();
+    const row = [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('flipvote-issue-list button'),
+    ].find((button) =>
+      button.getAttribute('aria-label')?.startsWith('ATL-217'),
+    ) as HTMLButtonElement;
+    row.click();
+    await fixture.whenStable();
+    const store = TestBed.inject(RoomStore);
+    expect(store.currentIssueId()).toBe('atl-217');
+    expect(store.topic()).toContain('ATL-217');
+  });
 });

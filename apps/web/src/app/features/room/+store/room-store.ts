@@ -1,7 +1,7 @@
 import { computed, Service, signal } from '@angular/core';
 import type { RoomState } from '@flipvote/protocol';
-import { FIBONACCI_DECK } from '../deck-types';
-import { summarizeVotes } from '../results';
+import { FIBONACCI_DECK } from '../hand/deck-types';
+import { summarizeVotes } from '../results/results';
 import { MOCK_CURRENT_ISSUE_ID, MOCK_ISSUES, MOCK_ROOM, SELF_ID } from '../../../shared/mock-room';
 import { type Issue, type IssueDetails, issueLabel, parseIssueLines } from '../issues/issue-types';
 

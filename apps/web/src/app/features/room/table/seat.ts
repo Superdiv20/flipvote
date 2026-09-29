@@ -1,8 +1,8 @@
 import { Component, computed, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck } from '@ng-icons/lucide';
-import { CardValue } from './card-value';
-import { cardLabel } from './deck-types';
+import { CardValue } from '../hand/card-value';
+import { cardLabel } from '../hand/deck-types';
 
 /** One participant at the table: their card (empty, face down, or flipped) and name. */
 @Component({

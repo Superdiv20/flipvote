@@ -15,7 +15,24 @@ import { HlmItemImports } from '@spartan-ng/helm/item';
     <hlm-item-group>
       @for (issue of issues(); track issue.id) {
         @let status = statusOf(issue);
-        <hlm-item role="listitem" class="group relative hover:bg-muted">
+        <hlm-item
+          role="listitem"
+          class="group relative"
+          [class]="
+            status === 'current'
+              ? 'bg-brand-soft inset-ring-brand-ring inset-ring'
+              : 'hover:bg-muted'
+          "
+        >
+          <!-- Covers the whole row so a click anywhere selects the issue; the actions sit above it. -->
+          <button
+            type="button"
+            class="focus-visible:ring-ring/50 absolute inset-0 rounded-md outline-none focus-visible:ring-3"
+            [class]="status === 'current' ? 'cursor-default' : 'cursor-pointer'"
+            [attr.aria-current]="status === 'current' ? 'true' : null"
+            [attr.aria-label]="ariaLabel(issue, status)"
+            (click)="status !== 'current' && select.emit(issue.id)"
+          ></button>
           <hlm-item-media>
             <div class="h-full flex items-center">
               <span
@@ -58,7 +75,7 @@ import { HlmItemImports } from '@spartan-ng/helm/item';
               {{ issue.title }}
             </span>
           </hlm-item-content>
-          <hlm-item-actions>
+          <hlm-item-actions class="relative z-10">
             <!-- Revealed on hover or keyboard focus, covering the status on the right. -->
             <div
               class="flex items-center gap-0.5 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"

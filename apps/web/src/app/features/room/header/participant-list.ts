@@ -3,8 +3,8 @@ import type { RoomState } from '@flipvote/protocol';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck } from '@ng-icons/lucide';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
-import { CardValue } from './card-value';
-import { cardLabel } from './deck-types';
+import { CardValue } from '../hand/card-value';
+import { cardLabel } from '../hand/deck-types';
 
 type Participant = RoomState['participants'][number];
 

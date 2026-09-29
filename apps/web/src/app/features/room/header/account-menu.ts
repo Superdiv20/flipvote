@@ -10,7 +10,7 @@ import {
 } from '@ng-icons/lucide';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
-import type { Account } from '../../core/account';
+import type { Account } from '../../../core/account';
 
 /** Avatar button in the top bar with the account dropdown. Guests get a person icon and a Sign in action. */
 @Component({

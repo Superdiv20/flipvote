@@ -4,8 +4,8 @@ import { lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers } from '@ng
 import type { RoomState } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
-import type { Account } from '../../core/account';
-import type { Theme } from '../../core/theme';
+import type { Account } from '../../../core/account';
+import type { Theme } from '../../../core/theme';
 import { AccountMenu } from './account-menu';
 import { Logo } from './logo';
 import { ParticipantList } from './participant-list';
