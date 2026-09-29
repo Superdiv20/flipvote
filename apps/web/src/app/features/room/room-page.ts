@@ -35,7 +35,7 @@ import { RoomStore } from './+store/room-store';
         [collapsed]="drawerCollapsed()"
         (toggle)="toggleDrawer()"
         (select)="store.selectIssue($event)"
-        (add)="store.addIssues($event)"
+        (add)="store.addIssue($event)"
         (create)="store.createIssue($event)"
         (update)="store.updateIssue($event.id, $event.details)"
       />

@@ -49,15 +49,12 @@ describe('RoomPage', () => {
     expect(store.topic()).toContain('ATL-217');
   });
 
-  it('adds one issue per pasted line and splits off tracker keys', () => {
+  it('quick-adds a single issue and splits off its tracker key', () => {
     const { store } = setup();
-    const before = store.issues().length;
-    store.addIssues('ATL-300 First\n\nSecond one\n');
-    const added = store.issues().slice(before);
-    expect(added.map(({ key, title }) => ({ key, title }))).toEqual([
-      { key: 'ATL-300', title: 'First' },
-      { key: undefined, title: 'Second one' },
-    ]);
+    store.addIssue('  ATL-300 First  ');
+    store.addIssue('   ');
+    expect(store.issues().at(-1)).toMatchObject({ key: 'ATL-300', title: 'First' });
+    expect(store.issues().filter((i) => i.title === '')).toEqual([]);
   });
 
   it('edits an issue from the dialog and keeps its key and estimate', () => {

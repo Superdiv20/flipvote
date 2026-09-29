@@ -9,7 +9,7 @@ import { HlmDialogService } from '@spartan-ng/helm/dialog';
 import { AddIssueDialog, type AddIssueDialogContext } from './add-issue-dialog';
 import type { IssueDetails } from './issue-types';
 
-/** Adds an issue on Enter; pasting several lines adds one issue per line. */
+/** Quick add: one issue from a single line on Enter. The plus button opens the full dialog. */
 @Component({
   selector: 'flipvote-add-issue-field',
   imports: [HlmInputImports, HlmInputGroupImports, FormField, NgIcon, HlmButtonImports],
@@ -25,10 +25,8 @@ import type { IssueDetails } from './issue-types';
           id="add-issue"
           class="h-8 text-sm"
           placeholder="Add issue…"
-          aria-describedby="add-issue-hint"
           autocomplete="off"
           (keydown.enter)="submit()"
-          (paste)="paste($event)"
         />
         <hlm-input-group-addon align="inline-end">
           <button
@@ -88,12 +86,5 @@ export class AddIssueField {
     if (!text) return;
     this.add.emit(text);
     this.quickIssueForm.title().value.set('');
-  }
-
-  protected paste(event: ClipboardEvent): void {
-    const text = event.clipboardData?.getData('text') ?? '';
-    if (!/\r?\n/.test(text.trim())) return;
-    event.preventDefault();
-    this.add.emit(text);
   }
 }

@@ -3,7 +3,7 @@ import type { RoomState } from '@flipvote/protocol';
 import { FIBONACCI_DECK } from '../hand/deck-types';
 import { summarizeVotes } from '../results/results';
 import { MOCK_CURRENT_ISSUE_ID, MOCK_ISSUES, MOCK_ROOM, SELF_ID } from '../../../shared/mock-room';
-import { type Issue, type IssueDetails, issueLabel, parseIssueLines } from '../issues/issue-types';
+import { type Issue, type IssueDetails, issueLabel, parseIssueTitle } from '../issues/issue-types';
 
 const MOCK_VOTES: Record<string, string> = { maya: '5', priya: '8', leo: '5' };
 
@@ -81,30 +81,28 @@ export class RoomStore {
     this.clearRound();
   }
 
-  /** Adds one issue per line. The first one becomes current when nothing is being estimated. */
-  addIssues(text: string): void {
-    const added = parseIssueLines(text).map((issue) => ({
-      ...issue,
-      id: `new-${++this.nextIssueId}`,
-    }));
-    if (!added.length) return;
-    this.issues.update((issues) => [...issues, ...added]);
-    if (this.currentIssueId() === null) this.currentIssueId.set(added[0].id);
+  /** Quick add: one issue from a single line. It becomes current when nothing is being estimated. */
+  addIssue(text: string): void {
+    const parsed = parseIssueTitle(text);
+    if (parsed) this.insertIssue(parsed);
   }
 
   /** Adds an issue from the full dialog. A leading tracker key in the title is split off like in quick add. */
   createIssue(details: IssueDetails): void {
-    const [parsed] = parseIssueLines(details.title);
-    if (!parsed) return;
-    const issue: Issue = { ...details, ...parsed, id: `new-${++this.nextIssueId}` };
-    this.issues.update((issues) => [...issues, issue]);
-    if (this.currentIssueId() === null) this.currentIssueId.set(issue.id);
+    const parsed = parseIssueTitle(details.title);
+    if (parsed) this.insertIssue({ ...details, ...parsed });
   }
 
   updateIssue(id: string, details: IssueDetails): void {
     this.issues.update((issues) =>
       issues.map((issue) => (issue.id === id ? { ...issue, ...details } : issue)),
     );
+  }
+
+  private insertIssue(fields: Omit<Issue, 'id'>): void {
+    const issue: Issue = { ...fields, id: `new-${++this.nextIssueId}` };
+    this.issues.update((issues) => [...issues, issue]);
+    if (this.currentIssueId() === null) this.currentIssueId.set(issue.id);
   }
 
   private nextOpenIssue(afterId: string): string | null {

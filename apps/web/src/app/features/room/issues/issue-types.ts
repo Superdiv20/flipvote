@@ -25,14 +25,10 @@ export function issueLabel(issue: Issue): string {
 
 const KEYED_LINE = /^([A-Z][A-Z0-9]*-\d+)[\s:·-]+(.+)$/;
 
-/** One issue per non-empty line; a leading tracker key (`ATL-12 Title`) is split off. */
-export function parseIssueLines(text: string): Omit<Issue, 'id'>[] {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const match = KEYED_LINE.exec(line);
-      return match ? { key: match[1], title: match[2].trim() } : { title: line };
-    });
+/** Splits a leading tracker key off a title (`ATL-12 Title`). Returns `null` for a blank title. */
+export function parseIssueTitle(text: string): Pick<Issue, 'key' | 'title'> | null {
+  const line = text.trim();
+  if (!line) return null;
+  const match = KEYED_LINE.exec(line);
+  return match ? { key: match[1], title: match[2].trim() } : { title: line };
 }
