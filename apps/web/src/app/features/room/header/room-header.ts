@@ -1,7 +1,7 @@
 import { Component, DOCUMENT, inject, input, output, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers } from '@ng-icons/lucide';
-import type { RoomState } from '@flipvote/protocol';
+import type { Participant } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
 import type { Account } from '../../../core/account';
@@ -81,7 +81,7 @@ export class RoomHeader {
 
   readonly roomName = input.required<string>();
   readonly topic = input.required<string | null>();
-  readonly participants = input.required<RoomState['participants']>();
+  readonly participants = input.required<Participant[]>();
   readonly selfId = input.required<string>();
   readonly flipped = input.required<boolean>();
   readonly votedCount = input.required<number>();

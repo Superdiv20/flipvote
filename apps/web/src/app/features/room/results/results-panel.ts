@@ -3,7 +3,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePartyPopper } from '@ng-icons/lucide';
 import { CardValue } from '../hand/card-value';
 import { cardLabel } from '../hand/deck-types';
-import type { VoteResults } from './results';
+import type { RoundResult } from '@flipvote/protocol';
 
 @Component({
   selector: 'flipvote-results-panel',
@@ -35,7 +35,7 @@ import type { VoteResults } from './results';
         <span class="text-4xl font-extrabold tracking-[-0.012em]">{{ average() }}</span>
       </div>
       <span class="text-muted-foreground pb-1.5 text-xs font-medium">
-        {{ results().count }} {{ results().count === 1 ? 'vote' : 'votes' }}
+        {{ results().voteCount }} {{ results().voteCount === 1 ? 'vote' : 'votes' }}
       </span>
     </div>
     <div class="bg-border h-px" aria-hidden="true"></div>
@@ -67,7 +67,7 @@ import type { VoteResults } from './results';
   `,
 })
 export class ResultsPanel {
-  readonly results = input.required<VoteResults>();
+  readonly results = input.required<RoundResult>();
 
   protected readonly average = computed(() => {
     const average = this.results().average;

@@ -1,12 +1,10 @@
 import { Component, input } from '@angular/core';
-import type { RoomState } from '@flipvote/protocol';
+import type { Participant } from '@flipvote/protocol';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck } from '@ng-icons/lucide';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 import { CardValue } from '../hand/card-value';
 import { cardLabel } from '../hand/deck-types';
-
-type Participant = RoomState['participants'][number];
 
 /** Everyone in the room with their voting status, or their card once revealed. */
 @Component({

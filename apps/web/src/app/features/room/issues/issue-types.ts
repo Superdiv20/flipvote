@@ -1,13 +1,4 @@
-export interface Issue {
-  id: string;
-  /** Tracker key such as `ATL-214`, when the issue came with one. */
-  key?: string;
-  title: string;
-  link?: string;
-  description?: string;
-  /** Set once a round on this issue has finished. */
-  estimate?: string;
-}
+import type { Issue } from '@flipvote/protocol';
 
 /** The fields the issue dialog edits. */
 export type IssueDetails = Pick<Issue, 'title' | 'link' | 'description'>;

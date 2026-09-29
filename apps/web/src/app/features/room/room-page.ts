@@ -4,7 +4,7 @@ import { ThemeService } from '../../core/theme';
 import { CardHand } from './hand/card-hand';
 import { IssueDrawer } from './issues/issue-drawer';
 import { PokerTable } from './table/poker-table';
-import type { VoteResults } from './results/results';
+import type { RoundResult } from '@flipvote/protocol';
 import { ResultsPanel } from './results/results-panel';
 import { RoomHeader } from './header/room-header';
 import { RoomStore } from './+store/room-store';
@@ -18,7 +18,7 @@ import { RoomStore } from './+store/room-store';
       [roomName]="store.roomName()"
       [topic]="store.topic()"
       [participants]="store.participants()"
-      [selfId]="store.selfId"
+      [selfId]="store.selfId()"
       [flipped]="store.flipped()"
       [votedCount]="store.votedCount()"
       [theme]="theme.theme()"
@@ -47,7 +47,7 @@ import { RoomStore } from './+store/room-store';
           <flipvote-poker-table
             class="max-w-150"
             [participants]="store.participants()"
-            [selfId]="store.selfId"
+            [selfId]="store.selfId()"
             [flipped]="store.flipped()"
             [votedCount]="store.votedCount()"
             [consensus]="!!results()?.consensus"
@@ -74,7 +74,7 @@ import { RoomStore } from './+store/room-store';
         </div>
         <flipvote-card-hand
           class="px-4 pb-8"
-          [deck]="store.deck"
+          [deck]="store.deck()"
           [selectedValue]="store.myVote()"
           [locked]="store.flipped()"
           (pick)="store.vote($event)"
@@ -89,16 +89,16 @@ export class RoomPage {
   protected readonly account = inject(AccountService);
 
   protected readonly selfName = computed(
-    () => this.store.participants().find((p) => p.id === this.store.selfId)?.name ?? 'Guest',
+    () => this.store.participants().find((p) => p.id === this.store.selfId())?.name ?? 'Guest',
   );
 
   protected readonly results = computed(() => {
     const results = this.store.results();
-    return results && results.count > 0 ? results : null;
+    return results && results.voteCount > 0 ? results : null;
   });
 
   /** Keeps the last results rendered while the panel fades out after a new round starts. */
-  protected readonly shownResults = linkedSignal<VoteResults | null, VoteResults | null>({
+  protected readonly shownResults = linkedSignal<RoundResult | null, RoundResult | null>({
     source: this.results,
     computation: (results, previous) => results ?? previous?.value ?? null,
   });

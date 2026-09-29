@@ -1,11 +1,9 @@
 import { Component, computed, input, output } from '@angular/core';
-import type { RoomState } from '@flipvote/protocol';
+import type { Participant } from '@flipvote/protocol';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideEye, lucideRotateCcw } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { Seat } from './seat';
-
-type Participant = RoomState['participants'][number];
 
 // The table is a stadium (a pill) with this width:height ratio. Seats are spread evenly along its edge.
 const TABLE_WIDTH = 640;

@@ -3,7 +3,8 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideChevronsRight, lucideListChecks } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
-import { type Issue, issueLabel, issueStatus } from './issue-types';
+import type { Issue } from '@flipvote/protocol';
+import { issueLabel, issueStatus } from './issue-types';
 
 const TOOLTIP_TITLE_LENGTH = 32;
 

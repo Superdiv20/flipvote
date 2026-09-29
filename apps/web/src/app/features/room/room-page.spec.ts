@@ -99,4 +99,15 @@ describe('RoomPage', () => {
     expect(store.currentIssueId()).toBe('atl-217');
     expect(store.topic()).toContain('ATL-217');
   });
+
+  it('never exposes other votes before the flip, but always the own vote', () => {
+    const { store } = setup();
+    store.vote('3');
+    expect(store.participants().every((p) => p.vote === undefined)).toBe(true);
+    expect(store.myVote()).toBe('3');
+    expect(store.results()).toBeNull();
+    store.flip();
+    expect(store.participants().find((p) => p.id === 'maya')?.vote).toBe('5');
+    expect(store.results()?.voteCount).toBe(4);
+  });
 });

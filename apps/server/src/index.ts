@@ -14,6 +14,7 @@ const server = Bun.serve({
 			const msg = JSON.parse(String(raw)) as ClientMessage;
 			const reply: ServerMessage = {
 				type: 'error',
+				code: 'INVALID_MESSAGE',
 				message: `Not implemented: ${msg.type}`,
 			};
 			ws.send(JSON.stringify(reply));

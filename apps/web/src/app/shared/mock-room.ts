@@ -1,22 +1,13 @@
-// Mock room until the socket is wired up. MOCK_VOTES stands in for the server,
+// Mock room until the socket is wired up, in the shape the server sends it.
 
-import { RoomState } from '@flipvote/protocol';
-import type { Issue } from '../features/room/issues/issue-types';
+import type { CardValue, Deck, Issue, RoomState } from '@flipvote/protocol';
 
-// which keeps other participants' votes hidden until the flip.
 export const SELF_ID = 'jonas';
 
-export const MOCK_ROOM: RoomState = {
-  id: 'demo',
-  flipped: false,
-  participants: [
-    { id: 'ahmed', name: 'Ahmed', hasVoted: false },
-    { id: 'maya', name: 'Maya', hasVoted: true },
-    { id: 'priya', name: 'Priya', hasVoted: true },
-    { id: 'sofia', name: 'Sofia', hasVoted: false },
-    { id: 'leo', name: 'Leo', hasVoted: true },
-    { id: SELF_ID, name: 'Jonas', hasVoted: false },
-  ],
+export const MOCK_DECK: Deck = {
+  id: 'fibonacci',
+  name: 'Fibonacci',
+  cards: ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', 'coffee'],
 };
 
 export const MOCK_ISSUES: Issue[] = [
@@ -38,4 +29,27 @@ export const MOCK_ISSUES: Issue[] = [
   { id: 'atl-223', key: 'ATL-223', title: 'Rate limit the public API' },
 ];
 
-export const MOCK_CURRENT_ISSUE_ID = 'atl-214';
+/** The room as the server would send it to Jonas, who is the facilitator. */
+export const MOCK_ROOM: RoomState = {
+  id: 'demo',
+  name: 'Atlas · Sprint 42 planning',
+  deck: MOCK_DECK,
+  phase: 'voting',
+  facilitatorId: SELF_ID,
+  participants: [
+    { id: 'ahmed', name: 'Ahmed', isSpectator: false, connected: true, hasVoted: false },
+    { id: 'maya', name: 'Maya', isSpectator: false, connected: true, hasVoted: true },
+    { id: 'priya', name: 'Priya', isSpectator: false, connected: true, hasVoted: true },
+    { id: 'sofia', name: 'Sofia', isSpectator: false, connected: true, hasVoted: false },
+    { id: 'leo', name: 'Leo', isSpectator: false, connected: true, hasVoted: true },
+    { id: SELF_ID, name: 'Jonas', isSpectator: false, connected: true, hasVoted: false },
+  ],
+  issues: MOCK_ISSUES,
+  currentIssueId: 'atl-214',
+  result: null,
+  selfId: SELF_ID,
+  myVote: null,
+};
+
+/** The other participants' votes, which only the server knows until the flip. */
+export const MOCK_HIDDEN_VOTES: Record<string, CardValue> = { maya: '5', priya: '8', leo: '5' };

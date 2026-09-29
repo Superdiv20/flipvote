@@ -2,7 +2,8 @@ import { Component, input, output } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideSquarePen, lucideTrash2 } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { type Issue, issueLabel, issueStatus } from './issue-types';
+import type { Issue } from '@flipvote/protocol';
+import { issueLabel, issueStatus } from './issue-types';
 import { HlmItemImports } from '@spartan-ng/helm/item';
 
 /** The expanded list: finished issues with their estimate, the current one, then what's up next. */

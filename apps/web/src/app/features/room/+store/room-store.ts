@@ -1,20 +1,29 @@
 import { computed, Service, signal } from '@angular/core';
-import type { RoomState } from '@flipvote/protocol';
-import { FIBONACCI_DECK } from '../hand/deck-types';
-import { summarizeVotes } from '../results/results';
-import { MOCK_CURRENT_ISSUE_ID, MOCK_ISSUES, MOCK_ROOM, SELF_ID } from '../../../shared/mock-room';
-import { type Issue, type IssueDetails, issueLabel, parseIssueTitle } from '../issues/issue-types';
+import type { ClientMessage, RoomState, ServerMessage } from '@flipvote/protocol';
+import { MOCK_HIDDEN_VOTES, MOCK_ROOM } from '../../../shared/mock-room';
+import { type IssueDetails, issueLabel, parseIssueTitle } from '../issues/issue-types';
+import { MockRoomServer } from './mock-room-server';
 
-const MOCK_VOTES: Record<string, string> = { maya: '5', priya: '8', leo: '5' };
-
+/**
+ * Room state as sent by the server. Actions only send intents; the state changes when the
+ * server answers. Until the socket is wired up, `MockRoomServer` answers instead.
+ */
 @Service({ autoProvided: false })
 export class RoomStore {
-  readonly selfId = SELF_ID;
-  readonly deck = FIBONACCI_DECK;
-  readonly roomName = signal('Atlas · Sprint 42 planning');
+  private readonly server = new MockRoomServer(MOCK_ROOM, MOCK_HIDDEN_VOTES);
+  private readonly room = signal<RoomState>(this.server.state());
 
-  readonly issues = signal<Issue[]>(MOCK_ISSUES);
-  readonly currentIssueId = signal<string | null>(MOCK_CURRENT_ISSUE_ID);
+  readonly selfId = computed(() => this.room().selfId);
+  readonly roomName = computed(() => this.room().name);
+  readonly deck = computed(() => this.room().deck.cards);
+  readonly participants = computed(() => this.room().participants);
+  readonly flipped = computed(() => this.room().phase === 'revealed');
+  readonly myVote = computed(() => this.room().myVote);
+  readonly results = computed(() => this.room().result);
+  readonly votedCount = computed(() => this.participants().filter((p) => p.hasVoted).length);
+
+  readonly issues = computed(() => this.room().issues);
+  readonly currentIssueId = computed(() => this.room().currentIssueId);
   readonly currentIssue = computed(
     () => this.issues().find((issue) => issue.id === this.currentIssueId()) ?? null,
   );
@@ -22,102 +31,55 @@ export class RoomStore {
     const issue = this.currentIssue();
     return issue ? issueLabel(issue) : null;
   });
-  private nextIssueId = 0;
-
-  private readonly room = signal<RoomState>(MOCK_ROOM);
-  readonly myVote = signal<string | null>(null);
-
-  readonly participants = computed(() => this.room().participants);
-  readonly flipped = computed(() => this.room().flipped);
-  readonly votedCount = computed(() => this.participants().filter((p) => p.hasVoted).length);
-  readonly results = computed(() => {
-    if (!this.flipped()) return null;
-    const votes = this.participants().flatMap((p) => (p.vote === undefined ? [] : [p.vote]));
-    return summarizeVotes(votes, this.deck);
-  });
 
   /** Picks a card, or withdraws the vote when the same card is picked again. */
   vote(value: string): void {
-    if (this.flipped()) return;
-    const next = this.myVote() === value ? null : value;
-    this.myVote.set(next);
-    this.room.update((room) => ({
-      ...room,
-      participants: room.participants.map((p) =>
-        p.id === this.selfId ? { ...p, hasVoted: next !== null } : p,
-      ),
-    }));
+    this.send({ type: 'vote', value: this.myVote() === value ? null : value });
   }
 
   flip(): void {
-    const myVote = this.myVote() ?? undefined;
-    this.room.update((room) => ({
-      ...room,
-      flipped: true,
-      participants: room.participants.map((p) => ({
-        ...p,
-        vote: p.id === this.selfId ? myVote : p.hasVoted ? MOCK_VOTES[p.id] : undefined,
-      })),
-    }));
+    this.send({ type: 'flip' });
   }
 
-  /** Starts a new round. A finished round records its estimate and moves on to the next open issue. */
+  /** Starts a new round. The server records the estimate and moves on to the next open issue. */
   reset(): void {
-    const estimate = this.results()?.estimate;
-    const current = this.currentIssueId();
-    if (estimate && current) {
-      this.issues.update((issues) =>
-        issues.map((issue) => (issue.id === current ? { ...issue, estimate } : issue)),
-      );
-      this.currentIssueId.set(this.nextOpenIssue(current));
-    }
-    this.clearRound();
+    this.send({ type: 'reset' });
   }
 
-  /** Switches the table to another issue and starts a fresh round on it. */
   selectIssue(id: string): void {
-    if (id === this.currentIssueId()) return;
-    this.currentIssueId.set(id);
-    this.clearRound();
+    this.send({ type: 'selectIssue', issueId: id });
   }
 
-  /** Quick add: one issue from a single line. It becomes current when nothing is being estimated. */
+  /** Quick add: one issue from a single line. */
   addIssue(text: string): void {
     const parsed = parseIssueTitle(text);
-    if (parsed) this.insertIssue(parsed);
+    if (parsed) this.send({ type: 'addIssue', issue: parsed });
   }
 
   /** Adds an issue from the full dialog. A leading tracker key in the title is split off like in quick add. */
   createIssue(details: IssueDetails): void {
     const parsed = parseIssueTitle(details.title);
-    if (parsed) this.insertIssue({ ...details, ...parsed });
+    if (parsed) this.send({ type: 'addIssue', issue: { ...details, ...parsed } });
   }
 
   updateIssue(id: string, details: IssueDetails): void {
-    this.issues.update((issues) =>
-      issues.map((issue) => (issue.id === id ? { ...issue, ...details } : issue)),
-    );
+    this.send({ type: 'updateIssue', issueId: id, changes: details });
   }
 
-  private insertIssue(fields: Omit<Issue, 'id'>): void {
-    const issue: Issue = { ...fields, id: `new-${++this.nextIssueId}` };
-    this.issues.update((issues) => [...issues, issue]);
-    if (this.currentIssueId() === null) this.currentIssueId.set(issue.id);
+  private send(message: ClientMessage): void {
+    this.handle(this.server.receive(message));
   }
 
-  private nextOpenIssue(afterId: string): string | null {
-    const issues = this.issues();
-    const index = issues.findIndex((issue) => issue.id === afterId);
-    const open = (issue: Issue) => issue.estimate === undefined;
-    return (issues.slice(index + 1).find(open) ?? issues.find(open))?.id ?? null;
-  }
-
-  private clearRound(): void {
-    this.myVote.set(null);
-    this.room.update((room) => ({
-      ...room,
-      flipped: false,
-      participants: room.participants.map(({ id, name }) => ({ id, name, hasVoted: false })),
-    }));
+  private handle(message: ServerMessage): void {
+    switch (message.type) {
+      case 'state':
+        this.room.set(message.room);
+        break;
+      case 'error':
+        console.warn(`[room] ${message.code}: ${message.message}`);
+        break;
+      case 'welcome':
+        break;
+    }
   }
 }

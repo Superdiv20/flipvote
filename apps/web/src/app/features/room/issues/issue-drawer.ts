@@ -7,7 +7,8 @@ import { AddIssueDialog, type AddIssueDialogContext } from './add-issue-dialog';
 import { AddIssueField } from './add-issue-field';
 import { IssueList } from './issue-list';
 import { IssueRail } from './issue-rail';
-import type { Issue, IssueDetails } from './issue-types';
+import type { Issue } from '@flipvote/protocol';
+import type { IssueDetails } from './issue-types';
 
 /**
  * Issues docked on the left, 300px wide or collapsed to a 56px rail. From `lg` up it pushes the
