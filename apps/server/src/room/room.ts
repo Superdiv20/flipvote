@@ -1,8 +1,11 @@
 import type { CardValue, Deck, ErrorCode, Issue, RoundPhase, RoundResult } from '@flipvote/protocol';
 
-/** Server-side participant. Separate from the protocol type; it will later hold server-only fields such as the session token. */
+/** Server-side participant. Separate from the protocol type, because it holds server-only fields. */
 export interface Participant {
+	/** Public: every client sees it. */
 	id: string;
+	/** Secret: proves a client owns this seat. Never sent to any client. */
+	sessionToken: string;
 	name: string;
 	isSpectator: boolean;
 	connected: boolean;
