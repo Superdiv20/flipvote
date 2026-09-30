@@ -1,5 +1,5 @@
 import { calculateResult } from './calculate-result';
-import { fail, ok, type Room, type RoomResult } from './room';
+import { fail, ok, type Room, type RoomResult } from '../room';
 
 /** Facilitator only. Reveals the cards and stores the result, calculated once. */
 export function flip(room: Room, participantId: string): RoomResult {

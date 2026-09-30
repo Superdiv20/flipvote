@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { setConnected } from './set-connected';
-import { applyPure, seatedRoom, unwrap } from './testing';
+import { applyPure, seatedRoom, unwrap } from '../testing';
 
 describe('setConnected', () => {
 	test('marks a participant as disconnected and back', () => {

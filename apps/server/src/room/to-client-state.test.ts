@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test';
-import { addIssue } from './add-issue';
-import { flip } from './flip';
+import { addIssue } from './issues/add-issue';
+import { flip } from './round/flip';
 import type { Participant, Room } from './room';
 import { seatedRoom, unwrap } from './testing';
 import { toClientState } from './to-client-state';
-import { vote } from './vote';
+import { vote } from './round/vote';
 
 function votedRoom(): Room {
 	let room = unwrap(addIssue(seatedRoom(), 'ana', 'i1', { key: 'ATL-1', title: 'Export' }));

@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 import { addIssue } from './add-issue';
-import { flip } from './flip';
+import { flip } from '../round/flip';
 import { selectIssue } from './select-issue';
-import { applyPure, seatedRoom, unwrap } from './testing';
-import { vote } from './vote';
+import { applyPure, seatedRoom, unwrap } from '../testing';
+import { vote } from '../round/vote';
 
 function withIssues() {
 	let room = seatedRoom();

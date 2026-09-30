@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { flip } from './flip';
+import { flip } from '../round/flip';
 import { setConnected } from './set-connected';
-import { applyPure, seatedRoom, unwrap } from './testing';
+import { applyPure, seatedRoom, unwrap } from '../testing';
 import { transferFacilitator } from './transfer-facilitator';
-import { vote } from './vote';
+import { vote } from '../round/vote';
 
 describe('transferFacilitator', () => {
 	test('hands the role to another participant', () => {

@@ -1,5 +1,5 @@
 import type { Issue } from '@flipvote/protocol';
-import { fail, newRound, ok, type Room, type RoomResult } from './room';
+import { fail, newRound, ok, type Room, type RoomResult } from '../room';
 
 /**
  * Facilitator only. Starts a new round: clears votes and result. After a revealed round with a

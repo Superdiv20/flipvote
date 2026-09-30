@@ -1,5 +1,5 @@
 import { type DeckId, DECKS } from '@flipvote/protocol';
-import { fail, newRound, ok, type Room, type RoomResult } from './room';
+import { fail, newRound, ok, type Room, type RoomResult } from '../room';
 
 /** Facilitator only. Switches the deck and starts a new round, since old votes may not exist in it. */
 export function changeDeck(room: Room, participantId: string, deckId: DeckId): RoomResult {

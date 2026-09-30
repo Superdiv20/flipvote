@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import type { IssueInput } from '@flipvote/protocol';
 import { addIssue } from './add-issue';
 import { editIssue } from './edit-issue';
-import { applyPure, seatedRoom, unwrap } from './testing';
+import { applyPure, seatedRoom, unwrap } from '../testing';
 
 function roomWithIssue() {
 	const room = unwrap(addIssue(seatedRoom(), 'ana', 'i1', { key: 'ATL-1', title: 'Export', link: 'https://x.test' }));

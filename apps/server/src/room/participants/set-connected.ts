@@ -1,4 +1,4 @@
-import { fail, ok, type Room, type RoomResult } from './room';
+import { fail, ok, type Room, type RoomResult } from '../room';
 
 /** Marks a participant as connected or as in their reconnect grace period. */
 export function setConnected(room: Room, participantId: string, connected: boolean): RoomResult {

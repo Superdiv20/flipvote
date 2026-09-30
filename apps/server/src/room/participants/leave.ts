@@ -1,4 +1,4 @@
-import { fail, ok, type Room, type RoomResult } from './room';
+import { fail, ok, type Room, type RoomResult } from '../room';
 
 /**
  * Removes the participant and their vote. If they were the facilitator, the role passes to the

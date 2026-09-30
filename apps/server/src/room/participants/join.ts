@@ -1,4 +1,4 @@
-import { fail, ok, type Room, type RoomResult } from './room';
+import { fail, ok, type Room, type RoomResult } from '../room';
 
 /**
  * Seats a new participant, or rejoins an existing one (same id) in the same seat with their vote

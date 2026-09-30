@@ -1,5 +1,5 @@
 import type { Issue, IssueInput } from '@flipvote/protocol';
-import { fail, ok, type Room, type RoomResult } from './room';
+import { fail, ok, type Room, type RoomResult } from '../room';
 
 /**
  * Anyone. Appends an issue; it becomes current when no issue is. The caller supplies the id, so

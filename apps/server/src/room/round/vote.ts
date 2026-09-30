@@ -1,5 +1,5 @@
 import type { CardValue } from '@flipvote/protocol';
-import { fail, ok, type Room, type RoomResult } from './room';
+import { fail, ok, type Room, type RoomResult } from '../room';
 
 /** Casts or changes a vote; `null` withdraws it. Only non-spectators, only while voting. */
 export function vote(room: Room, participantId: string, value: CardValue | null): RoomResult {

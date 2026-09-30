@@ -1,4 +1,4 @@
-import { fail, ok, type Room, type RoomResult } from './room';
+import { fail, ok, type Room, type RoomResult } from '../room';
 
 /**
  * Makes the participant a spectator or a voter again. Takes the target state rather than flipping

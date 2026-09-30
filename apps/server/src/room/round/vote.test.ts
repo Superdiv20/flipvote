@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { flip } from './flip';
-import { applyPure, seatedRoom, unwrap } from './testing';
-import { toggleSpectator } from './toggle-spectator';
+import { applyPure, seatedRoom, unwrap } from '../testing';
+import { toggleSpectator } from '../participants/toggle-spectator';
 import { vote } from './vote';
 
 describe('vote', () => {

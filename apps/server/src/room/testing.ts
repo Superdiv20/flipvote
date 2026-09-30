@@ -1,6 +1,6 @@
 import { expect } from 'bun:test';
 import { DECKS } from '@flipvote/protocol';
-import { join } from './join';
+import { join } from './participants/join';
 import { createRoom, type Room, type RoomResult } from './room';
 
 /** A room with `ana`, `ben` and `cy` joined in that order; `ana` is the facilitator. */

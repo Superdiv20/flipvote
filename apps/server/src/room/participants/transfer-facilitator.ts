@@ -1,4 +1,4 @@
-import { fail, ok, type RoomResult, type Room } from './room';
+import { fail, ok, type RoomResult, type Room } from '../room';
 
 /**
  * Moves the facilitator role from the current facilitator to another participant manually.

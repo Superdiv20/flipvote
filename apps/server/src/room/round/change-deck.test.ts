@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { DECKS, type DeckId } from '@flipvote/protocol';
 import { changeDeck } from './change-deck';
 import { flip } from './flip';
-import { applyPure, seatedRoom, unwrap } from './testing';
+import { applyPure, seatedRoom, unwrap } from '../testing';
 import { vote } from './vote';
 
 describe('changeDeck', () => {

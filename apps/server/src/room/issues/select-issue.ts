@@ -1,4 +1,4 @@
-import { fail, newRound, ok, type Room, type RoomResult } from './room';
+import { fail, newRound, ok, type Room, type RoomResult } from '../room';
 
 /** Facilitator only. Makes another issue current and starts a new round on it. */
 export function selectIssue(room: Room, participantId: string, issueId: string): RoomResult {
