@@ -1,5 +1,5 @@
 import { computed, inject } from '@angular/core';
-import type { ClientMessage, RoomState, ServerMessage } from '@flipvote/protocol';
+import type { ClientMessage, Deck, RoomState, ServerMessage } from '@flipvote/protocol';
 import {
   patchState,
   signalStore,

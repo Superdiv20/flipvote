@@ -7,7 +7,7 @@ import { HlmPopoverImports } from '@spartan-ng/helm/popover';
 import type { Account } from '../../../core/account';
 import type { Theme } from '../../../core/theme';
 import { AccountMenu } from './account-menu';
-import { Logo } from './logo';
+import { Logo } from '../../../shared/logo';
 import { ParticipantList } from './participant-list';
 
 @Component({
