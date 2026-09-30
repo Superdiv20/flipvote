@@ -1,17 +1,24 @@
 import { TestBed } from '@angular/core/testing';
-import { type ClientMessage, DECKS } from '@flipvote/protocol';
+import { DECKS } from '@flipvote/protocol';
+import { SocketService } from '../../core/socket';
+import { provideMockSession } from './+store/mock-session';
 import { RoomStore } from './+store/room-store';
 import { RoomPage } from './room-page';
 
 describe('RoomPage', () => {
   function setup() {
-    TestBed.configureTestingModule({ imports: [RoomPage], providers: [RoomStore] });
+    TestBed.configureTestingModule({
+      imports: [RoomPage],
+      providers: [RoomStore, provideMockSession()],
+    });
     const fixture = TestBed.createComponent(RoomPage);
     const page = fixture.componentInstance as unknown as {
       drawerCollapsed: () => boolean;
       toggleDrawer: () => void;
     };
-    return { store: TestBed.inject(RoomStore), page };
+    const store = TestBed.inject(RoomStore);
+    store.join('demo', 'Jonas');
+    return { store, page, fixture };
   }
 
   it('starts with the issue drawer collapsed', () => {
@@ -86,8 +93,7 @@ describe('RoomPage', () => {
   });
 
   it('selects an issue when its row in the list is clicked', async () => {
-    TestBed.configureTestingModule({ imports: [RoomPage], providers: [RoomStore] });
-    const fixture = TestBed.createComponent(RoomPage);
+    const { store, fixture } = setup();
     await fixture.whenStable();
     const row = [
       ...(fixture.nativeElement as HTMLElement).querySelectorAll('flipvote-issue-list button'),
@@ -96,7 +102,6 @@ describe('RoomPage', () => {
     ) as HTMLButtonElement;
     row.click();
     await fixture.whenStable();
-    const store = TestBed.inject(RoomStore);
     expect(store.currentIssueId()).toBe('atl-217');
     expect(store.topic()).toContain('ATL-217');
   });
@@ -115,10 +120,7 @@ describe('RoomPage', () => {
   it('switches to another deck from the shared list and starts a new round', () => {
     const { store } = setup();
     store.vote('5');
-    (store as unknown as { send: (m: ClientMessage) => void }).send({
-      type: 'setDeck',
-      deckId: 't-shirt',
-    });
+    TestBed.inject(SocketService).send({ type: 'setDeck', deckId: 't-shirt' });
     expect(store.deck()).toEqual(DECKS['t-shirt'].cards);
     expect(store.myVote()).toBeNull();
   });
