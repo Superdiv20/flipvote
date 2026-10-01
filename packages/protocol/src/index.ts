@@ -1,3 +1,4 @@
+export type * from './api';
 export * from './decks';
 export type * from './errors';
 export type * from './messages';

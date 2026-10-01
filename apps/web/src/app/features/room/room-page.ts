@@ -1,5 +1,15 @@
-import { Component, computed, inject, linkedSignal, signal, untracked } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  type OnInit,
+  signal,
+  untracked,
+} from '@angular/core';
 import { AccountService } from '../../core/account';
+import { SessionService } from '../../core/session';
 import { ThemeService } from '../../core/theme';
 import { CardHand } from './hand/card-hand';
 import { IssueDrawer } from './issues/issue-drawer';
@@ -23,7 +33,7 @@ import { RoomStore } from './+store/room-store';
       [votedCount]="store.votedCount()"
       [theme]="theme.theme()"
       [account]="account.account()"
-      [guestName]="selfName()"
+      [guestName]="guestName()"
       (toggleTheme)="theme.toggle()"
       (signIn)="account.signIn()"
       (signOut)="account.signOut()"
@@ -83,14 +93,17 @@ import { RoomStore } from './+store/room-store';
     </div>
   `,
 })
-export class RoomPage {
+export class RoomPage implements OnInit {
+  /** From the route `r/:roomId`. */
+  readonly roomId = input.required<string>();
+
   protected readonly store = inject(RoomStore);
   protected readonly theme = inject(ThemeService);
   protected readonly account = inject(AccountService);
+  private readonly session = inject(SessionService);
 
-  protected readonly selfName = computed(
-    () => this.store.participants().find((p) => p.id === this.store.selfId())?.name ?? 'Guest',
-  );
+  /** Without an account, the menu shows the name saved in the session. */
+  protected readonly guestName = computed(() => this.session.name() ?? 'Guest');
 
   protected readonly results = computed(() => {
     const results = this.store.results();
@@ -111,6 +124,11 @@ export class RoomPage {
     source: this.store.flipped,
     computation: (flipped) => flipped || untracked(this.collapsedByUser),
   });
+
+  // Not the constructor: route inputs are only set once the component is initialised.
+  ngOnInit(): void {
+    this.store.enter(this.roomId());
+  }
 
   protected toggleDrawer(): void {
     const collapsed = !this.drawerCollapsed();

@@ -12,6 +12,7 @@ describe('RoomPage', () => {
       providers: [RoomStore, provideMockSession()],
     });
     const fixture = TestBed.createComponent(RoomPage);
+    fixture.componentRef.setInput('roomId', 'demo');
     const page = fixture.componentInstance as unknown as {
       drawerCollapsed: () => boolean;
       toggleDrawer: () => void;

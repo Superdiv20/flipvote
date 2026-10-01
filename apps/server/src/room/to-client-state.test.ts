@@ -59,6 +59,7 @@ describe('toClientState', () => {
 		} as Participant);
 		const state = toClientState({ ...room, participants: withSecret }, 'ana');
 		expect(JSON.stringify(state)).not.toContain('secret');
+		expect(JSON.stringify(state)).not.toContain(room.creatorToken);
 		expect(Object.keys(state).sort()).toEqual(
 			['currentIssueId', 'deck', 'facilitatorId', 'id', 'issues', 'myVote', 'name', 'participants', 'phase', 'result', 'selfId'].sort(),
 		);

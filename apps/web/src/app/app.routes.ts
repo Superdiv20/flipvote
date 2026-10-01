@@ -11,7 +11,7 @@ export const routes: Routes = [
     providers: [CreateRoomStore],
   },
   {
-    path: 'room/:roomId',
+    path: 'r/:roomId',
     loadComponent: () => import('./features/room/room-page').then((m) => m.RoomPage),
     providers: [RoomStore],
   },

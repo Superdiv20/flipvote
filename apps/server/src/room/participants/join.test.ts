@@ -7,7 +7,7 @@ import { vote } from '../round/vote';
 
 describe('join', () => {
 	test('seats a new participant and makes the first one facilitator', () => {
-		const empty = createRoom({ id: 'r', name: 'R', deck: DECKS.fibonacci });
+		const empty = createRoom({ id: 'r', name: 'R', deck: DECKS.fibonacci, creatorToken: 'token-creator' });
 		const room = unwrap(applyPure(empty, (r) => join(r, 'ana', '  Ana  ', 'token-ana')));
 		expect(room.participants.get('ana')).toEqual({
 			id: 'ana',
@@ -30,6 +30,18 @@ describe('join', () => {
 		expect([...rejoined.participants.keys()]).toEqual(['ana', 'ben', 'cy']);
 		expect(rejoined.participants.get('ana')).toMatchObject({ name: 'Ana K', connected: true });
 		expect(rejoined.votes.get('ana')).toBe('5');
+	});
+
+	test('makes the creator facilitator when they join, even after others', () => {
+		const room = unwrap(applyPure(seatedRoom(), (r) => join(r, 'cara', 'Cara', 'token-creator')));
+		expect(room.facilitatorId).toBe('cara');
+		expect([...room.participants.keys()]).toEqual(['ana', 'ben', 'cy', 'cara']);
+	});
+
+	test('does not give the creator the role back when they rejoin', () => {
+		let room = unwrap(join(seatedRoom(), 'cara', 'Cara', 'token-creator'));
+		room = { ...room, facilitatorId: 'ben' };
+		expect(unwrap(join(room, 'cara', 'Cara', 'token-creator')).facilitatorId).toBe('ben');
 	});
 
 	test('rejects taking over a seat without its token', () => {

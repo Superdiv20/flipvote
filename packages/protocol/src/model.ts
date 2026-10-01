@@ -3,16 +3,16 @@ export type CardValue = string;
 
 export type DeckId = 'fibonacci' | 'modified-fibonacci' | 't-shirt';
 
-export interface Deck {
+export type Deck = {
 	id: DeckId;
 	name: string;
 	/** In display order, special cards (`?`, `coffee`) included. */
 	cards: CardValue[];
-}
+};
 
 export type RoundPhase = 'voting' | 'revealed';
 
-export interface Participant {
+export type Participant = {
 	id: string;
 	name: string;
 	isSpectator: boolean;
@@ -21,9 +21,9 @@ export interface Participant {
 	hasVoted: boolean;
 	/** Only present when the phase is `revealed`. Never sent before the flip. */
 	vote?: CardValue;
-}
+};
 
-export interface Issue {
+export type Issue = {
 	id: string;
 	/** Tracker key such as `ATL-209`. */
 	key?: string;
@@ -32,13 +32,13 @@ export interface Issue {
 	description?: string;
 	/** Final estimate, recorded by the server when a round on this issue finishes. */
 	estimate?: CardValue;
-}
+};
 
 /** Issue fields a client may send when adding or editing. The id and estimate belong to the server. */
 export type IssueInput = Pick<Issue, 'key' | 'title' | 'link' | 'description'>;
 
 /** Calculated by the server when the cards are revealed. */
-export interface RoundResult {
+export type RoundResult = {
 	voteCount: number;
 	/** Mean of the numeric votes, `null` when nobody picked a number. */
 	average: number | null;
@@ -48,13 +48,13 @@ export interface RoundResult {
 	consensus: CardValue | null;
 	/** Most common numeric vote, the higher one on a tie. Recorded on the issue at `reset`. */
 	suggestedEstimate: CardValue | null;
-}
+};
 
 /**
  * The full room as sent to one recipient. It is built per recipient: `selfId` and `myVote`
  * differ between clients, everything else is the same for everyone.
  */
-export interface RoomState {
+export type RoomState = {
 	id: string;
 	name: string;
 	deck: Deck;
@@ -71,4 +71,4 @@ export interface RoomState {
 	selfId: string;
 	/** The recipient's own vote, also before the flip. */
 	myVote: CardValue | null;
-}
+};

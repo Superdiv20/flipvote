@@ -1,5 +1,6 @@
-import { Service, signal } from '@angular/core';
+import { DOCUMENT, inject, Service, signal } from '@angular/core';
 import type { ClientMessage, ServerMessage } from '@flipvote/protocol';
+import { APP_CONFIG } from './config';
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'open' | 'closed';
 
@@ -8,7 +9,7 @@ type MessageHandler = (message: ServerMessage) => void;
 /** One WebSocket connection to the server. Sends `ClientMessage`s and hands incoming `ServerMessage`s to its listeners. Knows nothing about rooms. */
 @Service()
 export class SocketService {
-  private readonly wsURL = 'ws://localhost:3000/ws';
+  private readonly wsURL = toSocketUrl(inject(APP_CONFIG).wsUrl, inject(DOCUMENT).baseURI);
 
   private socket: WebSocket | null = null;
   /** Messages sent before the socket opened, flushed once it does. */
@@ -59,4 +60,11 @@ export class SocketService {
     this.handlers.add(handler);
     return () => this.handlers.delete(handler);
   }
+}
+
+/** Resolves a relative path such as `/ws` against the page, and switches `http:`/`https:` to `ws:`/`wss:`. */
+function toSocketUrl(path: string, base: string): string {
+  const url = new URL(path, base);
+  url.protocol = url.protocol.replace(/^http/, 'ws');
+  return url.href;
 }

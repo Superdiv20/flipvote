@@ -15,6 +15,8 @@ export interface Participant {
 export interface Room {
 	id: string;
 	name: string;
+	/** Token of whoever created the room over HTTP. Secret: never sent to any client. */
+	creatorToken: string;
 	deck: Deck;
 	phase: RoundPhase;
 	/** `null` only while the room is empty. */
@@ -31,10 +33,11 @@ export interface Room {
 
 export type RoomResult = { ok: true; room: Room } | { ok: false; code: ErrorCode };
 
-export function createRoom(init: { id: string; name: string; deck: Deck }): Room {
+export function createRoom(init: { id: string; name: string; deck: Deck; creatorToken: string }): Room {
 	return {
 		id: init.id,
 		name: init.name,
+		creatorToken: init.creatorToken,
 		deck: init.deck,
 		phase: 'voting',
 		facilitatorId: null,

@@ -61,6 +61,17 @@ export const RoomStore = signalStore(
         send({ type: 'join', roomId, name, sessionToken: session.token });
       },
 
+      /**
+       * Joins with the saved display name, e.g. right after creating the room or after a refresh.
+       * Returns `false` when no name is saved yet, so the page can ask for one.
+       */
+      enter(roomId: string): boolean {
+        const name = session.name();
+        if (!name) return false;
+        send({ type: 'join', roomId, name, sessionToken: session.token });
+        return true;
+      },
+
       /** Picks a card, or withdraws the vote when the same card is picked again. */
       vote(value: string): void {
         send({ type: 'vote', value: store.myVote() === value ? null : value });

@@ -14,7 +14,7 @@ import { cardLabel } from './card-label';
         @let selected = value === selectedValue();
         <button
           type="button"
-          class="focus-visible:ring-ring/50 flex h-[70px] w-12 items-center justify-center rounded-lg outline-none focus-visible:ring-3 disabled:cursor-default"
+          class="focus-visible:ring-ring/50 flex h-17.5 w-12 items-center justify-center rounded-lg outline-none focus-visible:ring-3 disabled:cursor-default"
           [class]="selected ? selectedClass : locked() ? lockedClass : idleClass"
           [attr.aria-pressed]="selected"
           [attr.aria-label]="label(value)"

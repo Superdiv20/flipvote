@@ -77,11 +77,31 @@ const DECK_OPTIONS = Object.values(DECKS).map((deck) => ({
             type="text"
             autocomplete="off"
             placeholder="Sprint 42 planning"
-            [formField]="createForm.name"
-            [attr.aria-describedby]="nameInvalid() ? 'room-name-error' : null"
+            [formField]="createForm.roomName"
+            [attr.aria-describedby]="nameInvalid('roomName') ? 'room-name-error' : null"
           />
-          @if (nameInvalid()) {
+          @if (nameInvalid('roomName')) {
             <hlm-field-error id="room-name-error" forceShow>{{ nameMessage }}</hlm-field-error>
+          }
+        </hlm-field>
+
+        <hlm-field>
+          <label hlmFieldLabel for="user-display-name">User name</label>
+          <input
+            hlmInput
+            id="user-display-name"
+            type="text"
+            autocomplete="off"
+            placeholder="Your display name"
+            [formField]="createForm.userDisplayName"
+            [attr.aria-describedby]="
+              nameInvalid('userDisplayName') ? 'user-display-name-error' : null
+            "
+          />
+          @if (nameInvalid('userDisplayName')) {
+            <hlm-field-error id="user-display-name-error" forceShow>{{
+              nameMessage
+            }}</hlm-field-error>
           }
         </hlm-field>
 
@@ -130,9 +150,7 @@ const DECK_OPTIONS = Object.values(DECKS).map((deck) => ({
       </form>
     </section>
 
-    <p class="text-center text-sm text-muted-foreground">
-      Anyone with the link can join.
-    </p>
+    <p class="text-center text-sm text-muted-foreground">Anyone with the link can join.</p>
   `,
 })
 export class CreateRoomPage {
@@ -143,29 +161,41 @@ export class CreateRoomPage {
   protected readonly decks = DECK_OPTIONS;
   protected readonly nameMessage = NAME_MESSAGE;
 
-  private readonly model = signal<{ name: string; deck: DeckId }>({ name: '', deck: 'fibonacci' });
+  private readonly _model = signal<{ roomName: string; userDisplayName: string; deck: DeckId }>({
+    roomName: '',
+    userDisplayName: '',
+    deck: 'fibonacci',
+  });
 
   protected readonly createForm = form(
-    this.model,
+    this._model,
     (schemaPath) => {
-      required(schemaPath.name, { message: NAME_MESSAGE });
+      required(schemaPath.roomName, { message: NAME_MESSAGE });
+      required(schemaPath.userDisplayName, { message: 'Display name is required.' });
       // `required` accepts a name of only spaces.
-      pattern(schemaPath.name, /\S/, { message: NAME_MESSAGE });
+      pattern(schemaPath.userDisplayName, /\S/, { message: 'Display name is required.' });
+      // `required` accepts a name of only spaces.
+      pattern(schemaPath.roomName, /\S/, { message: NAME_MESSAGE });
     },
     {
       submission: {
         action: async (field) => {
-          const { name, deck } = field().value();
-          const roomId = await this.store.createRoom(name.trim(), DECKS[deck], this.session.token);
-          if (roomId) await this.router.navigate(['/room', roomId]);
+          const { roomName, userDisplayName: displayName, deck } = field().value();
+          const roomId = await this.store.createRoom(
+            roomName.trim(),
+            displayName.trim(),
+            deck,
+            this.session.token,
+          );
+          if (roomId) await this.router.navigate(['/r', roomId]);
           return undefined;
         },
       },
     },
   );
 
-  protected nameInvalid(): boolean {
-    const name = this.createForm.name();
-    return name.touched() && name.invalid();
+  protected nameInvalid(fieldName: 'roomName' | 'userDisplayName'): boolean {
+    const field = this.createForm[fieldName]();
+    return field.touched() && field.invalid();
   }
 }

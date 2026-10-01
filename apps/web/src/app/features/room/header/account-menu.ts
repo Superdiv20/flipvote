@@ -45,17 +45,15 @@ import type { Account } from '../../../core/account';
         </div>
         <hlm-dropdown-menu-separator />
         @if (!account()) {
-          <div class="px-0.5 pt-1 pb-1.5">
-            <button
-              hlmDropdownMenuItem
-              class="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground h-10 w-full justify-center font-medium"
-              (triggered)="signIn.emit()"
-            >
-              <ng-icon name="lucideLogIn" />
-              Sign in
-            </button>
-          </div>
+          <button hlmDropdownMenuItem (triggered)="signIn.emit()">
+            <ng-icon name="lucideLogIn" />
+            Sign in
+          </button>
         }
+        <button hlmDropdownMenuItem (triggered)="signUp.emit()">
+          <ng-icon name="lucideUser" />
+          Sign up
+        </button>
         <button hlmDropdownMenuItem (triggered)="openSettings.emit()">
           <ng-icon name="lucideSettings" />
           Profile settings
@@ -95,6 +93,7 @@ export class AccountMenu {
 
   readonly openSettings = output();
   readonly signIn = output();
+  readonly signUp = output();
   readonly signOut = output();
 
   protected readonly displayName = computed(() => this.account()?.name ?? this.guestName());

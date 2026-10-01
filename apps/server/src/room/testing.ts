@@ -3,9 +3,12 @@ import { DECKS } from '@flipvote/protocol';
 import { join } from './participants/join';
 import { createRoom, type Room, type RoomResult } from './room';
 
-/** A room with `ana`, `ben` and `cy` joined in that order; `ana` is the facilitator. Each token is `token-<id>`. */
+/**
+ * A room with `ana`, `ben` and `cy` joined in that order; `ana` is the facilitator. Each token is
+ * `token-<id>`. The creator (`token-creator`) hasn't joined.
+ */
 export function seatedRoom(ids: string[] = ['ana', 'ben', 'cy']): Room {
-	let room = createRoom({ id: 'room-1', name: 'Sprint 42', deck: DECKS.fibonacci });
+	let room = createRoom({ id: 'room-1', name: 'Sprint 42', deck: DECKS.fibonacci, creatorToken: 'token-creator' });
 	for (const id of ids) room = unwrap(join(room, id, id.toUpperCase(), `token-${id}`));
 	return room;
 }
