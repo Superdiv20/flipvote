@@ -51,8 +51,9 @@ export type RoundResult = {
 };
 
 /**
- * The full room as sent to one recipient. It is built per recipient: `selfId` and `myVote`
- * differ between clients, everything else is the same for everyone.
+ * The room as every client in it sees it. It is the same for everyone, so the server publishes it
+ * once to the room's topic. Personal data travels separately: the own participant id in
+ * `welcome`, the own vote in `welcome` and `myVote`.
  */
 export type RoomState = {
 	id: string;
@@ -67,8 +68,4 @@ export type RoomState = {
 	currentIssueId: string | null;
 	/** Only set when the phase is `revealed`. */
 	result: RoundResult | null;
-	/** The recipient's own participant id. */
-	selfId: string;
-	/** The recipient's own vote, also before the flip. */
-	myVote: CardValue | null;
 };

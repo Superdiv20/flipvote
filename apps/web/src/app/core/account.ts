@@ -5,17 +5,13 @@ export interface Account {
   email: string;
 }
 
-// Mock account until sign-in is wired up to the server.
-const MOCK_ACCOUNT: Account = { name: 'Jonas Keller', email: 'jonas@superdiv.de' };
-
 /** The signed-in account, or `null` for a guest. Everyone starts as a guest; accounts are optional. */
 @Service()
 export class AccountService {
   readonly account = signal<Account | null>(null);
 
-  signIn(): void {
-    this.account.set(MOCK_ACCOUNT);
-  }
+  /** Not available yet: accounts arrive with the SaaS phase of the roadmap. */
+  signIn(): void {}
 
   signOut(): void {
     this.account.set(null);

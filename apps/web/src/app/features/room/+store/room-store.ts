@@ -1,5 +1,5 @@
 import { computed, inject } from '@angular/core';
-import type { ClientMessage, Deck, RoomState, ServerMessage } from '@flipvote/protocol';
+import type { CardValue, ClientMessage, RoomState, ServerMessage } from '@flipvote/protocol';
 import {
   patchState,
   signalStore,
@@ -13,19 +13,24 @@ import { SocketService } from '../../../core/socket';
 import { type IssueDetails, issueLabel, parseIssueTitle } from '../issues/issue-types';
 
 type RoomStoreState = {
-  /** The room as the server last sent it. `null` until the first `state` message arrives. */
+  /** The shared room state, the same for everyone in the room. `null` until the first `state` arrives. */
   room: RoomState | null;
+  /** Our own seat, from `welcome`. */
+  participantId: string | null;
+  /** Our own vote in this round. Only we receive it; others see just `hasVoted` until the flip. */
+  myVote: CardValue | null;
 };
 
-const initialState: RoomStoreState = { room: null };
+const initialState: RoomStoreState = { room: null, participantId: null, myVote: null };
 
 /**
  * Room state as sent by the server. Actions only send intents; the state changes when the
- * server answers. Connects when a room visit starts and disconnects when it ends.
+ * server answers: the shared `state` for everyone, plus `welcome` and `myVote` for us alone.
+ * Connects when a room visit starts and disconnects when it ends.
  */
 export const RoomStore = signalStore(
   withState(initialState),
-  withComputed(({ room }) => {
+  withComputed(({ room, participantId }) => {
     const participants = computed(() => room()?.participants ?? []);
     const issues = computed(() => room()?.issues ?? []);
     const currentIssueId = computed(() => room()?.currentIssueId ?? null);
@@ -34,12 +39,11 @@ export const RoomStore = signalStore(
     );
 
     return {
-      selfId: computed(() => room()?.selfId ?? ''),
+      selfId: computed(() => participantId() ?? ''),
       roomName: computed(() => room()?.name ?? ''),
       deck: computed(() => room()?.deck.cards ?? []),
       participants,
       flipped: computed(() => room()?.phase === 'revealed'),
-      myVote: computed(() => room()?.myVote ?? null),
       results: computed(() => room()?.result ?? null),
       votedCount: computed(() => participants().filter((p) => p.hasVoted).length),
       issues,
@@ -106,13 +110,24 @@ export const RoomStore = signalStore(
         send({ type: 'updateIssue', issueId: id, changes: details });
       },
 
-      _handle(message: ServerMessage): void {
+      _handleRoomUpdate(message: ServerMessage): void {
         switch (message.type) {
           case 'welcome':
+            patchState(store, { participantId: message.participantId, myVote: message.myVote });
             break;
-          case 'state':
-            patchState(store, { room: message.room });
+          case 'myVote':
+            patchState(store, { myVote: message.value });
             break;
+          case 'state': {
+            // A new round clears every vote without a `myVote` message. The shared state shows it:
+            // once our seat says `hasVoted: false`, we have no vote either.
+            const self = message.room.participants.find((p) => p.id === store.participantId());
+            patchState(store, {
+              room: message.room,
+              ...(self && !self.hasVoted ? { myVote: null } : {}),
+            });
+            break;
+          }
           case 'error':
             console.warn(`[room] ${message.code}: ${message.message}`);
             break;
@@ -127,7 +142,7 @@ export const RoomStore = signalStore(
     return {
       onInit(): void {
         // Listen first, so no message that arrives right after connecting is missed.
-        stopListening = socket.onMessage((message) => store._handle(message));
+        stopListening = socket.onMessage((message) => store._handleRoomUpdate(message));
         socket.connect();
       },
       onDestroy(): void {

@@ -25,12 +25,12 @@ import { RoomStore } from './+store/room-store';
   host: { class: 'flex h-dvh flex-col bg-background text-foreground' },
   template: `
     <flipvote-room-header
-      [roomName]="store.roomName()"
-      [topic]="store.topic()"
-      [participants]="store.participants()"
-      [selfId]="store.selfId()"
-      [flipped]="store.flipped()"
-      [votedCount]="store.votedCount()"
+      [roomName]="roomStore.roomName()"
+      [topic]="roomStore.topic()"
+      [participants]="roomStore.participants()"
+      [selfId]="roomStore.selfId()"
+      [flipped]="roomStore.flipped()"
+      [votedCount]="roomStore.votedCount()"
       [theme]="theme.theme()"
       [account]="account.account()"
       [guestName]="guestName()"
@@ -40,14 +40,14 @@ import { RoomStore } from './+store/room-store';
     />
     <div class="flex min-h-0 flex-1">
       <flipvote-issue-drawer
-        [issues]="store.issues()"
-        [currentId]="store.currentIssueId()"
+        [issues]="roomStore.issues()"
+        [currentId]="roomStore.currentIssueId()"
         [collapsed]="drawerCollapsed()"
         (toggle)="toggleDrawer()"
-        (select)="store.selectIssue($event)"
-        (add)="store.addIssue($event)"
-        (create)="store.createIssue($event)"
-        (update)="store.updateIssue($event.id, $event.details)"
+        (select)="roomStore.selectIssue($event)"
+        (add)="roomStore.addIssue($event)"
+        (create)="roomStore.createIssue($event)"
+        (update)="roomStore.updateIssue($event.id, $event.details)"
       />
       <main class="flex min-w-0 flex-1 flex-col">
         <!-- The results slide in right beside the table while the drawer closes on the left, so the table keeps its size. -->
@@ -56,13 +56,13 @@ import { RoomStore } from './+store/room-store';
         >
           <flipvote-poker-table
             class="max-w-150"
-            [participants]="store.participants()"
-            [selfId]="store.selfId()"
-            [flipped]="store.flipped()"
-            [votedCount]="store.votedCount()"
+            [participants]="roomStore.participants()"
+            [selfId]="roomStore.selfId()"
+            [flipped]="roomStore.flipped()"
+            [votedCount]="roomStore.votedCount()"
             [consensus]="!!results()?.consensus"
-            (flip)="store.flip()"
-            (reset)="store.reset()"
+            (flip)="roomStore.flip()"
+            (reset)="roomStore.reset()"
           />
           @if (results(); as results) {
             <flipvote-results-panel class="md:hidden" [results]="results" />
@@ -84,10 +84,10 @@ import { RoomStore } from './+store/room-store';
         </div>
         <flipvote-card-hand
           class="px-4 pb-8"
-          [deck]="store.deck()"
-          [selectedValue]="store.myVote()"
-          [locked]="store.flipped()"
-          (pick)="store.vote($event)"
+          [deck]="roomStore.deck()"
+          [selectedValue]="roomStore.myVote()"
+          [locked]="roomStore.flipped()"
+          (pick)="roomStore.vote($event)"
         />
       </main>
     </div>
@@ -97,7 +97,7 @@ export class RoomPage implements OnInit {
   /** From the route `r/:roomId`. */
   readonly roomId = input.required<string>();
 
-  protected readonly store = inject(RoomStore);
+  protected readonly roomStore = inject(RoomStore);
   protected readonly theme = inject(ThemeService);
   protected readonly account = inject(AccountService);
   private readonly session = inject(SessionService);
@@ -106,7 +106,7 @@ export class RoomPage implements OnInit {
   protected readonly guestName = computed(() => this.session.name() ?? 'Guest');
 
   protected readonly results = computed(() => {
-    const results = this.store.results();
+    const results = this.roomStore.results();
     return results && results.voteCount > 0 ? results : null;
   });
 
@@ -121,13 +121,13 @@ export class RoomPage implements OnInit {
 
   /** Collapses to the rail when the cards flip, and returns to the user's choice on the next round. */
   protected readonly drawerCollapsed = linkedSignal({
-    source: this.store.flipped,
+    source: this.roomStore.flipped,
     computation: (flipped) => flipped || untracked(this.collapsedByUser),
   });
 
   // Not the constructor: route inputs are only set once the component is initialised.
   ngOnInit(): void {
-    this.store.enter(this.roomId());
+    this.roomStore.enter(this.roomId());
   }
 
   protected toggleDrawer(): void {

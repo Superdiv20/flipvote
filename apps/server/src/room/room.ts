@@ -11,7 +11,7 @@ export interface Participant {
 	connected: boolean;
 }
 
-/** Server-side room. Never sent as is; `toClientState` builds what a client may see. */
+/** Server-side room. Never sent as is; `toSharedState` builds what clients may see. */
 export interface Room {
 	id: string;
 	name: string;

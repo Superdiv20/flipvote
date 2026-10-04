@@ -32,9 +32,22 @@ export type ClientMessage =
 	/** Facilitator. Hands the role to another participant. */
 	| { type: 'transferFacilitator'; participantId: string };
 
+/**
+ * `state` goes to everyone in the room and is identical for all of them. The other messages go
+ * to a single client only.
+ */
 export type ServerMessage =
-	/** Sent only to the joining client, with the seat its token maps to. */
-	| { type: 'welcome'; participantId: string }
+	/**
+	 * To the joining client: the seat its token maps to, and its vote in the current round, so a
+	 * refresh while voting shows the picked card again.
+	 */
+	| { type: 'welcome'; participantId: string; myVote: CardValue | null }
+	/** To everyone in the room after every change. */
 	| { type: 'state'; room: RoomState }
-	/** Sent only to the client whose intent failed. */
+	/**
+	 * To the voter only, after each `vote`. Others learn only `hasVoted` until the flip. A new
+	 * round sends no `myVote`: a `state` where the own seat has `hasVoted: false` means no vote.
+	 */
+	| { type: 'myVote'; value: CardValue | null }
+	/** To the client whose intent failed. */
 	| { type: 'error'; code: ErrorCode; message: string };

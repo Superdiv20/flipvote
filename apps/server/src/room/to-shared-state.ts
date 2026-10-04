@@ -1,17 +1,16 @@
-import type { RoomState } from '@flipvote/protocol';
+import type { CardValue, RoomState } from '@flipvote/protocol';
 import type { Room } from './room';
 
 /**
- * The state one recipient may see. Every field is mapped explicitly, so server-only fields on
- * `Room` or `Participant` can never leak. Votes of others appear only once revealed; the
- * recipient's own vote is always included as `myVote`.
+ * The state every client in the room sees, identical for all of them, so it can be published
+ * once to the room's topic. Every field is mapped explicitly, so server-only fields on `Room` or
+ * `Participant` can never leak. Vote values and the result appear only once revealed.
  */
-export function toClientState(room: Room, recipientId: string): RoomState {
-	if (!room.participants.has(recipientId)) {
-		throw new Error(`${recipientId} is not in room ${room.id}`);
+export function toSharedState(room: Room): RoomState {
+	// Only rooms with participants are ever sent, and those always have a facilitator.
+	if (room.facilitatorId === null) {
+		throw new Error(`Room ${room.id} has nobody in it to send its state to`);
 	}
-	// A room with a participant always has a facilitator.
-	const facilitatorId = room.facilitatorId!;
 	const revealed = room.phase === 'revealed';
 
 	return {
@@ -19,7 +18,7 @@ export function toClientState(room: Room, recipientId: string): RoomState {
 		name: room.name,
 		deck: { id: room.deck.id, name: room.deck.name, cards: [...room.deck.cards] },
 		phase: room.phase,
-		facilitatorId,
+		facilitatorId: room.facilitatorId,
 		participants: [...room.participants.values()].map((participant) => {
 			const vote = room.votes.get(participant.id);
 			return {
@@ -41,7 +40,10 @@ export function toClientState(room: Room, recipientId: string): RoomState {
 		})),
 		currentIssueId: room.currentIssueId,
 		result: revealed && room.result ? structuredClone(room.result) : null,
-		selfId: recipientId,
-		myVote: room.votes.get(recipientId) ?? null,
 	};
+}
+
+/** A participant's own vote in the current round, for `welcome` and `myVote`. Only ever sent to that participant. */
+export function ownVote(room: Room, participantId: string): CardValue | null {
+	return room.votes.get(participantId) ?? null;
 }

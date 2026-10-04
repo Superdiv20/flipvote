@@ -23,7 +23,7 @@ export const MOCK_ISSUES: Issue[] = [
   { id: 'atl-223', key: 'ATL-223', title: 'Rate limit the public API' },
 ];
 
-/** The room as the server would send it to Jonas, who is the facilitator. */
+/** The shared room state as the server would send it. Jonas (`SELF_ID`) is the facilitator. */
 export const MOCK_ROOM: RoomState = {
   id: 'demo',
   name: 'Atlas · Sprint 42 planning',
@@ -41,8 +41,6 @@ export const MOCK_ROOM: RoomState = {
   issues: MOCK_ISSUES,
   currentIssueId: 'atl-214',
   result: null,
-  selfId: SELF_ID,
-  myVote: null,
 };
 
 /** The other participants' votes, which only the server knows until the flip. */

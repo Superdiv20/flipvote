@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { DECKS } from '@flipvote/protocol';
 import { registry } from '../room/room-registry';
+import { ERROR_MESSAGES } from '../shared/error-messages';
 import { createRoomHandler } from './create-room';
 
 function post(body: unknown, token: string | null = 'token-creator'): Request {
@@ -30,6 +31,11 @@ describe('POST /api/rooms', () => {
 		const response = await createRoomHandler(post({ name: 'R', deckId: 'fibonacci' }, null));
 		expect(response.status).toBe(401);
 		expect(await response.json()).toMatchObject({ code: 'INVALID_SESSION' });
+	});
+
+	test('sends the text that belongs to the error code', async () => {
+		const response = await createRoomHandler(post({ name: 'R', deckId: 'fibonacci' }, null));
+		expect(await response.json()).toEqual({ code: 'INVALID_SESSION', message: ERROR_MESSAGES.INVALID_SESSION });
 	});
 
 	test('rejects a blank name', async () => {

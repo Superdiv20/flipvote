@@ -10,23 +10,26 @@ import {
 } from '@flipvote/protocol';
 
 /**
- * Stands in for the server until the socket is wired up. It takes the same `ClientMessage`s,
- * keeps votes hidden until the flip, and answers with the per-recipient `RoomState`.
- * Only the recipient `selfId` exists; everyone else is simulated.
+ * Stands in for the server in tests. It takes the same `ClientMessage`s, keeps votes hidden until
+ * the flip, and answers like the real server: the shared `state`, plus `welcome` and `myVote`
+ * for the one real client, `selfId`. Everyone else is simulated.
  */
 export class MockRoomServer {
-  private room: Omit<RoomState, 'myVote' | 'result'>;
+  private room: Omit<RoomState, 'result'>;
   private readonly votes: Map<string, CardValue>;
   private nextIssueId = 0;
 
-  constructor(initial: RoomState, hiddenVotes: Record<string, CardValue>) {
-    const { myVote, result: _result, ...room } = initial;
+  constructor(
+    initial: RoomState,
+    hiddenVotes: Record<string, CardValue>,
+    private readonly selfId: string,
+  ) {
+    const { result: _result, ...room } = initial;
     this.room = room;
     this.votes = new Map(Object.entries(hiddenVotes));
-    if (myVote !== null) this.votes.set(initial.selfId, myVote);
   }
 
-  /** The state as sent to the recipient. */
+  /** The shared state, the same for everyone. */
   state(): RoomState {
     const revealed = this.room.phase === 'revealed';
     return {
@@ -40,18 +43,29 @@ export class MockRoomServer {
           ...(revealed && vote !== undefined ? { vote } : {}),
         };
       }),
-      myVote: this.votes.get(this.room.selfId) ?? null,
       result: revealed ? calculateResult([...this.votes.values()], this.room.deck.cards) : null,
     };
   }
 
-  receive(message: ClientMessage): ServerMessage {
+  /** The replies in the order the real server sends them: personal messages first, then `state`. */
+  receive(message: ClientMessage): ServerMessage[] {
     const error = this.apply(message);
-    return error ? { type: 'error', ...error } : { type: 'state', room: this.state() };
+    if (error) return [{ type: 'error', ...error }];
+
+    const state: ServerMessage = { type: 'state', room: this.state() };
+    const myVote = this.votes.get(this.selfId) ?? null;
+    switch (message.type) {
+      case 'join':
+        return [{ type: 'welcome', participantId: this.selfId, myVote }, state];
+      case 'vote':
+        return [{ type: 'myVote', value: myVote }, state];
+      default:
+        return [state];
+    }
   }
 
   private apply(message: ClientMessage): { code: ErrorCode; message: string } | null {
-    const self = this.room.selfId;
+    const self = this.selfId;
     const isFacilitator = this.room.facilitatorId === self;
     const facilitatorOnly = {
       code: 'NOT_FACILITATOR',

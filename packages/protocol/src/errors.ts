@@ -2,6 +2,8 @@ export type ErrorCode =
 	| 'INVALID_MESSAGE'
 	| 'ROOM_NOT_FOUND'
 	| 'NOT_JOINED'
+	/** The connection already sits in another room. Open a new connection to join a different one. */
+	| 'ALREADY_IN_ROOM'
 	| 'NAME_REQUIRED'
 	| 'INVALID_SESSION'
 	| 'NOT_FACILITATOR'
