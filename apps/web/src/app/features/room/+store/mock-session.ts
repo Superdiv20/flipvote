@@ -14,9 +14,12 @@ export class MockSession implements Pick<SocketService, 'connect' | 'disconnect'
   disconnect(): void {}
 
   send(message: ClientMessage): void {
-    for (const reply of this.server.receive(message)) {
-      for (const handler of this.handlers) handler(reply);
-    }
+    for (const reply of this.server.receive(message)) this.deliver(reply);
+  }
+
+  /** Hands a server message to the listeners, for cases the mock server doesn't produce itself. */
+  deliver(message: ServerMessage): void {
+    for (const handler of this.handlers) handler(message);
   }
 
   onMessage(handler: (message: ServerMessage) => void): () => void {

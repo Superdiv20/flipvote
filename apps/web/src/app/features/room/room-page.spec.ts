@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { DECKS } from '@flipvote/protocol';
 import { SocketService } from '../../core/socket';
-import { provideMockSession } from './+store/mock-session';
+import { MockSession, provideMockSession } from './+store/mock-session';
 import { RoomStore } from './+store/room-store';
 import { RoomPage } from './room-page';
 
@@ -124,5 +125,25 @@ describe('RoomPage', () => {
     TestBed.inject(SocketService).send({ type: 'setDeck', deckId: 't-shirt' });
     expect(store.deck()).toEqual(DECKS['t-shirt'].cards);
     expect(store.myVote()).toBeNull();
+  });
+
+  it('shows the not-found screen instead of the room when the server does not know it', async () => {
+    TestBed.configureTestingModule({
+      imports: [RoomPage],
+      providers: [RoomStore, provideMockSession(), provideRouter([])],
+    });
+    const fixture = TestBed.createComponent(RoomPage);
+    fixture.componentRef.setInput('roomId', 'no-such-room');
+    await fixture.whenStable();
+
+    const socket = TestBed.inject(SocketService) as unknown as MockSession;
+    socket.deliver({ type: 'error', code: 'ROOM_NOT_FOUND', message: 'This room does not exist or has closed.' });
+    await fixture.whenStable();
+
+    const page = fixture.nativeElement as HTMLElement;
+    expect(page.querySelector('h1')?.textContent).toContain('Room not found');
+    expect(page.querySelector('a[href="/"]')?.textContent).toContain('Create a new room');
+    expect(page.querySelector('flipvote-poker-table')).toBeNull();
+    expect(page.querySelector('flipvote-card-hand')).toBeNull();
   });
 });

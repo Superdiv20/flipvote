@@ -191,6 +191,21 @@ describe('RoomStore', () => {
   });
 
   describe('errors', () => {
+    it('marks the room as not found', () => {
+      const store = setup();
+      expect(store.notFound()).toBe(false);
+      socket.receive({ type: 'error', code: 'ROOM_NOT_FOUND', message: 'This room does not exist or has closed.' });
+      expect(store.notFound()).toBe(true);
+    });
+
+    it('keeps the room for errors about a single intent', () => {
+      const store = setup();
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      socket.receive({ type: 'error', code: 'NOT_FACILITATOR', message: 'Only the facilitator can do that.' });
+      expect(store.notFound()).toBe(false);
+      vi.restoreAllMocks();
+    });
+
     it('changes nothing', () => {
       const store = setup();
       socket.receive({ type: 'welcome', participantId: 'ben', myVote: '5' });

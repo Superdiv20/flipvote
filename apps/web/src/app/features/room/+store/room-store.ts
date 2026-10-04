@@ -19,9 +19,16 @@ type RoomStoreState = {
   participantId: string | null;
   /** Our own vote in this round. Only we receive it; others see just `hasVoted` until the flip. */
   myVote: CardValue | null;
+  /** The server answered the join with `ROOM_NOT_FOUND`: a mistyped link, or the room has closed. */
+  notFound: boolean;
 };
 
-const initialState: RoomStoreState = { room: null, participantId: null, myVote: null };
+const initialState: RoomStoreState = {
+  room: null,
+  participantId: null,
+  myVote: null,
+  notFound: false,
+};
 
 /**
  * Room state as sent by the server. Actions only send intents; the state changes when the
@@ -129,7 +136,9 @@ export const RoomStore = signalStore(
             break;
           }
           case 'error':
-            console.warn(`[room] ${message.code}: ${message.message}`);
+            // Only a join can fail like this, so the whole page switches to the not-found screen.
+            if (message.code === 'ROOM_NOT_FOUND') patchState(store, { notFound: true });
+            else console.warn(`[room] ${message.code}: ${message.message}`);
             break;
         }
       },
