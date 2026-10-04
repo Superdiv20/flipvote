@@ -6,6 +6,7 @@ import {
   withComputed,
   withHooks,
   withMethods,
+  withProps,
   withState,
 } from '@ngrx/signals';
 import { SessionService } from '../../../core/session';
@@ -37,6 +38,10 @@ const initialState: RoomStoreState = {
  */
 export const RoomStore = signalStore(
   withState(initialState),
+  withProps(() => ({
+    /** Whether the socket to the server is open, for the live indicator. */
+    connection: inject(SocketService).status,
+  })),
   withComputed(({ room, participantId }) => {
     const participants = computed(() => room()?.participants ?? []);
     const issues = computed(() => room()?.issues ?? []);

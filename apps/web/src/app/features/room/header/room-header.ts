@@ -1,10 +1,11 @@
-import { Component, DOCUMENT, inject, input, output, signal } from '@angular/core';
+import { Component, computed, DOCUMENT, inject, input, output, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers } from '@ng-icons/lucide';
 import type { Participant } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
 import type { Account } from '../../../core/account';
+import type { ConnectionStatus } from '../../../core/socket';
 import type { Theme } from '../../../core/theme';
 import { AccountMenu } from './account-menu';
 import { Logo } from '../../../shared/logo';
@@ -30,8 +31,25 @@ import { ParticipantList } from './participant-list';
         hlmBtn
         variant="secondary"
         class="gap-1.5 px-2.5"
-        [attr.aria-label]="participants().length + ' participants, show list'"
+        [attr.aria-label]="
+          participants().length +
+          ' participants, ' +
+          connectionLabel().toLowerCase() +
+          ', show list'
+        "
       >
+        <!-- Live indicator: steady when connected, pulsing while connecting, grey when the connection is gone. -->
+        <span class="relative flex size-2" aria-hidden="true">
+          @if (connection() === 'connecting') {
+            <span
+              class="absolute inline-flex size-full animate-ping rounded-full bg-amber-500 opacity-75 motion-reduce:animate-none"
+            ></span>
+          }
+          <span
+            class="relative inline-flex size-2 rounded-full"
+            [class]="connectionDotClass()"
+          ></span>
+        </span>
         <ng-icon name="lucideUsers" aria-hidden="true" />
         <span aria-hidden="true">{{ participants().length }}</span>
       </button>
@@ -39,6 +57,7 @@ import { ParticipantList } from './participant-list';
         <hlm-popover-header class="px-1">
           <h2 hlmPopoverTitle>Participants</h2>
           <p hlmPopoverDescription class="text-xs">
+            {{ connectionLabel() }} ·
             {{
               flipped()
                 ? 'Cards revealed'
@@ -53,6 +72,10 @@ import { ParticipantList } from './participant-list';
         />
       </hlm-popover-content>
     </hlm-popover>
+    <!-- Announces a dropped connection once; the dot alone would only be visible. -->
+    <span class="sr-only" aria-live="polite">
+      {{ connection() === 'closed' ? 'Connection to the room lost' : '' }}
+    </span>
     <button
       hlmBtn
       variant="ghost"
@@ -85,6 +108,7 @@ export class RoomHeader {
   readonly selfId = input.required<string>();
   readonly flipped = input.required<boolean>();
   readonly votedCount = input.required<number>();
+  readonly connection = input.required<ConnectionStatus>();
   readonly theme = input.required<Theme>();
   readonly account = input.required<Account | null>();
   readonly guestName = input.required<string>();
@@ -92,6 +116,9 @@ export class RoomHeader {
   readonly openSettings = output();
   readonly signIn = output();
   readonly signOut = output();
+
+  protected readonly connectionLabel = computed(() => CONNECTION_LABELS[this.connection()]);
+  protected readonly connectionDotClass = computed(() => CONNECTION_DOTS[this.connection()]);
 
   protected readonly copied = signal(false);
   private resetCopied?: ReturnType<typeof setTimeout>;
@@ -107,3 +134,17 @@ export class RoomHeader {
     this.resetCopied = setTimeout(() => this.copied.set(false), 2000);
   }
 }
+
+const CONNECTION_LABELS: Record<ConnectionStatus, string> = {
+  open: 'Connected',
+  connecting: 'Connecting…',
+  idle: 'Disconnected',
+  closed: 'Disconnected',
+};
+
+const CONNECTION_DOTS: Record<ConnectionStatus, string> = {
+  open: 'bg-emerald-500',
+  connecting: 'bg-amber-500',
+  idle: 'bg-muted-foreground/60',
+  closed: 'bg-muted-foreground/60',
+};

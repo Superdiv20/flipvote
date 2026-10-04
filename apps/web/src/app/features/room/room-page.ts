@@ -35,6 +35,7 @@ import { RoomNotFound } from './room-not-found';
         [selfId]="roomStore.selfId()"
         [flipped]="roomStore.flipped()"
         [votedCount]="roomStore.votedCount()"
+        [connection]="roomStore.connection()"
         [theme]="theme.theme()"
         [account]="account.account()"
         [guestName]="guestName()"

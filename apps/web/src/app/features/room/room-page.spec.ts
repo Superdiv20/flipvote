@@ -137,7 +137,11 @@ describe('RoomPage', () => {
     await fixture.whenStable();
 
     const socket = TestBed.inject(SocketService) as unknown as MockSession;
-    socket.deliver({ type: 'error', code: 'ROOM_NOT_FOUND', message: 'This room does not exist or has closed.' });
+    socket.deliver({
+      type: 'error',
+      code: 'ROOM_NOT_FOUND',
+      message: 'This room does not exist or has closed.',
+    });
     await fixture.whenStable();
 
     const page = fixture.nativeElement as HTMLElement;
@@ -145,5 +149,14 @@ describe('RoomPage', () => {
     expect(page.querySelector('a[href="/"]')?.textContent).toContain('Create a new room');
     expect(page.querySelector('flipvote-poker-table')).toBeNull();
     expect(page.querySelector('flipvote-card-hand')).toBeNull();
+  });
+
+  it('marks the participants button as live while the socket is open', async () => {
+    const { fixture } = setup();
+    await fixture.whenStable();
+    const button = (fixture.nativeElement as HTMLElement).querySelector(
+      'flipvote-room-header button[aria-label*="participants"]',
+    );
+    expect(button?.getAttribute('aria-label')).toBe('6 participants, connected, show list');
   });
 });

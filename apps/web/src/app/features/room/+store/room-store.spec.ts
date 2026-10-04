@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   type ClientMessage,
@@ -7,11 +8,15 @@ import {
   type ServerMessage,
 } from '@flipvote/protocol';
 import { SessionService } from '../../../core/session';
-import { SocketService } from '../../../core/socket';
+import { type ConnectionStatus, SocketService } from '../../../core/socket';
 import { RoomStore } from './room-store';
 
 /** Records what the store sends and lets a test deliver server messages by hand. */
-class FakeSocket implements Pick<SocketService, 'connect' | 'disconnect' | 'send' | 'onMessage'> {
+class FakeSocket implements Pick<
+  SocketService,
+  'status' | 'connect' | 'disconnect' | 'send' | 'onMessage'
+> {
+  readonly status = signal<ConnectionStatus>('idle');
   readonly sent: ClientMessage[] = [];
   readonly handlers = new Set<(message: ServerMessage) => void>();
   connected = false;
@@ -70,6 +75,15 @@ describe('RoomStore', () => {
   beforeEach(() => localStorage.clear());
 
   describe('connection', () => {
+    it('reports the socket’s connection status', () => {
+      const store = setup();
+      expect(store.connection()).toBe('idle');
+      socket.status.set('connecting');
+      expect(store.connection()).toBe('connecting');
+      socket.status.set('open');
+      expect(store.connection()).toBe('open');
+    });
+
     it('connects when created and listens for messages', () => {
       setup();
       expect(socket.connected).toBe(true);
@@ -152,7 +166,10 @@ describe('RoomStore', () => {
   describe('state', () => {
     it('applies the shared state', () => {
       const store = setup();
-      socket.receive({ type: 'state', room: shared([seat('ana', true), seat('ben', false)], 'revealed') });
+      socket.receive({
+        type: 'state',
+        room: shared([seat('ana', true), seat('ben', false)], 'revealed'),
+      });
       expect(store.roomName()).toBe('Sprint 42');
       expect(store.flipped()).toBe(true);
       expect(store.votedCount()).toBe(1);
@@ -169,7 +186,10 @@ describe('RoomStore', () => {
     it('clears our vote when a new round shows our seat without a vote', () => {
       const store = setup();
       socket.receive({ type: 'welcome', participantId: 'ben', myVote: '5' });
-      socket.receive({ type: 'state', room: shared([seat('ana', true), seat('ben', true)], 'revealed') });
+      socket.receive({
+        type: 'state',
+        room: shared([seat('ana', true), seat('ben', true)], 'revealed'),
+      });
       socket.receive({ type: 'state', room: shared([seat('ana', false), seat('ben', false)]) });
       expect(store.myVote()).toBeNull();
     });
@@ -194,14 +214,22 @@ describe('RoomStore', () => {
     it('marks the room as not found', () => {
       const store = setup();
       expect(store.notFound()).toBe(false);
-      socket.receive({ type: 'error', code: 'ROOM_NOT_FOUND', message: 'This room does not exist or has closed.' });
+      socket.receive({
+        type: 'error',
+        code: 'ROOM_NOT_FOUND',
+        message: 'This room does not exist or has closed.',
+      });
       expect(store.notFound()).toBe(true);
     });
 
     it('keeps the room for errors about a single intent', () => {
       const store = setup();
       vi.spyOn(console, 'warn').mockImplementation(() => {});
-      socket.receive({ type: 'error', code: 'NOT_FACILITATOR', message: 'Only the facilitator can do that.' });
+      socket.receive({
+        type: 'error',
+        code: 'NOT_FACILITATOR',
+        message: 'Only the facilitator can do that.',
+      });
       expect(store.notFound()).toBe(false);
       vi.restoreAllMocks();
     });
@@ -211,8 +239,14 @@ describe('RoomStore', () => {
       socket.receive({ type: 'welcome', participantId: 'ben', myVote: '5' });
       socket.receive({ type: 'state', room: shared([seat('ana', false), seat('ben', true)]) });
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      socket.receive({ type: 'error', code: 'NOT_FACILITATOR', message: 'Only the facilitator can do that.' });
-      expect(warn).toHaveBeenCalledWith('[room] NOT_FACILITATOR: Only the facilitator can do that.');
+      socket.receive({
+        type: 'error',
+        code: 'NOT_FACILITATOR',
+        message: 'Only the facilitator can do that.',
+      });
+      expect(warn).toHaveBeenCalledWith(
+        '[room] NOT_FACILITATOR: Only the facilitator can do that.',
+      );
       expect(store.myVote()).toBe('5');
       expect(store.selfId()).toBe('ben');
       expect(store.votedCount()).toBe(1);
