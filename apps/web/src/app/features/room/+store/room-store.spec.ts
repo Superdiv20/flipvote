@@ -110,22 +110,98 @@ describe('RoomStore', () => {
       const store = setup();
       const session = TestBed.inject(SessionService);
       session.setName('Ana');
-      expect(store.enter('room-1')).toBe(true);
+      store.enter('room-1');
       expect(socket.sent).toEqual([
         { type: 'join', roomId: 'room-1', name: 'Ana', sessionToken: session.token },
       ]);
+      expect(store.view()).toBe('joining');
     });
 
-    it('sends nothing without a saved name, so the page can ask for one', () => {
+    it('sends nothing without a saved name and asks for one', () => {
       const store = setup();
-      expect(store.enter('room-1')).toBe(false);
+      store.enter('room-1');
       expect(socket.sent).toEqual([]);
+      expect(store.view()).toBe('name');
+    });
+
+    it('joins with the entered name and leaves the name prompt', () => {
+      const store = setup();
+      store.enter('room-1');
+      store.join('room-1', 'Cy');
+      expect(socket.sent).toEqual([
+        {
+          type: 'join',
+          roomId: 'room-1',
+          name: 'Cy',
+          sessionToken: TestBed.inject(SessionService).token,
+        },
+      ]);
+      expect(store.view()).toBe('joining');
     });
 
     it('saves the name used to join for the next visit', () => {
       const store = setup();
       store.join('room-1', 'Ben');
       expect(TestBed.inject(SessionService).name()).toBe('Ben');
+    });
+  });
+
+  describe('view', () => {
+    it('is joining until the first state arrives, then shows the room', () => {
+      const store = setup();
+      TestBed.inject(SessionService).setName('Ana');
+      store.enter('room-1');
+      socket.receive({ type: 'welcome', participantId: 'ana', myVote: null });
+      expect(store.view()).toBe('joining');
+      socket.receive({ type: 'state', room: shared([seat('ana', false)]) });
+      expect(store.view()).toBe('room');
+    });
+
+    it('shows not found after the name prompt when the room does not exist', () => {
+      const store = setup();
+      store.enter('no-such-room');
+      store.join('no-such-room', 'Cy');
+      socket.receive({
+        type: 'error',
+        code: 'ROOM_NOT_FOUND',
+        message: 'This room does not exist or has closed.',
+      });
+      expect(store.view()).toBe('notFound');
+    });
+
+    it('shows why the join failed for any other error before the room arrives', () => {
+      const store = setup();
+      TestBed.inject(SessionService).setName('Ana');
+      store.enter('room-1');
+      socket.receive({
+        type: 'error',
+        code: 'INVALID_SESSION',
+        message: 'Your session could not be verified.',
+      });
+      expect(store.view()).toBe('joinFailed');
+      expect(store.joinError()).toBe('INVALID_SESSION');
+    });
+
+    it('clears a failed join when joining again', () => {
+      const store = setup();
+      socket.receive({ type: 'error', code: 'NAME_REQUIRED', message: 'A name is required.' });
+      store.join('room-1', 'Cy');
+      expect(store.joinError()).toBeNull();
+      expect(store.view()).toBe('joining');
+    });
+
+    it('keeps showing the room once it has arrived, whatever error follows', () => {
+      const store = setup();
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      socket.receive({ type: 'state', room: shared([seat('ana', false)]) });
+      socket.receive({
+        type: 'error',
+        code: 'ROOM_NOT_FOUND',
+        message: 'This room does not exist or has closed.',
+      });
+      expect(store.view()).toBe('room');
+      expect(store.joinError()).toBeNull();
+      vi.restoreAllMocks();
     });
   });
 
@@ -213,24 +289,25 @@ describe('RoomStore', () => {
   describe('errors', () => {
     it('marks the room as not found', () => {
       const store = setup();
-      expect(store.notFound()).toBe(false);
+      expect(store.view()).not.toBe('notFound');
       socket.receive({
         type: 'error',
         code: 'ROOM_NOT_FOUND',
         message: 'This room does not exist or has closed.',
       });
-      expect(store.notFound()).toBe(true);
+      expect(store.view()).toBe('notFound');
     });
 
     it('keeps the room for errors about a single intent', () => {
       const store = setup();
       vi.spyOn(console, 'warn').mockImplementation(() => {});
+      socket.receive({ type: 'state', room: shared([seat('ana', false)]) });
       socket.receive({
         type: 'error',
         code: 'NOT_FACILITATOR',
         message: 'Only the facilitator can do that.',
       });
-      expect(store.notFound()).toBe(false);
+      expect(store.view()).toBe('room');
       vi.restoreAllMocks();
     });
 

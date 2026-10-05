@@ -1,5 +1,11 @@
 import { computed, inject } from '@angular/core';
-import type { CardValue, ClientMessage, RoomState, ServerMessage } from '@flipvote/protocol';
+import type {
+  CardValue,
+  ClientMessage,
+  ErrorCode,
+  RoomState,
+  ServerMessage,
+} from '@flipvote/protocol';
 import {
   patchState,
   signalStore,
@@ -20,16 +26,25 @@ type RoomStoreState = {
   participantId: string | null;
   /** Our own vote in this round. Only we receive it; others see just `hasVoted` until the flip. */
   myVote: CardValue | null;
-  /** The server answered the join with `ROOM_NOT_FOUND`: a mistyped link, or the room has closed. */
-  notFound: boolean;
+  /**
+   * Why the join failed, e.g. `ROOM_NOT_FOUND` for a mistyped link or a closed room. Any error
+   * before the first `state` belongs to the join, since nothing else can be sent before it.
+   */
+  joinError: ErrorCode | null;
+  /** No display name was saved, so nothing has been sent yet and the page asks for one. */
+  awaitingName: boolean;
 };
 
 const initialState: RoomStoreState = {
   room: null,
   participantId: null,
   myVote: null,
-  notFound: false,
+  joinError: null,
+  awaitingName: false,
 };
+
+/** What the room page shows. */
+type RoomView = 'notFound' | 'joinFailed' | 'name' | 'joining' | 'room';
 
 /**
  * Room state as sent by the server. Actions only send intents; the state changes when the
@@ -42,7 +57,7 @@ export const RoomStore = signalStore(
     /** Whether the socket to the server is open, for the live indicator. */
     connection: inject(SocketService).status,
   })),
-  withComputed(({ room, participantId }) => {
+  withComputed(({ room, participantId, joinError, awaitingName }) => {
     const participants = computed(() => room()?.participants ?? []);
     const issues = computed(() => room()?.issues ?? []);
     const currentIssueId = computed(() => room()?.currentIssueId ?? null);
@@ -51,6 +66,12 @@ export const RoomStore = signalStore(
     );
 
     return {
+      view: computed((): RoomView => {
+        const error = joinError();
+        if (error) return error === 'ROOM_NOT_FOUND' ? 'notFound' : 'joinFailed';
+        if (awaitingName()) return 'name';
+        return room() ? 'room' : 'joining';
+      }),
       selfId: computed(() => participantId() ?? ''),
       roomName: computed(() => room()?.name ?? ''),
       deck: computed(() => room()?.deck.cards ?? []),
@@ -74,18 +95,21 @@ export const RoomStore = signalStore(
       /** Takes a seat, or the same seat again after a refresh. Remembers the name for the next visit. */
       join(roomId: string, name: string): void {
         session.setName(name);
+        patchState(store, { awaitingName: false, joinError: null });
         send({ type: 'join', roomId, name, sessionToken: session.token });
       },
 
       /**
        * Joins with the saved display name, e.g. right after creating the room or after a refresh.
-       * Returns `false` when no name is saved yet, so the page can ask for one.
+       * Without a saved name it sends nothing and switches to the name prompt instead.
        */
-      enter(roomId: string): boolean {
+      enter(roomId: string): void {
         const name = session.name();
-        if (!name) return false;
+        if (!name) {
+          patchState(store, { awaitingName: true });
+          return;
+        }
         send({ type: 'join', roomId, name, sessionToken: session.token });
-        return true;
       },
 
       /** Picks a card, or withdraws the vote when the same card is picked again. */
@@ -141,8 +165,9 @@ export const RoomStore = signalStore(
             break;
           }
           case 'error':
-            // Only a join can fail like this, so the whole page switches to the not-found screen.
-            if (message.code === 'ROOM_NOT_FOUND') patchState(store, { notFound: true });
+            // Before the first state, only the join can have failed: the page shows why.
+            // Afterwards an error concerns a single intent, and the room stays.
+            if (store.room() === null) patchState(store, { joinError: message.code });
             else console.warn(`[room] ${message.code}: ${message.message}`);
             break;
         }

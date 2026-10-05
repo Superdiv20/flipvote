@@ -1,7 +1,9 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { DECKS } from '@flipvote/protocol';
-import { SocketService } from '../../core/socket';
+import { SessionService } from '../../core/session';
+import { type ConnectionStatus, SocketService } from '../../core/socket';
 import { MockSession, provideMockSession } from './+store/mock-session';
 import { RoomStore } from './+store/room-store';
 import { RoomPage } from './room-page';
@@ -134,8 +136,8 @@ describe('RoomPage', () => {
     });
     const fixture = TestBed.createComponent(RoomPage);
     fixture.componentRef.setInput('roomId', 'no-such-room');
-    await fixture.whenStable();
-
+    // The server answers a join for an unknown room with this error instead of a state. The mock
+    // server answers every join, so deliver it before the page joins.
     const socket = TestBed.inject(SocketService) as unknown as MockSession;
     socket.deliver({
       type: 'error',
@@ -158,5 +160,119 @@ describe('RoomPage', () => {
       'flipvote-room-header button[aria-label*="participants"]',
     );
     expect(button?.getAttribute('aria-label')).toBe('6 participants, connected, show list');
+  });
+
+  describe('before the room arrives', () => {
+    /** A socket that never answers, so the page stays between join and the first state. */
+    function silentSocket(status: ConnectionStatus) {
+      return {
+        status: signal(status).asReadonly(),
+        connect() {},
+        disconnect() {},
+        send() {},
+        onMessage: () => () => {},
+      };
+    }
+
+    function render(status: ConnectionStatus) {
+      TestBed.configureTestingModule({
+        imports: [RoomPage],
+        providers: [RoomStore, { provide: SocketService, useValue: silentSocket(status) }],
+      });
+      TestBed.inject(SessionService).setName('Ana');
+      const fixture = TestBed.createComponent(RoomPage);
+      fixture.componentRef.setInput('roomId', 'room-1');
+      return fixture;
+    }
+
+    it('shows that it is joining instead of an empty room', async () => {
+      const fixture = render('open');
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+      expect(page.querySelector('[role="status"]')?.textContent).toContain('Joining the room');
+      expect(page.querySelector('flipvote-poker-table')).toBeNull();
+    });
+
+    it('offers to try again when the server cannot be reached', async () => {
+      const fixture = render('closed');
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+      expect(page.querySelector('[role="alert"] h1')?.textContent).toContain('reach the server');
+      expect(page.querySelector('button')?.textContent).toContain('Try again');
+    });
+  });
+
+  describe('a visitor without a saved name', () => {
+    function render() {
+      localStorage.clear();
+      TestBed.configureTestingModule({
+        imports: [RoomPage],
+        providers: [RoomStore, provideMockSession()],
+      });
+      const fixture = TestBed.createComponent(RoomPage);
+      fixture.componentRef.setInput('roomId', 'demo');
+      return fixture;
+    }
+
+    it('is asked for a name before anything is sent', async () => {
+      const fixture = render();
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+      expect(page.querySelector('h1')?.textContent).toContain('Join the planning session');
+      expect(page.querySelector('flipvote-poker-table')).toBeNull();
+    });
+
+    it('joins with the entered name and then sees the room', async () => {
+      const fixture = render();
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+
+      const input = page.querySelector<HTMLInputElement>('#display-name')!;
+      input.value = '  Cy  ';
+      input.dispatchEvent(new Event('input'));
+      page.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+      await fixture.whenStable();
+
+      expect(TestBed.inject(SessionService).name()).toBe('Cy');
+      expect(page.querySelector('flipvote-poker-table')).not.toBeNull();
+    });
+
+    it('does not join with a blank name', async () => {
+      const fixture = render();
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+
+      const input = page.querySelector<HTMLInputElement>('#display-name')!;
+      input.value = '   ';
+      input.dispatchEvent(new Event('input'));
+      page.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+      await fixture.whenStable();
+
+      expect(TestBed.inject(SessionService).name()).toBeNull();
+      expect(page.querySelector('#display-name-error')?.textContent).toContain('Enter the name');
+    });
+  });
+
+  it('explains a failed join and offers a way out', async () => {
+    TestBed.configureTestingModule({
+      imports: [RoomPage],
+      providers: [RoomStore, provideMockSession(), provideRouter([])],
+    });
+    const fixture = TestBed.createComponent(RoomPage);
+    fixture.componentRef.setInput('roomId', 'demo');
+    TestBed.inject(SessionService).setName('Ana');
+    const socket = TestBed.inject(SocketService) as unknown as MockSession;
+    // The mock server answers every join, so deliver the error before the page joins.
+    socket.deliver({
+      type: 'error',
+      code: 'INVALID_SESSION',
+      message: 'Your session could not be verified.',
+    });
+    await fixture.whenStable();
+
+    const alert = (fixture.nativeElement as HTMLElement).querySelector('[role="alert"]');
+    expect(alert?.querySelector('h1')?.textContent).toContain('Couldn’t join the room');
+    expect(alert?.textContent).toContain('Your session doesn’t match your seat');
+    expect(alert?.querySelector('a[href="/"]')?.textContent).toContain('Back to start');
   });
 });

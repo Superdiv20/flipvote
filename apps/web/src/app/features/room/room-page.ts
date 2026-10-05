@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  DOCUMENT,
   inject,
   input,
   linkedSignal,
@@ -18,84 +19,109 @@ import type { RoundResult } from '@flipvote/protocol';
 import { ResultsPanel } from './results/results-panel';
 import { RoomHeader } from './header/room-header';
 import { RoomStore } from './+store/room-store';
+import { JoinRoom } from './join-room';
+import { RoomJoinFailed } from './room-join-failed';
+import { RoomJoining } from './room-joining';
 import { RoomNotFound } from './room-not-found';
 
 @Component({
   selector: 'flipvote-room-page',
-  imports: [RoomHeader, IssueDrawer, PokerTable, ResultsPanel, CardHand, RoomNotFound],
+  imports: [
+    RoomHeader,
+    IssueDrawer,
+    PokerTable,
+    ResultsPanel,
+    CardHand,
+    RoomNotFound,
+    JoinRoom,
+    RoomJoining,
+    RoomJoinFailed,
+  ],
   host: { class: 'flex h-dvh flex-col bg-background text-foreground' },
   template: `
-    @if (roomStore.notFound()) {
-      <flipvote-room-not-found />
-    } @else {
-      <flipvote-room-header
-        [roomName]="roomStore.roomName()"
-        [topic]="roomStore.topic()"
-        [participants]="roomStore.participants()"
-        [selfId]="roomStore.selfId()"
-        [flipped]="roomStore.flipped()"
-        [votedCount]="roomStore.votedCount()"
-        [connection]="roomStore.connection()"
-        [theme]="theme.theme()"
-        [account]="account.account()"
-        [guestName]="guestName()"
-        (toggleTheme)="theme.toggle()"
-        (signIn)="account.signIn()"
-        (signOut)="account.signOut()"
-      />
-      <div class="flex min-h-0 flex-1">
-        <flipvote-issue-drawer
-          [issues]="roomStore.issues()"
-          [currentId]="roomStore.currentIssueId()"
-          [collapsed]="drawerCollapsed()"
-          (toggle)="toggleDrawer()"
-          (select)="roomStore.selectIssue($event)"
-          (add)="roomStore.addIssue($event)"
-          (create)="roomStore.createIssue($event)"
-          (update)="roomStore.updateIssue($event.id, $event.details)"
+    @switch (roomStore.view()) {
+      @case ('notFound') {
+        <flipvote-room-not-found />
+      }
+      @case ('joinFailed') {
+        <flipvote-room-join-failed [code]="roomStore.joinError()" (retry)="reload()" />
+      }
+      @case ('name') {
+        <flipvote-join-room (join)="roomStore.join(roomId(), $event)" />
+      }
+      @case ('joining') {
+        <flipvote-room-joining [connection]="roomStore.connection()" (retry)="reload()" />
+      }
+      @default {
+        <flipvote-room-header
+          [roomName]="roomStore.roomName()"
+          [topic]="roomStore.topic()"
+          [participants]="roomStore.participants()"
+          [selfId]="roomStore.selfId()"
+          [flipped]="roomStore.flipped()"
+          [votedCount]="roomStore.votedCount()"
+          [connection]="roomStore.connection()"
+          [theme]="theme.theme()"
+          [account]="account.account()"
+          [guestName]="guestName()"
+          (toggleTheme)="theme.toggle()"
+          (signIn)="account.signIn()"
+          (signOut)="account.signOut()"
         />
-        <main class="flex min-w-0 flex-1 flex-col">
-          <!-- The results slide in right beside the table while the drawer closes on the left, so the table keeps its size. -->
-          <div
-            class="flex flex-1 flex-col items-center justify-center gap-16 px-16 py-16 max-sm:px-10 md:flex-row"
-          >
-            <flipvote-poker-table
-              class="max-w-150"
-              [participants]="roomStore.participants()"
-              [selfId]="roomStore.selfId()"
-              [flipped]="roomStore.flipped()"
-              [votedCount]="roomStore.votedCount()"
-              [consensus]="!!results()?.consensus"
-              (flip)="roomStore.flip()"
-              (reset)="roomStore.reset()"
-            />
-            @if (results(); as results) {
-              <flipvote-results-panel class="md:hidden" [results]="results" />
-            }
-            <div
-              class="shrink-0 overflow-hidden transition-[width] duration-220 ease-[cubic-bezier(0.2,0,0,1)] max-md:hidden motion-reduce:transition-none"
-              [class]="results() ? 'w-76' : 'w-0'"
-              [inert]="!results()"
-            >
-              @if (shownResults(); as shownResults) {
-                <div
-                  class="w-76 py-2 pr-2 pl-12 transition-[opacity,translate] duration-220 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none"
-                  [class]="results() ? 'translate-x-0 opacity-100' : 'translate-x-6 opacity-0'"
-                >
-                  <flipvote-results-panel [results]="shownResults" />
-                </div>
-              }
-            </div>
-          </div>
-          <flipvote-card-hand
-            class="px-4 pb-8"
-            [deck]="roomStore.deck()"
-            [selectedValue]="roomStore.myVote()"
-            [locked]="roomStore.flipped()"
-            (pick)="roomStore.vote($event)"
+        <div class="flex min-h-0 flex-1">
+          <flipvote-issue-drawer
+            [issues]="roomStore.issues()"
+            [currentId]="roomStore.currentIssueId()"
+            [collapsed]="drawerCollapsed()"
+            (toggle)="toggleDrawer()"
+            (select)="roomStore.selectIssue($event)"
+            (add)="roomStore.addIssue($event)"
+            (create)="roomStore.createIssue($event)"
+            (update)="roomStore.updateIssue($event.id, $event.details)"
           />
-        </main>
-      </div>
+          <main class="flex min-w-0 flex-1 flex-col">
+            <!-- The results slide in right beside the table while the drawer closes on the left, so the table keeps its size. -->
+            <div
+              class="flex flex-1 flex-col items-center justify-center gap-16 px-16 py-16 max-sm:px-10 md:flex-row"
+            >
+              <flipvote-poker-table
+                class="max-w-150"
+                [participants]="roomStore.participants()"
+                [selfId]="roomStore.selfId()"
+                [flipped]="roomStore.flipped()"
+                [votedCount]="roomStore.votedCount()"
+                [consensus]="!!results()?.consensus"
+                (flip)="roomStore.flip()"
+                (reset)="roomStore.reset()"
+              />
+              @if (results(); as results) {
+                <flipvote-results-panel class="md:hidden" [results]="results" />
+              }
+              <div
+                class="shrink-0 overflow-hidden transition-[width] duration-220 ease-[cubic-bezier(0.2,0,0,1)] max-md:hidden motion-reduce:transition-none"
+                [class]="results() ? 'w-76' : 'w-0'"
+                [inert]="!results()"
+              >
+                @if (shownResults(); as shownResults) {
+                  <div
+                    class="w-76 py-2 pr-2 pl-12 transition-[opacity,translate] duration-220 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none"
+                    [class]="results() ? 'translate-x-0 opacity-100' : 'translate-x-6 opacity-0'"
+                  >
+                    <flipvote-results-panel [results]="shownResults" />
+                  </div>
+                }
+              </div>
+            </div>
+            <flipvote-card-hand
+              class="px-4 pb-8"
+              [deck]="roomStore.deck()"
+              [selectedValue]="roomStore.myVote()"
+              [locked]="roomStore.flipped()"
+              (pick)="roomStore.vote($event)"
+            />
+          </main>
+        </div>
+      }
     }
   `,
 })
@@ -107,6 +133,7 @@ export class RoomPage implements OnInit {
   protected readonly theme = inject(ThemeService);
   protected readonly account = inject(AccountService);
   private readonly session = inject(SessionService);
+  private readonly document = inject(DOCUMENT);
 
   /** Without an account, the menu shows the name saved in the session. */
   protected readonly guestName = computed(() => this.session.name() ?? 'Guest');
@@ -134,6 +161,11 @@ export class RoomPage implements OnInit {
   // Not the constructor: route inputs are only set once the component is initialised.
   ngOnInit(): void {
     this.roomStore.enter(this.roomId());
+  }
+
+  /** There is no reconnect yet, so trying again means loading the page anew. */
+  protected reload(): void {
+    this.document.location.reload();
   }
 
   protected toggleDrawer(): void {
