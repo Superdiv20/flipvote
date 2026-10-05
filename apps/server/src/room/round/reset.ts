@@ -1,4 +1,4 @@
-import type { Issue } from '@flipvote/protocol';
+import { nextOpenIssue } from '../issues/next-open-issue';
 import { fail, newRound, ok, type Room, type RoomResult } from '../room';
 
 /**
@@ -16,11 +16,4 @@ export function reset(room: Room, participantId: string): RoomResult {
 
 	const issues = room.issues.map((issue) => (issue.id === currentId ? { ...issue, estimate } : issue));
 	return ok(newRound({ ...room, issues, currentIssueId: nextOpenIssue(issues, currentId) }));
-}
-
-/** The next issue without an estimate after `afterId`, wrapping around to the start. */
-function nextOpenIssue(issues: Issue[], afterId: string): string | null {
-	const index = issues.findIndex((issue) => issue.id === afterId);
-	const open = (issue: Issue) => issue.estimate === undefined;
-	return (issues.slice(index + 1).find(open) ?? issues.find(open))?.id ?? null;
 }

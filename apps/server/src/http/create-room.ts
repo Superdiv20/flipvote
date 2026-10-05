@@ -2,12 +2,12 @@ import {
 	type ApiError,
 	type CreateRoomResponse,
 	DECKS,
-	type DeckId,
 	type ErrorCode,
 } from '@flipvote/protocol';
 import { registry } from '../room/room-registry';
 import { ERROR_MESSAGES } from '../shared/error-messages';
 import { isObject } from '../shared/is-object';
+import { isDeckId } from '../shared/is-deck-id';
 
 /**
  * `POST /api/rooms`. Creates an empty room that remembers the creator's session token, and
@@ -24,12 +24,9 @@ export async function createRoomHandler(req: Request): Promise<Response> {
 	if (!name) return error(400, 'NAME_REQUIRED');
 
 	const { deckId } = body;
-	// `hasOwn`, so keys like `__proto__` or `toString` don't count as decks.
-	if (typeof deckId !== 'string' || !Object.hasOwn(DECKS, deckId)) {
-		return error(400, 'INVALID_MESSAGE');
-	}
+	if (!isDeckId(deckId)) return error(400, 'INVALID_MESSAGE');
 
-	const room = registry.addRoom(name, DECKS[deckId as DeckId], token);
+	const room = registry.addRoom(name, DECKS[deckId], token);
 	return Response.json({ roomId: room.id } satisfies CreateRoomResponse, {
 		status: 201,
 	});
@@ -40,5 +37,8 @@ function bearerToken(req: Request): string | null {
 }
 
 function error(status: number, code: ErrorCode): Response {
-	return Response.json({ code, message: ERROR_MESSAGES[code] } satisfies ApiError, { status });
+	return Response.json(
+		{ code, message: ERROR_MESSAGES[code] } satisfies ApiError,
+		{ status },
+	);
 }
