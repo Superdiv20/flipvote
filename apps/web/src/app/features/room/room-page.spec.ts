@@ -12,7 +12,7 @@ describe('RoomPage', () => {
   function setup() {
     TestBed.configureTestingModule({
       imports: [RoomPage],
-      providers: [RoomStore, provideMockSession()],
+      providers: [provideMockSession()],
     });
     const fixture = TestBed.createComponent(RoomPage);
     fixture.componentRef.setInput('roomId', 'demo');
@@ -20,7 +20,8 @@ describe('RoomPage', () => {
       drawerCollapsed: () => boolean;
       toggleDrawer: () => void;
     };
-    const store = TestBed.inject(RoomStore);
+    // The page provides its own store, so take that one rather than a TestBed-level copy.
+    const store = fixture.debugElement.injector.get(RoomStore);
     store.join('demo', 'Jonas');
     return { store, page, fixture };
   }
@@ -132,7 +133,7 @@ describe('RoomPage', () => {
   it('shows the not-found screen instead of the room when the server does not know it', async () => {
     TestBed.configureTestingModule({
       imports: [RoomPage],
-      providers: [RoomStore, provideMockSession(), provideRouter([])],
+      providers: [provideMockSession(), provideRouter([])],
     });
     const fixture = TestBed.createComponent(RoomPage);
     fixture.componentRef.setInput('roomId', 'no-such-room');
@@ -177,7 +178,7 @@ describe('RoomPage', () => {
     function render(status: ConnectionStatus) {
       TestBed.configureTestingModule({
         imports: [RoomPage],
-        providers: [RoomStore, { provide: SocketService, useValue: silentSocket(status) }],
+        providers: [{ provide: SocketService, useValue: silentSocket(status) }],
       });
       TestBed.inject(SessionService).setName('Ana');
       const fixture = TestBed.createComponent(RoomPage);
@@ -207,7 +208,7 @@ describe('RoomPage', () => {
       localStorage.clear();
       TestBed.configureTestingModule({
         imports: [RoomPage],
-        providers: [RoomStore, provideMockSession()],
+        providers: [provideMockSession()],
       });
       const fixture = TestBed.createComponent(RoomPage);
       fixture.componentRef.setInput('roomId', 'demo');
@@ -256,7 +257,7 @@ describe('RoomPage', () => {
   it('explains a failed join and offers a way out', async () => {
     TestBed.configureTestingModule({
       imports: [RoomPage],
-      providers: [RoomStore, provideMockSession(), provideRouter([])],
+      providers: [provideMockSession(), provideRouter([])],
     });
     const fixture = TestBed.createComponent(RoomPage);
     fixture.componentRef.setInput('roomId', 'demo');

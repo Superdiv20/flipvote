@@ -26,6 +26,9 @@ import { RoomNotFound } from './room-not-found';
 
 @Component({
   selector: 'flipvote-room-page',
+  // Here and not on the route: a component's providers are destroyed with it, so every room visit
+  // gets a fresh store, and leaving the room closes its socket.
+  providers: [RoomStore],
   imports: [
     RoomHeader,
     IssueDrawer,
