@@ -1,10 +1,13 @@
 import { calculateResult } from './calculate-result';
 import { fail, ok, type Room, type RoomResult } from '../room';
 
-/** Facilitator only. Reveals the cards and stores the result, calculated once. */
+/**
+ * Reveals the cards by hand and stores the result, calculated once. Only the facilitator may, unless
+ * the room lets everyone flip (`onlyFacilitatorCanFlip` off).
+ */
 export function flip(room: Room, participantId: string): RoomResult {
 	if (!room.participants.has(participantId)) return fail('NOT_JOINED');
-	if (room.facilitatorId !== participantId) return fail('NOT_FACILITATOR');
+	if (room.onlyFacilitatorCanFlip && room.facilitatorId !== participantId) return fail('NOT_FACILITATOR');
 	return reveal(room);
 }
 

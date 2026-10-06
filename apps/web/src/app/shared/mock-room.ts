@@ -43,6 +43,7 @@ export const MOCK_ROOM: RoomState = {
   result: null,
   autoFlip: false,
   flipInMs: null,
+  onlyFacilitatorCanFlip: true,
 };
 
 /** The other participants' votes, which only the server knows until the flip. */

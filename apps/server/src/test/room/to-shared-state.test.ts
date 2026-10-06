@@ -73,7 +73,7 @@ describe('toSharedState', () => {
 	describe('the same state for everyone', () => {
 		test('has no per-recipient fields', () => {
 			expect(Object.keys(toSharedState(votedRoom())).sort()).toEqual(
-				['autoFlip', 'currentIssueId', 'deck', 'facilitatorId', 'flipInMs', 'id', 'issues', 'name', 'participants', 'phase', 'result'].sort(),
+				['autoFlip', 'currentIssueId', 'deck', 'facilitatorId', 'flipInMs', 'id', 'issues', 'name', 'onlyFacilitatorCanFlip', 'participants', 'phase', 'result'].sort(),
 			);
 		});
 

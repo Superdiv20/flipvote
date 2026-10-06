@@ -196,6 +196,18 @@ describe('handleIntent', () => {
 			expect(lastState(log).autoFlip).toBe(true);
 		});
 
+		test('setOnlyFacilitatorCanFlip lets everyone flip, once the facilitator allows it', () => {
+			const { log, server, states, ana, ben } = seated();
+			handleIntent(ben, { type: 'vote', value: '5' }, server, states);
+			handleIntent(ben, { type: 'flip' }, server, states);
+			expect(log.at(-1)).toEqual(error('NOT_FACILITATOR'));
+
+			handleIntent(ana, { type: 'setOnlyFacilitatorCanFlip', enabled: false }, server, states);
+			expect(lastState(log).onlyFacilitatorCanFlip).toBe(false);
+			handleIntent(ben, { type: 'flip' }, server, states);
+			expect(lastState(log).phase).toBe('revealed');
+		});
+
 		test('transferFacilitator hands the role over', () => {
 			const { log, server, states, ana, ben } = seated();
 			handleIntent(ana, { type: 'transferFacilitator', participantId: ben.data.participantId! }, server, states);

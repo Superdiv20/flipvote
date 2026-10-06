@@ -95,6 +95,20 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
             />
           </div>
 
+          <div class="flex items-start justify-between gap-4">
+            <label for="only-facilitator-can-flip" class="flex flex-col gap-1">
+              <span class="text-sm font-medium">Only facilitator can flip</span>
+              <span class="text-sm text-muted-foreground">
+                When enabled, only the facilitator can flip the cards manually.
+              </span>
+            </label>
+            <hlm-switch
+              inputId="only-facilitator-can-flip"
+              [checked]="onlyFacilitatorCanFlip()"
+              (checkedChange)="setOnlyFacilitatorCanFlip.emit($event)"
+            />
+          </div>
+
           <section class="flex flex-col gap-3" aria-labelledby="facilitator-heading">
             <div class="flex flex-col gap-1">
               <h3 id="facilitator-heading" class="text-sm font-medium">Facilitator</h3>
@@ -146,10 +160,12 @@ export class RoomSettings {
   readonly votedCount = input.required<number>();
   readonly flipped = input.required<boolean>();
   readonly autoFlip = input.required<boolean>();
+  readonly onlyFacilitatorCanFlip = input.required<boolean>();
 
   readonly setDeck = output<DeckId>();
   readonly transferFacilitator = output<string>();
   readonly setAutoFlip = output<boolean>();
+  readonly setOnlyFacilitatorCanFlip = output<boolean>();
 
   protected readonly decks = DECK_OPTIONS;
 

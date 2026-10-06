@@ -31,6 +31,8 @@ export type ClientMessage =
 	| { type: 'setSpectator'; spectator: boolean }
 	/** Facilitator. Turns flipping by itself on or off once everyone has voted. */
 	| { type: 'setAutoFlip'; enabled: boolean }
+	/** Facilitator. Restricts flipping so that only the facilitator can flip the cards. */
+	| { type: 'setOnlyFacilitatorCanFlip'; enabled: boolean }
 	/** The sender, for themselves. Renames their seat; the seat, vote and role stay. */
 	| { type: 'setName'; name: string }
 	/** Facilitator. Hands the role to another participant. */

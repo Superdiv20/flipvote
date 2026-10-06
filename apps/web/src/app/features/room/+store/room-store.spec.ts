@@ -62,6 +62,7 @@ function shared(participants: Participant[], phase: RoomState['phase'] = 'voting
     result: null,
     autoFlip: false,
     flipInMs: null,
+    onlyFacilitatorCanFlip: true,
   };
 }
 
@@ -372,6 +373,38 @@ describe('RoomStore', () => {
       const store = setup();
       store.setAutoFlip(true);
       expect(socket.sent).toEqual([{ type: 'setAutoFlip', enabled: true }]);
+    });
+  });
+
+  describe('who may flip', () => {
+    function as(participantId: string, onlyFacilitatorCanFlip: boolean) {
+      const store = setup();
+      socket.receive({ type: 'welcome', participantId, myVote: null });
+      socket.receive({
+        type: 'state',
+        room: { ...shared([seat('ana', false), seat('ben', false)]), onlyFacilitatorCanFlip },
+      });
+      return store;
+    }
+
+    it('only the facilitator, by default', () => {
+      expect(as('ana', true).canFlip()).toBe(true);
+      TestBed.resetTestingModule();
+      expect(as('ben', true).canFlip()).toBe(false);
+    });
+
+    it('everyone, once the room allows it', () => {
+      expect(as('ben', false).canFlip()).toBe(true);
+    });
+
+    it('nobody before the room has arrived', () => {
+      expect(setup().canFlip()).toBe(false);
+    });
+
+    it('sends the setting', () => {
+      const store = setup();
+      store.setOnlyFacilitatorCanFlip(false);
+      expect(socket.sent).toEqual([{ type: 'setOnlyFacilitatorCanFlip', enabled: false }]);
     });
   });
 

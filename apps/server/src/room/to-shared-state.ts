@@ -44,6 +44,7 @@ export function toSharedState(room: Room, flipInMs: number | null = null): RoomS
 		result: revealed && room.result ? structuredClone(room.result) : null,
 		autoFlip: room.autoFlip,
 		flipInMs: revealed ? null : flipInMs,
+		onlyFacilitatorCanFlip: room.onlyFacilitatorCanFlip,
 	};
 }
 

@@ -46,8 +46,10 @@ import { ParticipantList } from './participant-list';
         [votedCount]="votedCount()"
         [flipped]="flipped()"
         [autoFlip]="autoFlip()"
+        [onlyFacilitatorCanFlip]="onlyFacilitatorCanFlip()"
         (setDeck)="setDeck.emit($event)"
         (setAutoFlip)="setAutoFlip.emit($event)"
+        (setOnlyFacilitatorCanFlip)="setOnlyFacilitatorCanFlip.emit($event)"
         (transferFacilitator)="transferFacilitator.emit($event)"
       />
     }
@@ -142,6 +144,7 @@ export class RoomHeader {
   readonly votedCount = input.required<number>();
   readonly deckId = input.required<DeckId | null>();
   readonly autoFlip = input.required<boolean>();
+  readonly onlyFacilitatorCanFlip = input.required<boolean>();
   readonly facilitatorId = input.required<string | null>();
   readonly connection = input.required<ConnectionStatus>();
   readonly theme = input.required<Theme>();
@@ -151,6 +154,7 @@ export class RoomHeader {
   readonly toggleTheme = output();
   readonly setDeck = output<DeckId>();
   readonly setAutoFlip = output<boolean>();
+  readonly setOnlyFacilitatorCanFlip = output<boolean>();
   readonly transferFacilitator = output<string>();
   readonly setSpectator = output<boolean>();
   readonly themePreferenceChange = output<ThemePreference>();

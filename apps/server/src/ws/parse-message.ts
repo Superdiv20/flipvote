@@ -76,6 +76,11 @@ export function parseMessage(raw: string | Buffer): ClientMessage | null {
 			if (typeof enabled !== 'boolean') return null;
 			return { type: 'setAutoFlip', enabled };
 		}
+		case 'setOnlyFacilitatorCanFlip': {
+			const { enabled } = data;
+			if (typeof enabled !== 'boolean') return null;
+			return { type: 'setOnlyFacilitatorCanFlip', enabled };
+		}
 		case 'setName': {
 			// A blank or too long name is the rule's call (`NAME_REQUIRED`, `NAME_TOO_LONG`).
 			const { name } = data;

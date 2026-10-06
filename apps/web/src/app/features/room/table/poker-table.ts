@@ -21,16 +21,28 @@ const TABLE_HEIGHT = 300;
     ></div>
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
       @if (flipped()) {
-        <button hlmBtn size="lg" class="px-4" (click)="reset.emit()">
-          <ng-icon name="lucideRotateCcw" data-icon="inline-start" />
-          New round
-        </button>
+        <!-- Only for the facilitator: a new round is theirs to start, whatever the flip setting says. -->
+        @if (canReset()) {
+          <button hlmBtn size="lg" class="px-4" (click)="reset.emit()">
+            <ng-icon name="lucideRotateCcw" data-icon="inline-start" />
+            New round
+          </button>
+        }
         <span class="text-muted-foreground text-sm" role="status">Cards revealed</span>
       } @else {
-        <button hlmBtn size="lg" class="px-4" [disabled]="votedCount() === 0" (click)="flip.emit()">
-          <ng-icon name="lucideEye" data-icon="inline-start" />
-          Reveal cards
-        </button>
+        <!-- Only for those who may flip: the facilitator, or everyone when the room allows it. -->
+        @if (canFlip()) {
+          <button
+            hlmBtn
+            size="lg"
+            class="px-4"
+            [disabled]="votedCount() === 0"
+            (click)="flip.emit()"
+          >
+            <ng-icon name="lucideEye" data-icon="inline-start" />
+            Reveal cards
+          </button>
+        }
         @if (countdown(); as seconds) {
           <span class="text-brand text-sm font-medium tabular-nums" aria-hidden="true">
             Revealing in {{ seconds }}…
@@ -68,6 +80,10 @@ export class PokerTable {
   readonly flipped = input.required<boolean>();
   readonly votedCount = input.required<number>();
   readonly consensus = input(false);
+  /** Whether this viewer may reveal the cards by hand. */
+  readonly canFlip = input(true);
+  /** Whether this viewer may start a new round: only the facilitator. */
+  readonly canReset = input(true);
   /** When the cards flip by themselves, on this browser's clock, or `null` without a countdown. */
   readonly flipDeadline = input<number | null>(null);
 

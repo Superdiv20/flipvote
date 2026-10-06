@@ -76,4 +76,6 @@ export type RoomState = {
 	 * down correctly.
 	 */
 	flipInMs: number | null;
+	/** Whether only the facilitator can flip the cards. */
+	onlyFacilitatorCanFlip: boolean;
 };

@@ -90,7 +90,7 @@ export class MockRoomServer {
         return null;
       }
       case 'flip':
-        if (!isFacilitator) return facilitatorOnly;
+        if (this.room.onlyFacilitatorCanFlip && !isFacilitator) return facilitatorOnly;
         if (this.votes.size === 0) return { code: 'NO_VOTES', message: 'Nobody has voted yet.' };
         this.room = { ...this.room, phase: 'revealed' };
         return null;
@@ -151,6 +151,10 @@ export class MockRoomServer {
             p.id === self ? { ...p, isSpectator: message.spectator } : p,
           ),
         };
+        return null;
+      case 'setOnlyFacilitatorCanFlip':
+        if (!isFacilitator) return facilitatorOnly;
+        this.room = { ...this.room, onlyFacilitatorCanFlip: message.enabled };
         return null;
       case 'setAutoFlip':
         if (!isFacilitator) return facilitatorOnly;

@@ -23,10 +23,15 @@ async function open(
   fixture.componentRef.setInput('votedCount', inputs.votedCount ?? 0);
   fixture.componentRef.setInput('flipped', inputs.flipped ?? false);
   fixture.componentRef.setInput('autoFlip', false);
+  fixture.componentRef.setInput('onlyFacilitatorCanFlip', true);
 
   const decks: DeckId[] = [];
   const transfers: string[] = [];
   const autoFlips: boolean[] = [];
+  const onlyFacilitator: boolean[] = [];
+  fixture.componentInstance.setOnlyFacilitatorCanFlip.subscribe((enabled) =>
+    onlyFacilitator.push(enabled),
+  );
   fixture.componentInstance.setAutoFlip.subscribe((enabled) => autoFlips.push(enabled));
   fixture.componentInstance.setDeck.subscribe((deckId) => decks.push(deckId));
   fixture.componentInstance.transferFacilitator.subscribe((id) => transfers.push(id));
@@ -45,7 +50,7 @@ async function open(
     [...sheet().querySelectorAll('button')].find((b) =>
       b.textContent?.includes(text),
     ) as HTMLButtonElement;
-  return { fixture, sheet, radio, button, decks, transfers, autoFlips };
+  return { fixture, sheet, radio, button, decks, transfers, autoFlips, onlyFacilitator };
 }
 
 describe('RoomSettings', () => {
@@ -118,6 +123,15 @@ describe('RoomSettings', () => {
     sheet().querySelector<HTMLButtonElement>('#auto-flip')!.click();
     await fixture.whenStable();
     expect(autoFlips).toEqual([true]);
+  });
+
+  it('lets everyone flip once its switch is turned off', async () => {
+    const { fixture, sheet, onlyFacilitator } = await open();
+    const toggle = sheet().querySelector<HTMLButtonElement>('#only-facilitator-can-flip')!;
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
+    toggle.click();
+    await fixture.whenStable();
+    expect(onlyFacilitator).toEqual([false]);
   });
 
   describe('handing over the role', () => {

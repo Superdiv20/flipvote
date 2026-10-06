@@ -88,6 +88,18 @@ export const RoomStore = signalStore(
       autoFlip: computed(() => room()?.autoFlip ?? false),
       /** The auto flip's countdown runs: votes are locked until the cards flip. */
       countingDown: computed(() => room()?.flipInMs != null),
+      // Same default as a new room on the server.
+      onlyFacilitatorCanFlip: computed(() => room()?.onlyFacilitatorCanFlip ?? true),
+      isFacilitator: computed(() => {
+        const id = participantId();
+        return id !== null && room()?.facilitatorId === id;
+      }),
+      /** Whether we may reveal the cards by hand: as the facilitator, or when the room lets everyone. */
+      canFlip: computed(() => {
+        const current = room();
+        if (!current) return false;
+        return !current.onlyFacilitatorCanFlip || current.facilitatorId === participantId();
+      }),
       facilitatorId: computed(() => room()?.facilitatorId ?? null),
       isSpectator: computed(
         () => participants().find((p) => p.id === participantId())?.isSpectator ?? false,
@@ -167,6 +179,11 @@ export const RoomStore = signalStore(
       /** Facilitator. Flip by itself, after a short countdown, once everyone has voted. */
       setAutoFlip(enabled: boolean): void {
         send({ type: 'setAutoFlip', enabled });
+      },
+
+      /** Facilitator. Whether only the facilitator, or everyone, may reveal the cards by hand. */
+      setOnlyFacilitatorCanFlip(enabled: boolean): void {
+        send({ type: 'setOnlyFacilitatorCanFlip', enabled });
       },
 
       /** Facilitator. Hands the role to another connected participant. */

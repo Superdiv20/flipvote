@@ -67,6 +67,8 @@ import { RoomNotFound } from './room-not-found';
           [deckId]="roomStore.deckId()"
           [autoFlip]="roomStore.autoFlip()"
           (setAutoFlip)="roomStore.setAutoFlip($event)"
+          [onlyFacilitatorCanFlip]="roomStore.onlyFacilitatorCanFlip()"
+          (setOnlyFacilitatorCanFlip)="roomStore.setOnlyFacilitatorCanFlip($event)"
           [facilitatorId]="roomStore.facilitatorId()"
           (setDeck)="roomStore.setDeck($event)"
           (transferFacilitator)="roomStore.transferFacilitator($event)"
@@ -105,6 +107,8 @@ import { RoomNotFound } from './room-not-found';
                 [votedCount]="roomStore.votedCount()"
                 [consensus]="!!results()?.consensus"
                 [flipDeadline]="roomStore.flipDeadline()"
+                [canFlip]="roomStore.canFlip()"
+                [canReset]="roomStore.isFacilitator()"
                 (flip)="roomStore.flip()"
                 (reset)="roomStore.reset()"
               />

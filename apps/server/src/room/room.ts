@@ -1,4 +1,11 @@
-import type { CardValue, Deck, ErrorCode, Issue, RoundPhase, RoundResult } from '@flipvote/protocol';
+import type {
+	CardValue,
+	Deck,
+	ErrorCode,
+	Issue,
+	RoundPhase,
+	RoundResult,
+} from '@flipvote/protocol';
 
 /** Server-side participant. Separate from the protocol type, because it holds server-only fields. */
 export interface Participant {
@@ -31,13 +38,22 @@ export interface Room {
 	result: RoundResult | null;
 	/** Flip by itself once everyone who can vote has voted. Off until the facilitator turns it on. */
 	autoFlip: boolean;
+	/** Only the facilitator may reveal the cards by hand. On by default; off lets everyone flip. */
+	onlyFacilitatorCanFlip: boolean;
 	/** The auto flip's countdown runs. Votes are locked until the cards are revealed. */
 	countingDown: boolean;
 }
 
-export type RoomResult = { ok: true; room: Room } | { ok: false; code: ErrorCode };
+export type RoomResult =
+	| { ok: true; room: Room }
+	| { ok: false; code: ErrorCode };
 
-export function createRoom(init: { id: string; name: string; deck: Deck; creatorToken: string }): Room {
+export function createRoom(init: {
+	id: string;
+	name: string;
+	deck: Deck;
+	creatorToken: string;
+}): Room {
 	return {
 		id: init.id,
 		name: init.name,
@@ -51,6 +67,7 @@ export function createRoom(init: { id: string; name: string; deck: Deck; creator
 		currentIssueId: null,
 		result: null,
 		autoFlip: false,
+		onlyFacilitatorCanFlip: true,
 		countingDown: false,
 	};
 }
@@ -65,5 +82,11 @@ export function fail(code: ErrorCode): RoomResult {
 
 /** Back to voting with no votes and no result. */
 export function newRound(room: Room): Room {
-	return { ...room, phase: 'voting', votes: new Map(), result: null, countingDown: false };
+	return {
+		...room,
+		phase: 'voting',
+		votes: new Map(),
+		result: null,
+		countingDown: false,
+	};
 }

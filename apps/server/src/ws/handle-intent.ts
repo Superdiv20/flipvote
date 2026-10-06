@@ -19,6 +19,7 @@ import type { StatePublisher } from './state-publisher';
 import { seatTopic } from './topics';
 import { setName } from '../room/participants/set-name';
 import { setAutoFlip } from '../room/round/auto-flip';
+import { setOnlyFacilitatorCanFlip } from '../room/round/only-facilitator-can-flip';
 
 /** Intents only read who is sending; only `join` writes it. */
 type IntentSocket = Pick<ServerWebSocket<SocketData>, 'send'> & {
@@ -104,5 +105,7 @@ function applyIntent(
 			return setName(room, participantId, msg.name);
 		case 'setAutoFlip':
 			return setAutoFlip(room, participantId, msg.enabled);
+		case 'setOnlyFacilitatorCanFlip':
+			return setOnlyFacilitatorCanFlip(room, participantId, msg.enabled);
 	}
 }

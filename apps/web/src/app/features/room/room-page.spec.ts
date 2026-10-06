@@ -353,4 +353,73 @@ describe('RoomPage', () => {
       expect([...cards].every((card) => card.disabled)).toBe(true);
     });
   });
+
+  describe('the reveal button', () => {
+    async function asParticipant(onlyFacilitatorCanFlip: boolean) {
+      const { fixture } = setup();
+      await fixture.whenStable();
+      // Jonas, the one viewing, is no longer the facilitator.
+      (TestBed.inject(SocketService) as unknown as MockSession).deliver({
+        type: 'state',
+        room: { ...MOCK_ROOM, facilitatorId: 'maya', onlyFacilitatorCanFlip },
+      });
+      await fixture.whenStable();
+      const buttons = (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'flipvote-poker-table button',
+      );
+      return [...buttons].some((b) => b.textContent?.includes('Reveal cards'));
+    }
+
+    it('is there for the facilitator', async () => {
+      const { fixture } = setup();
+      await fixture.whenStable();
+      const buttons = (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'flipvote-poker-table button',
+      );
+      expect([...buttons].some((b) => b.textContent?.includes('Reveal cards'))).toBe(true);
+    });
+
+    it('is hidden from everyone else while only the facilitator may flip', async () => {
+      expect(await asParticipant(true)).toBe(false);
+    });
+
+    it('is there for everyone once the room lets everyone flip', async () => {
+      expect(await asParticipant(false)).toBe(true);
+    });
+  });
+
+  describe('after the flip', () => {
+    async function revealed(facilitatorId: string, onlyFacilitatorCanFlip = true) {
+      const { fixture } = setup();
+      await fixture.whenStable();
+      (TestBed.inject(SocketService) as unknown as MockSession).deliver({
+        type: 'state',
+        room: { ...MOCK_ROOM, phase: 'revealed', facilitatorId, onlyFacilitatorCanFlip },
+      });
+      await fixture.whenStable();
+      const table = (fixture.nativeElement as HTMLElement).querySelector('flipvote-poker-table')!;
+      const hasNewRound = [...table.querySelectorAll('button')].some((b) =>
+        b.textContent?.includes('New round'),
+      );
+      return { table, hasNewRound };
+    }
+
+    it('shows the facilitator the new round button', async () => {
+      const { table, hasNewRound } = await revealed('jonas');
+      expect(hasNewRound).toBe(true);
+      expect(table.querySelector('[role="status"]')?.textContent).toContain('Cards revealed');
+    });
+
+    it('tells everyone else the cards are revealed, without the button', async () => {
+      const { table, hasNewRound } = await revealed('maya');
+      expect(hasNewRound).toBe(false);
+      expect(table.querySelector('[role="status"]')?.textContent).toContain('Cards revealed');
+      expect(table.textContent).not.toContain('voted');
+    });
+
+    it('keeps the new round with the facilitator even when everyone may flip', async () => {
+      const { hasNewRound } = await revealed('maya', false);
+      expect(hasNewRound).toBe(false);
+    });
+  });
 });

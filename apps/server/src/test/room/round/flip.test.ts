@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { flip, reveal } from '../../../room/round/flip';
+import { setOnlyFacilitatorCanFlip } from '../../../room/round/only-facilitator-can-flip';
 import { applyPure, seatedRoom, unwrap } from '../test-helpers';
 import { vote } from '../../../room/round/vote';
 
@@ -39,5 +40,23 @@ describe('reveal', () => {
 		expect(reveal(seatedRoom())).toEqual({ ok: false, code: 'NO_VOTES' });
 		const revealed = unwrap(reveal(unwrap(vote(seatedRoom(), 'ben', '5'))));
 		expect(reveal(revealed)).toEqual({ ok: false, code: 'ALREADY_REVEALED' });
+	});
+});
+
+describe('flip, when the room lets everyone flip', () => {
+	const open = () => unwrap(setOnlyFacilitatorCanFlip(unwrap(vote(seatedRoom(), 'ben', '5')), 'ana', false));
+
+	test('anyone in the room may reveal the cards', () => {
+		const revealed = unwrap(applyPure(open(), (r) => flip(r, 'cy')));
+		expect(revealed.phase).toBe('revealed');
+	});
+
+	test('someone who is not in the room still may not', () => {
+		expect(flip(open(), 'zoe')).toEqual({ ok: false, code: 'NOT_JOINED' });
+	});
+
+	test('with the setting on, only the facilitator may', () => {
+		const room = unwrap(vote(seatedRoom(), 'ben', '5'));
+		expect(flip(room, 'cy')).toEqual({ ok: false, code: 'NOT_FACILITATOR' });
 	});
 });
