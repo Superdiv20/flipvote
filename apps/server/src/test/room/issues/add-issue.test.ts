@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { addIssue } from './add-issue';
-import { applyPure, seatedRoom, unwrap } from '../testing';
+import { addIssue } from '../../../room/issues/add-issue';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
 
 describe('addIssue', () => {
 	test('anyone can add; the first issue becomes current', () => {

@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { flip } from '../round/flip';
-import { setConnected } from './set-connected';
-import { applyPure, seatedRoom, unwrap } from '../testing';
-import { transferFacilitator } from './transfer-facilitator';
-import { vote } from '../round/vote';
+import { flip } from '../../../room/round/flip';
+import { setConnected } from '../../../room/participants/set-connected';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
+import { transferFacilitator } from '../../../room/participants/transfer-facilitator';
+import { vote } from '../../../room/round/vote';
 
 describe('transferFacilitator', () => {
 	test('hands the role to another participant', () => {

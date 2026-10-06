@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 import { DECKS } from '@flipvote/protocol';
-import { join, participantIdForToken } from './join';
-import { createRoom } from '../room';
-import { applyPure, seatedRoom, unwrap } from '../testing';
-import { vote } from '../round/vote';
+import { join, participantIdForToken } from '../../../room/participants/join';
+import { createRoom } from '../../../room/room';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
+import { vote } from '../../../room/round/vote';
 
 describe('join', () => {
 	test('seats a new participant and makes the first one facilitator', () => {

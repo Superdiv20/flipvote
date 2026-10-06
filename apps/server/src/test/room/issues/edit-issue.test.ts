@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import type { IssueInput } from '@flipvote/protocol';
-import { addIssue } from './add-issue';
-import { editIssue } from './edit-issue';
-import { applyPure, seatedRoom, unwrap } from '../testing';
+import { addIssue } from '../../../room/issues/add-issue';
+import { editIssue } from '../../../room/issues/edit-issue';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
 
 function roomWithIssue() {
 	const room = unwrap(addIssue(seatedRoom(), 'ana', 'i1', { key: 'ATL-1', title: 'Export', link: 'https://x.test' }));

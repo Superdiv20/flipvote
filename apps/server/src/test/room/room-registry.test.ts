@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { DECKS } from '@flipvote/protocol';
-import { join } from './participants/join';
-import { registry } from './room-registry';
-import { unwrap } from './testing';
+import { join } from '../../room/participants/join';
+import { registry } from '../../room/room-registry';
+import { unwrap } from './test-helpers';
 
 const addRoom = () => registry.addRoom('Sprint 42', DECKS.fibonacci, 'token-creator');
 

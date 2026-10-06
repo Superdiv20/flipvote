@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { DECKS } from '@flipvote/protocol';
-import { calculateResult } from './calculate-result';
+import { calculateResult } from '../../../room/round/calculate-result';
 
 describe('calculateResult', () => {
 	test('averages numeric votes and lists the distribution in deck order', () => {

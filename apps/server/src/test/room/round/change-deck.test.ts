@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 import { DECKS, type DeckId } from '@flipvote/protocol';
-import { changeDeck } from './change-deck';
-import { flip } from './flip';
-import { applyPure, seatedRoom, unwrap } from '../testing';
-import { vote } from './vote';
+import { changeDeck } from '../../../room/round/change-deck';
+import { flip } from '../../../room/round/flip';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
+import { vote } from '../../../room/round/vote';
 
 describe('changeDeck', () => {
 	test('switches the deck and clears the votes', () => {

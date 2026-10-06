@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { ClientMessage } from '@flipvote/protocol';
-import { parseMessage } from './parse-message';
+import { parseMessage } from '../../ws/parse-message';
 
 const validJoin: ClientMessage = { type: 'join', roomId: 'room-1', name: 'Ana', sessionToken: 'token-ana' };
 const frame = (value: unknown) => JSON.stringify(value);

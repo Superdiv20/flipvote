@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
-import { flip } from '../round/flip';
-import { leave } from './leave';
-import { applyPure, seatedRoom, unwrap } from '../testing';
-import { vote } from '../round/vote';
+import { flip } from '../../../room/round/flip';
+import { leave } from '../../../room/participants/leave';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
+import { vote } from '../../../room/round/vote';
 
 describe('leave', () => {
 	test('removes the participant and their vote', () => {

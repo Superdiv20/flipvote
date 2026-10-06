@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test';
-import { addIssue } from '../issues/add-issue';
-import { flip } from './flip';
-import { reset } from './reset';
-import type { Room } from '../room';
-import { applyPure, seatedRoom, unwrap } from '../testing';
-import { vote } from './vote';
+import { addIssue } from '../../../room/issues/add-issue';
+import { flip } from '../../../room/round/flip';
+import { reset } from '../../../room/round/reset';
+import type { Room } from '../../../room/room';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
+import { vote } from '../../../room/round/vote';
 
 function withIssues(): Room {
 	let room = seatedRoom();

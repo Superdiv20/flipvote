@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { Issue } from '@flipvote/protocol';
-import { nextOpenIssue } from './next-open-issue';
+import { nextOpenIssue } from '../../../room/issues/next-open-issue';
 
 const issue = (id: string, estimate?: string): Issue => (estimate ? { id, title: id, estimate } : { id, title: id });
 

@@ -1,15 +1,15 @@
 import { type ClientMessage, DECKS, type ServerMessage } from '@flipvote/protocol';
-import { registry } from '../room/room-registry';
-import { handleClose } from './handle-close';
-import { createPresence, type Schedule } from './presence';
-import type { SocketData } from './socket-data';
+import { registry } from '../../room/room-registry';
+import { handleClose } from '../../ws/handle-close';
+import { createPresence, type Schedule } from '../../ws/presence';
+import type { SocketData } from '../../ws/socket-data';
 
 /** Everything that left the server, in order: `send` to one socket, or `publish` to a topic. */
 export type Outgoing =
 	| { to: 'socket'; message: ServerMessage }
 	| { to: 'topic'; topic: string; message: ServerMessage };
 
-/** The grace period the harness's presence uses. Only `clock.advance` lets it pass. */
+/** The grace period the fakeServer's presence uses. Only `clock.advance` lets it pass. */
 export const TEST_GRACE_MS = 1000;
 
 /** A clock that only moves when the test says so. */
@@ -47,7 +47,7 @@ export function manualClock() {
  * shared `log`, so tests can check the order as well as the content. Subscriptions are tracked,
  * so `subscriberCount` and `close` behave like Bun's.
  */
-export function harness() {
+export function fakeServer() {
 	const log: Outgoing[] = [];
 	const subscribers = new Map<string, Set<object>>();
 	const server = {

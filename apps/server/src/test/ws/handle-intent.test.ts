@@ -1,18 +1,18 @@
 import { describe, expect, test } from 'bun:test';
 import { DECKS, type ErrorCode, type ServerMessage } from '@flipvote/protocol';
-import { registry } from '../room/room-registry';
-import { ERROR_MESSAGES } from '../shared/error-messages';
-import { handleIntent } from './handle-intent';
-import { handleJoin } from './handle-join';
-import { harness, joinMessage, newRoom, type Outgoing } from './testing';
-import { seatTopic } from './topics';
+import { registry } from '../../room/room-registry';
+import { ERROR_MESSAGES } from '../../shared/error-messages';
+import { handleIntent } from '../../ws/handle-intent';
+import { handleJoin } from '../../ws/handle-join';
+import { fakeServer, joinMessage, newRoom, type Outgoing } from './fake-server';
+import { seatTopic } from '../../ws/topics';
 
 type State = Extract<ServerMessage, { type: 'state' }>['room'];
 
 /** Ana (the creator, so facilitator) and Ben, seated through the real join. The log starts empty. */
 function seated() {
 	const room = newRoom();
-	const h = harness();
+	const h = fakeServer();
 	const ana = h.socket();
 	const ben = h.socket();
 	handleJoin(ana.ws, joinMessage(room.id, 'Ana', 'token-creator'), h.server, h.presence);
@@ -22,7 +22,7 @@ function seated() {
 }
 
 /** The state of the last publish. */
-function lastState(log: ReturnType<typeof harness>['log']): State {
+function lastState(log: ReturnType<typeof fakeServer>['log']): State {
 	const entry = log.findLast((e) => e.to === 'topic');
 	if (!entry || entry.message.type !== 'state') throw new Error('Nothing was published');
 	return entry.message.room;
@@ -36,13 +36,13 @@ const error = (code: ErrorCode): Outgoing => ({
 describe('handleIntent', () => {
 	describe('before the rule runs', () => {
 		test('rejects a socket that has not joined', () => {
-			const { log, server, socket } = harness();
+			const { log, server, socket } = fakeServer();
 			handleIntent(socket().ws, { type: 'flip' }, server);
 			expect(log).toEqual([error('NOT_JOINED')]);
 		});
 
 		test('rejects a socket whose room is gone', () => {
-			const { log, server, socket } = harness();
+			const { log, server, socket } = fakeServer();
 			const { ws } = socket({ roomId: 'gone', participantId: 'ana' });
 			handleIntent(ws, { type: 'flip' }, server);
 			expect(log).toEqual([error('ROOM_NOT_FOUND')]);

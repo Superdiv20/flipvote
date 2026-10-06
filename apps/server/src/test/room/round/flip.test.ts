@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
-import { flip } from './flip';
-import { applyPure, seatedRoom, unwrap } from '../testing';
-import { vote } from './vote';
+import { flip } from '../../../room/round/flip';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
+import { vote } from '../../../room/round/vote';
 
 describe('flip', () => {
 	test('reveals the cards and stores the result', () => {

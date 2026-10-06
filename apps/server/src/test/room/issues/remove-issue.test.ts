@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test';
-import type { Room } from '../room';
-import { flip } from '../round/flip';
-import { vote } from '../round/vote';
-import { applyPure, seatedRoom, unwrap } from '../testing';
-import { addIssue } from './add-issue';
-import { removeIssue } from './remove-issue';
+import type { Room } from '../../../room/room';
+import { flip } from '../../../room/round/flip';
+import { vote } from '../../../room/round/vote';
+import { applyPure, seatedRoom, unwrap } from '../test-helpers';
+import { addIssue } from '../../../room/issues/add-issue';
+import { removeIssue } from '../../../room/issues/remove-issue';
 
 /** Issues i1, i2, i3; i1 is current (the first added issue becomes current). */
 function withIssues(): Room {

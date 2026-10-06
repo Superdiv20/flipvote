@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'bun:test';
-import { addIssue } from './issues/add-issue';
-import { join } from './participants/join';
-import { setConnected } from './participants/set-connected';
-import { toggleSpectator } from './participants/toggle-spectator';
-import { createRoom, type Participant, type Room } from './room';
-import { flip } from './round/flip';
-import { reset } from './round/reset';
-import { vote } from './round/vote';
-import { seatedRoom, unwrap } from './testing';
-import { ownVote, toSharedState } from './to-shared-state';
+import { addIssue } from '../../room/issues/add-issue';
+import { join } from '../../room/participants/join';
+import { setConnected } from '../../room/participants/set-connected';
+import { toggleSpectator } from '../../room/participants/toggle-spectator';
+import { createRoom, type Participant, type Room } from '../../room/room';
+import { flip } from '../../room/round/flip';
+import { reset } from '../../room/round/reset';
+import { vote } from '../../room/round/vote';
+import { seatedRoom, unwrap } from './test-helpers';
+import { ownVote, toSharedState } from '../../room/to-shared-state';
 import { DECKS } from '@flipvote/protocol';
 
 /** Ana voted 3, Ben voted 8, Cy hasn't voted. Ana's issue `i1` is current. */

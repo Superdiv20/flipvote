@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { DECKS } from '@flipvote/protocol';
-import { registry } from '../room/room-registry';
-import { ERROR_MESSAGES } from '../shared/error-messages';
-import { createRoomHandler } from './create-room';
+import { registry } from '../../room/room-registry';
+import { ERROR_MESSAGES } from '../../shared/error-messages';
+import { createRoomHandler } from '../../http/create-room';
 
 function post(body: unknown, token: string | null = 'token-creator'): Request {
 	return new Request('http://localhost/api/rooms', {

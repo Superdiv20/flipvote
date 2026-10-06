@@ -1,17 +1,17 @@
 import { describe, expect, test } from 'bun:test';
 import type { ServerMessage } from '@flipvote/protocol';
-import { registry } from '../room/room-registry';
-import { handleIntent } from './handle-intent';
-import { handleJoin } from './handle-join';
-import { harness, joinMessage, newRoom, TEST_GRACE_MS } from './testing';
-import { seatTopic } from './topics';
+import { registry } from '../../room/room-registry';
+import { handleIntent } from '../../ws/handle-intent';
+import { handleJoin } from '../../ws/handle-join';
+import { fakeServer, joinMessage, newRoom, TEST_GRACE_MS } from './fake-server';
+import { seatTopic } from '../../ws/topics';
 
 type State = Extract<ServerMessage, { type: 'state' }>['room'];
 
 /** Ana (the creator, so facilitator) and Ben, each with one tab. The log starts empty. */
 function seated() {
 	const room = newRoom();
-	const h = harness();
+	const h = fakeServer();
 	const ana = h.socket();
 	const ben = h.socket();
 	handleJoin(ana.ws, joinMessage(room.id, 'Ana', 'token-creator'), h.server, h.presence);
@@ -20,7 +20,7 @@ function seated() {
 	return { ...h, roomId: room.id, ana, ben };
 }
 
-function lastState(log: ReturnType<typeof harness>['log']): State {
+function lastState(log: ReturnType<typeof fakeServer>['log']): State {
 	const entry = log.findLast((e) => e.to === 'topic' && e.message.type === 'state');
 	if (!entry || entry.message.type !== 'state') throw new Error('Nothing was published');
 	return entry.message.room;

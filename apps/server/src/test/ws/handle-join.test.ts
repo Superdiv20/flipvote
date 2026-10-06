@@ -1,18 +1,18 @@
 import { describe, expect, test } from 'bun:test';
 import type { ServerMessage } from '@flipvote/protocol';
-import { registry } from '../room/room-registry';
-import { vote } from '../room/round/vote';
-import { unwrap } from '../room/testing';
-import { ERROR_MESSAGES } from '../shared/error-messages';
-import { handleJoin } from './handle-join';
-import { harness, joinMessage, newRoom } from './testing';
-import { seatTopic } from './topics';
+import { registry } from '../../room/room-registry';
+import { vote } from '../../room/round/vote';
+import { unwrap } from '../room/test-helpers';
+import { ERROR_MESSAGES } from '../../shared/error-messages';
+import { handleJoin } from '../../ws/handle-join';
+import { fakeServer, joinMessage, newRoom } from './fake-server';
+import { seatTopic } from '../../ws/topics';
 
 describe('handleJoin', () => {
 	describe('a first join', () => {
 		test('seats the creator as facilitator and remembers the seat on the connection', () => {
 			const room = newRoom();
-			const { server, presence, socket } = harness();
+			const { server, presence, socket } = fakeServer();
 			const { ws, topics } = socket();
 
 			handleJoin(ws, joinMessage(room.id, 'Ana', 'token-creator'), server, presence);
@@ -26,7 +26,7 @@ describe('handleJoin', () => {
 
 		test('sends welcome to the joiner first, then the state to the room', () => {
 			const room = newRoom();
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 			const { ws } = socket();
 
 			handleJoin(ws, joinMessage(room.id, 'Ana', 'token-creator'), server, presence);
@@ -45,7 +45,7 @@ describe('handleJoin', () => {
 
 		test('never publishes session tokens', () => {
 			const room = newRoom();
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 
 			handleJoin(socket().ws, joinMessage(room.id, 'Ana', 'token-creator'), server, presence);
 
@@ -57,7 +57,7 @@ describe('handleJoin', () => {
 	describe('more people', () => {
 		test('a new token gets its own seat, and the room sees both', () => {
 			const room = newRoom();
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 			const ana = socket();
 			const ben = socket();
 
@@ -76,7 +76,7 @@ describe('handleJoin', () => {
 	describe('rejoining', () => {
 		test('the same token gets the same seat on a new connection', () => {
 			const room = newRoom();
-			const { server, presence, socket } = harness();
+			const { server, presence, socket } = fakeServer();
 			const first = socket();
 			handleJoin(first.ws, joinMessage(room.id, 'Ana', 'token-creator'), server, presence);
 
@@ -89,7 +89,7 @@ describe('handleJoin', () => {
 
 		test('gives the vote back in welcome after a refresh while voting', () => {
 			const room = newRoom();
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 			const first = socket();
 			handleJoin(first.ws, joinMessage(room.id, 'Ana', 'token-creator'), server, presence);
 			const participantId = first.ws.data.participantId!;
@@ -106,7 +106,7 @@ describe('handleJoin', () => {
 
 		test('the same connection joining the same room again is a rejoin', () => {
 			const room = newRoom();
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 			const { ws } = socket();
 			handleJoin(ws, joinMessage(room.id, 'Ana', 'token-creator'), server, presence);
 			const participantId = ws.data.participantId;
@@ -121,7 +121,7 @@ describe('handleJoin', () => {
 
 	describe('rejections', () => {
 		test('an unknown room', () => {
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 			const { ws, topics } = socket();
 
 			handleJoin(ws, joinMessage('no-such-room', 'Ana', 'token-ana'), server, presence);
@@ -135,7 +135,7 @@ describe('handleJoin', () => {
 
 		test('a blank name leaves the room untouched', () => {
 			const room = newRoom();
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 			const { ws, topics } = socket();
 
 			handleJoin(ws, joinMessage(room.id, '   ', 'token-ana'), server, presence);
@@ -151,7 +151,7 @@ describe('handleJoin', () => {
 		test('a connection that already sits in another room', () => {
 			const first = newRoom();
 			const second = newRoom();
-			const { log, server, presence, socket } = harness();
+			const { log, server, presence, socket } = fakeServer();
 			const { ws, topics } = socket();
 			handleJoin(ws, joinMessage(first.id, 'Ana', 'token-ana'), server, presence);
 			log.length = 0;
