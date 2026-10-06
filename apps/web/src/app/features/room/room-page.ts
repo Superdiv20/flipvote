@@ -65,6 +65,8 @@ import { RoomNotFound } from './room-not-found';
           [votedCount]="roomStore.votedCount()"
           [connection]="roomStore.connection()"
           [theme]="theme.theme()"
+          [themePreference]="theme.preference()"
+          (themePreferenceChange)="theme.setPreference($event)"
           [account]="account.account()"
           [guestName]="guestName()"
           (toggleTheme)="theme.toggle()"

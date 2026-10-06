@@ -5,19 +5,32 @@ import {
   lucideChevronDown,
   lucideLogIn,
   lucideLogOut,
+  lucideMonitor,
+  lucideMoon,
   lucideSettings,
+  lucideSun,
   lucideUser,
 } from '@ng-icons/lucide';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import type { Account } from '../../../core/account';
+import type { ThemePreference } from '../../../core/theme';
 
 /** Avatar button in the top bar with the account dropdown. Guests get a person icon and a Sign in action. */
 @Component({
   selector: 'flipvote-account-menu',
   imports: [NgTemplateOutlet, NgIcon, HlmAvatarImports, HlmDropdownMenuImports],
   providers: [
-    provideIcons({ lucideChevronDown, lucideLogIn, lucideLogOut, lucideSettings, lucideUser }),
+    provideIcons({
+      lucideChevronDown,
+      lucideLogIn,
+      lucideLogOut,
+      lucideMonitor,
+      lucideMoon,
+      lucideSettings,
+      lucideSun,
+      lucideUser,
+    }),
   ],
   host: { class: 'flex' },
   template: `
@@ -45,12 +58,12 @@ import type { Account } from '../../../core/account';
         </div>
         <hlm-dropdown-menu-separator />
         @if (!account()) {
-          <button hlmDropdownMenuItem (triggered)="signIn.emit()">
+          <button disabled hlmDropdownMenuItem (triggered)="signIn.emit()">
             <ng-icon name="lucideLogIn" />
             Sign in
           </button>
         }
-        <button hlmDropdownMenuItem (triggered)="signUp.emit()">
+        <button disabled hlmDropdownMenuItem (triggered)="signUp.emit()">
           <ng-icon name="lucideUser" />
           Sign up
         </button>
@@ -58,6 +71,21 @@ import type { Account } from '../../../core/account';
           <ng-icon name="lucideSettings" />
           Profile settings
         </button>
+        <hlm-dropdown-menu-separator />
+        <hlm-dropdown-menu-group>
+          <hlm-dropdown-menu-label>Theme</hlm-dropdown-menu-label>
+          @for (option of themeOptions; track option.value) {
+            <button
+              hlmDropdownMenuRadio
+              [checked]="themePreference() === option.value"
+              (triggered)="themePreferenceChange.emit(option.value)"
+            >
+              <ng-icon [name]="option.icon" />
+              {{ option.label }}
+              <hlm-dropdown-menu-radio-indicator />
+            </button>
+          }
+        </hlm-dropdown-menu-group>
         @if (account()) {
           <hlm-dropdown-menu-separator />
           <button hlmDropdownMenuItem (triggered)="signOut.emit()">
@@ -90,11 +118,16 @@ export class AccountMenu {
   readonly account = input.required<Account | null>();
   /** Shown for guests, who only have the name they joined with. */
   readonly guestName = input.required<string>();
+  readonly themePreference = input.required<ThemePreference>();
+
+  readonly themePreferenceChange = output<ThemePreference>();
 
   readonly openSettings = output();
   readonly signIn = output();
   readonly signUp = output();
   readonly signOut = output();
+
+  protected readonly themeOptions = THEME_OPTIONS;
 
   protected readonly displayName = computed(() => this.account()?.name ?? this.guestName());
   protected readonly initials = computed(() =>
@@ -106,3 +139,9 @@ export class AccountMenu {
       .join(''),
   );
 }
+
+const THEME_OPTIONS: { value: ThemePreference; label: string; icon: string }[] = [
+  { value: 'light', label: 'Light', icon: 'lucideSun' },
+  { value: 'dark', label: 'Dark', icon: 'lucideMoon' },
+  { value: 'system', label: 'System', icon: 'lucideMonitor' },
+];

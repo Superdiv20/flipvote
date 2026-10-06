@@ -6,7 +6,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
 import type { Account } from '../../../core/account';
 import type { ConnectionStatus } from '../../../core/socket';
-import type { Theme } from '../../../core/theme';
+import type { Theme, ThemePreference } from '../../../core/theme';
 import { AccountMenu } from './account-menu';
 import { Logo } from '../../../shared/logo';
 import { ParticipantList } from './participant-list';
@@ -76,15 +76,6 @@ import { ParticipantList } from './participant-list';
     <span class="sr-only" aria-live="polite">
       {{ connection() === 'closed' ? 'Connection to the room lost' : '' }}
     </span>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-      (click)="toggleTheme.emit()"
-    >
-      <ng-icon [name]="theme() === 'dark' ? 'lucideSun' : 'lucideMoon'" />
-    </button>
     <button hlmBtn variant="outline" size="lg" class="px-4" (click)="copyInvite()">
       <ng-icon [name]="copied() ? 'lucideCheck' : 'lucideLink'" data-icon="inline-start" />
       <span aria-live="polite">{{ copied() ? 'Link copied' : 'Invite' }}</span>
@@ -93,6 +84,8 @@ import { ParticipantList } from './participant-list';
     <flipvote-account-menu
       [account]="account()"
       [guestName]="guestName()"
+      [themePreference]="themePreference()"
+      (themePreferenceChange)="themePreferenceChange.emit($event)"
       (openSettings)="openSettings.emit()"
       (signIn)="signIn.emit()"
       (signOut)="signOut.emit()"
@@ -110,9 +103,11 @@ export class RoomHeader {
   readonly votedCount = input.required<number>();
   readonly connection = input.required<ConnectionStatus>();
   readonly theme = input.required<Theme>();
+  readonly themePreference = input.required<ThemePreference>();
   readonly account = input.required<Account | null>();
   readonly guestName = input.required<string>();
   readonly toggleTheme = output();
+  readonly themePreferenceChange = output<ThemePreference>();
   readonly openSettings = output();
   readonly signIn = output();
   readonly signOut = output();
