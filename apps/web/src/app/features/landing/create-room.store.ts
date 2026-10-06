@@ -3,6 +3,7 @@ import type { DeckId, ErrorCode } from '@flipvote/protocol';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { toast } from '@spartan-ng/brain/sonner';
 import { RoomApiError, RoomApiService } from '../../core/room-api';
+import { ERROR_MESSAGES } from '../../shared/error-messages';
 import { SessionService } from '../../core/session';
 import { CREATE_ROOM_ERRORS } from './create-room-error-types';
 
@@ -45,8 +46,7 @@ export const CreateRoomStore = signalStore(
 function createRoomErrorMessage(error: unknown): string {
   // `fetch` rejects with a TypeError when the request never reached the server.
   if (!(error instanceof RoomApiError)) return 'Could not reach the server. Check your connection.';
-  const known = error.code && CREATE_ROOM_ERRORS[error.code];
-  if (known) return known;
+  if (error.code) return CREATE_ROOM_ERRORS[error.code] ?? ERROR_MESSAGES[error.code];
   if (error.status >= 500) return 'The server ran into a problem. Try again in a moment.';
   return 'The room could not be created. Please try again.';
 }

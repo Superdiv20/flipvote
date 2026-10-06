@@ -2,9 +2,10 @@ import { Component, computed, input, output } from '@angular/core';
 import type { ErrorCode } from '@flipvote/protocol';
 import { RouterLink } from '@angular/router';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { ERROR_MESSAGES } from '../../shared/error-messages';
 import { Logo } from '../../shared/logo';
 
-/** What went wrong, in the client's words. The server's text is for logs and other clients. */
+/** Wording for the join screen. Other codes fall back to the shared `ERROR_MESSAGES`. */
 const JOIN_ERRORS: Partial<Record<ErrorCode, string>> = {
   NAME_REQUIRED: 'The room needs a name to show at the table.',
   NAME_TOO_LONG: 'That name is too long. Pick a shorter one.',
@@ -35,6 +36,7 @@ export class RoomJoinFailed {
 
   protected readonly reason = computed(() => {
     const code = this.code();
-    return (code && JOIN_ERRORS[code]) ?? 'Something went wrong while joining. Please try again.';
+    if (!code) return 'Something went wrong while joining. Please try again.';
+    return JOIN_ERRORS[code] ?? ERROR_MESSAGES[code];
   });
 }

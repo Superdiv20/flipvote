@@ -9,6 +9,8 @@ import {
 } from '@flipvote/protocol';
 import { SessionService } from '../../../core/session';
 import { type ConnectionStatus, SocketService } from '../../../core/socket';
+import { toast } from '@spartan-ng/brain/sonner';
+import { ERROR_MESSAGES } from '../../../shared/error-messages';
 import { RoomStore } from './room-store';
 
 /** Records what the store sends and lets a test deliver server messages by hand. */
@@ -190,18 +192,15 @@ describe('RoomStore', () => {
       expect(store.view()).toBe('joining');
     });
 
-    it('keeps showing the room once it has arrived, whatever error follows', () => {
+    it('switches to not found when the room disappears during the visit', () => {
       const store = setup();
-      vi.spyOn(console, 'warn').mockImplementation(() => {});
       socket.receive({ type: 'state', room: shared([seat('ana', false)]) });
       socket.receive({
         type: 'error',
         code: 'ROOM_NOT_FOUND',
         message: 'This room does not exist or has closed.',
       });
-      expect(store.view()).toBe('room');
-      expect(store.joinError()).toBeNull();
-      vi.restoreAllMocks();
+      expect(store.view()).toBe('notFound');
     });
   });
 
@@ -298,9 +297,11 @@ describe('RoomStore', () => {
       expect(store.view()).toBe('notFound');
     });
 
-    it('keeps the room for errors about a single intent', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it('keeps the room for errors about a single intent and shows them as a toast', () => {
       const store = setup();
-      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const toastError = vi.spyOn(toast, 'error').mockImplementation(() => '');
       socket.receive({ type: 'state', room: shared([seat('ana', false)]) });
       socket.receive({
         type: 'error',
@@ -308,26 +309,39 @@ describe('RoomStore', () => {
         message: 'Only the facilitator can do that.',
       });
       expect(store.view()).toBe('room');
-      vi.restoreAllMocks();
+      expect(toastError).toHaveBeenCalledWith(ERROR_MESSAGES.NOT_FACILITATOR);
+    });
+
+    it('shows the client’s wording, not the server’s', () => {
+      setup();
+      const toastError = vi.spyOn(toast, 'error').mockImplementation(() => '');
+      socket.receive({ type: 'state', room: shared([seat('ana', false)]) });
+      socket.receive({ type: 'error', code: 'NO_VOTES', message: 'server text' });
+      expect(toastError).toHaveBeenCalledWith(ERROR_MESSAGES.NO_VOTES);
+      expect(toastError).not.toHaveBeenCalledWith('server text');
+    });
+
+    it('does not toast a failed join, which has its own screen', () => {
+      const store = setup();
+      const toastError = vi.spyOn(toast, 'error').mockImplementation(() => '');
+      socket.receive({ type: 'error', code: 'INVALID_SESSION', message: 'x' });
+      expect(store.view()).toBe('joinFailed');
+      expect(toastError).not.toHaveBeenCalled();
     });
 
     it('changes nothing', () => {
       const store = setup();
+      vi.spyOn(toast, 'error').mockImplementation(() => '');
       socket.receive({ type: 'welcome', participantId: 'ben', myVote: '5' });
       socket.receive({ type: 'state', room: shared([seat('ana', false), seat('ben', true)]) });
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       socket.receive({
         type: 'error',
         code: 'NOT_FACILITATOR',
         message: 'Only the facilitator can do that.',
       });
-      expect(warn).toHaveBeenCalledWith(
-        '[room] NOT_FACILITATOR: Only the facilitator can do that.',
-      );
       expect(store.myVote()).toBe('5');
       expect(store.selfId()).toBe('ben');
       expect(store.votedCount()).toBe(1);
-      warn.mockRestore();
     });
   });
 

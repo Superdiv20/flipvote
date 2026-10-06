@@ -16,7 +16,9 @@ import {
   withProps,
   withState,
 } from '@ngrx/signals';
+import { toast } from '@spartan-ng/brain/sonner';
 import { SessionService } from '../../../core/session';
+import { ERROR_MESSAGES } from '../../../shared/error-messages';
 import { SocketService } from '../../../core/socket';
 import { type IssueDetails, issueLabel, parseIssueTitle } from '../issues/issue-types';
 
@@ -192,10 +194,14 @@ export const RoomStore = signalStore(
             break;
           }
           case 'error':
-            // Before the first state, only the join can have failed: the page shows why.
-            // Afterwards an error concerns a single intent, and the room stays.
-            if (store.room() === null) patchState(store, { joinError: message.code });
-            else console.warn(`[room] ${message.code}: ${message.message}`);
+            // Before the first state, only the join can have failed, and a gone room is gone at
+            // any time: the page shows a screen for both. Anything else concerns a single
+            // intent, so the room stays and a toast says what went wrong.
+            if (store.room() === null || message.code === 'ROOM_NOT_FOUND') {
+              patchState(store, { joinError: message.code });
+            } else {
+              toast.error(ERROR_MESSAGES[message.code]);
+            }
             break;
         }
       },
