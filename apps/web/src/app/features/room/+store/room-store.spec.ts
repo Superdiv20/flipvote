@@ -352,6 +352,13 @@ describe('RoomStore', () => {
       expect(store.isSpectator()).toBe(true);
     });
 
+    it('renames us at the table and remembers the name for the next visit', () => {
+      const store = setup();
+      store.rename('Ana K');
+      expect(socket.sent).toEqual([{ type: 'setName', name: 'Ana K' }]);
+      expect(TestBed.inject(SessionService).name()).toBe('Ana K');
+    });
+
     it('sends the deck, the hand-over and watch only', () => {
       const store = setup();
       store.setDeck('modified-fibonacci');

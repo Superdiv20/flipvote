@@ -1,5 +1,6 @@
 import { Component, output, signal } from '@angular/core';
-import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
+import { form, FormField, FormRoot, maxLength, pattern, required } from '@angular/forms/signals';
+import { NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -46,7 +47,7 @@ const NAME_MESSAGE = 'Enter the name the others will see.';
             [attr.aria-describedby]="nameInvalid() ? 'display-name-error' : null"
           />
           @if (nameInvalid()) {
-            <hlm-field-error id="display-name-error" forceShow>{{ nameMessage }}</hlm-field-error>
+            <hlm-field-error id="display-name-error" forceShow>{{ nameError() }}</hlm-field-error>
           }
         </hlm-field>
 
@@ -64,8 +65,6 @@ const NAME_MESSAGE = 'Enter the name the others will see.';
 export class JoinRoom {
   readonly join = output<string>();
 
-  protected readonly nameMessage = NAME_MESSAGE;
-
   private readonly model = signal({ name: '' });
 
   protected readonly joinForm = form(
@@ -74,6 +73,9 @@ export class JoinRoom {
       required(schemaPath.name, { message: NAME_MESSAGE });
       // `required` accepts a name of only spaces.
       pattern(schemaPath.name, /\S/, { message: NAME_MESSAGE });
+      maxLength(schemaPath.name, NAME_MAX_LENGTH, {
+        message: `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
+      });
     },
     {
       submission: {
@@ -88,5 +90,10 @@ export class JoinRoom {
   protected nameInvalid(): boolean {
     const name = this.joinForm.name();
     return name.touched() && name.invalid();
+  }
+
+  /** The first error of the name field, e.g. too long, rather than one fixed text. */
+  protected nameError(): string {
+    return this.joinForm.name().errors()[0]?.message ?? NAME_MESSAGE;
   }
 }

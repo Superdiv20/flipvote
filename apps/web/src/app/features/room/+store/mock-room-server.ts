@@ -1,6 +1,7 @@
 import {
   type CardValue,
   DECKS,
+  NAME_MAX_LENGTH,
   type ClientMessage,
   type ErrorCode,
   type Issue,
@@ -151,6 +152,18 @@ export class MockRoomServer {
           ),
         };
         return null;
+      case 'setName': {
+        const name = message.name.trim();
+        if (!name) return { code: 'NAME_REQUIRED', message: 'A name is required.' };
+        if (name.length > NAME_MAX_LENGTH) {
+          return { code: 'NAME_TOO_LONG', message: 'That name is too long.' };
+        }
+        this.room = {
+          ...this.room,
+          participants: this.room.participants.map((p) => (p.id === self ? { ...p, name } : p)),
+        };
+        return null;
+      }
       case 'transferFacilitator': {
         if (!isFacilitator) return facilitatorOnly;
         const target = this.participant(message.participantId);

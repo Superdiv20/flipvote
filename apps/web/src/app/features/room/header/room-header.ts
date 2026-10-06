@@ -6,6 +6,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
 import { HlmSwitchImports } from '@spartan-ng/helm/switch';
 import { RoomSettings } from '../settings/room-settings';
+import { ProfileSettings } from './profile-settings';
 import type { Account } from '../../../core/account';
 import type { ConnectionStatus } from '../../../core/socket';
 import type { Theme, ThemePreference } from '../../../core/theme';
@@ -24,6 +25,7 @@ import { ParticipantList } from './participant-list';
     ParticipantList,
     AccountMenu,
     RoomSettings,
+    ProfileSettings,
   ],
   providers: [provideIcons({ lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers })],
   host: {
@@ -36,6 +38,17 @@ import { ParticipantList } from './participant-list';
       <span class="text-muted-foreground truncate text-xs font-medium">{{ roomName() }}</span>
       <h1 class="truncate text-sm font-semibold">{{ topic() ?? 'No issue selected' }}</h1>
     </div>
+    @if (isFacilitator()) {
+      <flipvote-room-settings
+        [deckId]="deckId()"
+        [participants]="participants()"
+        [selfId]="selfId()"
+        [votedCount]="votedCount()"
+        [flipped]="flipped()"
+        (setDeck)="setDeck.emit($event)"
+        (transferFacilitator)="transferFacilitator.emit($event)"
+      />
+    }
     <hlm-popover class="max-sm:ml-auto" align="end" sideOffset="8">
       <button
         hlmPopoverTrigger
@@ -103,27 +116,17 @@ import { ParticipantList } from './participant-list';
       <ng-icon [name]="copied() ? 'lucideCheck' : 'lucideLink'" data-icon="inline-start" />
       <span aria-live="polite">{{ copied() ? 'Link copied' : 'Invite' }}</span>
     </button>
-    @if (isFacilitator()) {
-      <flipvote-room-settings
-        [deckId]="deckId()"
-        [participants]="participants()"
-        [selfId]="selfId()"
-        [votedCount]="votedCount()"
-        [flipped]="flipped()"
-        (setDeck)="setDeck.emit($event)"
-        (transferFacilitator)="transferFacilitator.emit($event)"
-      />
-    }
     <div class="bg-border h-5 w-px" aria-hidden="true"></div>
     <flipvote-account-menu
       [account]="account()"
       [guestName]="guestName()"
       [themePreference]="themePreference()"
       (themePreferenceChange)="themePreferenceChange.emit($event)"
-      (openSettings)="openSettings.emit()"
+      (openSettings)="profile.open()"
       (signIn)="signIn.emit()"
       (signOut)="signOut.emit()"
     />
+    <flipvote-profile-settings #profile [name]="guestName()" (rename)="rename.emit($event)" />
   `,
 })
 export class RoomHeader {
@@ -147,7 +150,7 @@ export class RoomHeader {
   readonly transferFacilitator = output<string>();
   readonly setSpectator = output<boolean>();
   readonly themePreferenceChange = output<ThemePreference>();
-  readonly openSettings = output();
+  readonly rename = output<string>();
   readonly signIn = output();
   readonly signOut = output();
 

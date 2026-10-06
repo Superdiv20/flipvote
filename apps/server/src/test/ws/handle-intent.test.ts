@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { DECKS, type ErrorCode, type ServerMessage } from '@flipvote/protocol';
+import { DECKS, type ErrorCode, NAME_MAX_LENGTH, type ServerMessage } from '@flipvote/protocol';
 import { registry } from '../../room/room-registry';
 import { ERROR_MESSAGES } from '../../shared/error-messages';
 import { handleIntent } from '../../ws/handle-intent';
@@ -172,6 +172,19 @@ describe('handleIntent', () => {
 			const { log, server, ben } = seated();
 			handleIntent(ben, { type: 'setSpectator', spectator: true }, server);
 			expect(lastState(log).participants.find((p) => p.name === 'Ben')?.isSpectator).toBe(true);
+		});
+
+		test('setName renames the sender’s seat for everyone', () => {
+			const { log, server, ben } = seated();
+			handleIntent(ben, { type: 'setName', name: '  Ben K ' }, server);
+			const names = lastState(log).participants.map((p) => p.name);
+			expect(names).toEqual(['Ana', 'Ben K']);
+		});
+
+		test('setName answers a name that is too long with the rule’s code', () => {
+			const { log, server, ben } = seated();
+			handleIntent(ben, { type: 'setName', name: 'x'.repeat(NAME_MAX_LENGTH + 1) }, server);
+			expect(log).toEqual([error('NAME_TOO_LONG')]);
 		});
 
 		test('transferFacilitator hands the role over', () => {

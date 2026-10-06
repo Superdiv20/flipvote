@@ -7,6 +7,7 @@ import { Logo } from '../../shared/logo';
 /** What went wrong, in the client's words. The server's text is for logs and other clients. */
 const JOIN_ERRORS: Partial<Record<ErrorCode, string>> = {
   NAME_REQUIRED: 'The room needs a name to show at the table.',
+  NAME_TOO_LONG: 'That name is too long. Pick a shorter one.',
   INVALID_SESSION: 'Your session doesn’t match your seat in this room.',
   ALREADY_IN_ROOM: 'This tab is already connected to another room.',
 };

@@ -5,9 +5,10 @@ import { MOCK_HIDDEN_VOTES, MOCK_ROOM, SELF_ID } from '../../../shared/mock-room
 import { MockRoomServer } from './mock-room-server';
 
 /** Stands in for `Session` in tests. `MockRoomServer` answers each message synchronously instead of a socket. */
-export class MockSession
-  implements Pick<SocketService, 'status' | 'connect' | 'disconnect' | 'send' | 'onMessage'>
-{
+export class MockSession implements Pick<
+  SocketService,
+  'status' | 'connect' | 'disconnect' | 'send' | 'onMessage'
+> {
   readonly status = signal<ConnectionStatus>('open').asReadonly();
   private readonly server = new MockRoomServer(MOCK_ROOM, MOCK_HIDDEN_VOTES, SELF_ID);
   private readonly handlers = new Set<(message: ServerMessage) => void>();

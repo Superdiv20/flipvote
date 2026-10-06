@@ -158,6 +158,12 @@ export const RoomStore = signalStore(
         send({ type: 'transferFacilitator', participantId });
       },
 
+      /** For ourselves: the name at the table. Saved for the next visit right away. */
+      rename(name: string): void {
+        session.setName(name);
+        send({ type: 'setName', name });
+      },
+
       /** For ourselves: watch the round without a card. Becoming a spectator drops our vote. */
       setSpectator(spectator: boolean): void {
         send({ type: 'setSpectator', spectator });

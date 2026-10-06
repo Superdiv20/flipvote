@@ -193,6 +193,21 @@ describe('parseMessage: transferFacilitator', () => {
 	});
 });
 
+describe('parseMessage: setName', () => {
+	test('accepts a name as it was sent', () => {
+		expect(parseMessage(frame({ type: 'setName', name: '  Ana K  ' }))).toEqual({ type: 'setName', name: '  Ana K  ' });
+	});
+
+	test('leaves a blank or too long name to the rule', () => {
+		expect(parseMessage(frame({ type: 'setName', name: '   ' }))).toEqual({ type: 'setName', name: '   ' });
+		expect(parseMessage(frame({ type: 'setName', name: 'x'.repeat(500) }))).not.toBeNull();
+	});
+
+	test.each([undefined, null, 42, { first: 'Ana' }])('rejects the name %p, which is not a string', (name) => {
+		expect(parseMessage(frame({ type: 'setName', name }))).toBeNull();
+	});
+});
+
 describe('parseMessage: coverage', () => {
 	// One valid example per message type. The `Record` makes this fail to compile when the
 	// protocol gains a type without an example here, and the test fails when the parser lacks a case.
@@ -208,6 +223,7 @@ describe('parseMessage: coverage', () => {
 		setDeck: { type: 'setDeck', deckId: 't-shirt' },
 		setSpectator: { type: 'setSpectator', spectator: true },
 		transferFacilitator: { type: 'transferFacilitator', participantId: 'ben' },
+		setName: { type: 'setName', name: 'Ana K' },
 	};
 
 	test.each(Object.values(examples))('parses every message type: $type', (message) => {

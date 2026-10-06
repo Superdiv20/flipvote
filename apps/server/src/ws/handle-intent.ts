@@ -16,6 +16,7 @@ import { ownVote, toSharedState } from '../room/to-shared-state';
 import { publish, type Publisher, sendError } from './send';
 import type { SocketData } from './socket-data';
 import { seatTopic } from './topics';
+import { setName } from '../room/participants/set-name';
 
 /** Intents only read who is sending; only `join` writes it. */
 type IntentSocket = Pick<ServerWebSocket<SocketData>, 'send'> & {
@@ -96,5 +97,7 @@ function applyIntent(
 			return toggleSpectator(room, participantId, msg.spectator);
 		case 'transferFacilitator':
 			return transferFacilitator(room, participantId, msg.participantId);
+		case 'setName':
+			return setName(room, participantId, msg.name);
 	}
 }

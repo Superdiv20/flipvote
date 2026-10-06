@@ -29,6 +29,8 @@ export type ClientMessage =
 	| { type: 'setDeck'; deckId: DeckId }
 	/** The sender, for themselves. */
 	| { type: 'setSpectator'; spectator: boolean }
+	/** The sender, for themselves. Renames their seat; the seat, vote and role stay. */
+	| { type: 'setName'; name: string }
 	/** Facilitator. Hands the role to another participant. */
 	| { type: 'transferFacilitator'; participantId: string };
 

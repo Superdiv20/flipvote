@@ -1,4 +1,4 @@
-import type { ErrorCode } from '@flipvote/protocol';
+import { type ErrorCode, NAME_MAX_LENGTH } from '@flipvote/protocol';
 
 /**
  * The human-readable text sent along with each error code, over HTTP and the socket alike, so the
@@ -11,6 +11,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
 	NOT_JOINED: 'Join the room first.',
 	ALREADY_IN_ROOM: 'This connection is already in another room.',
 	NAME_REQUIRED: 'A name is required.',
+	NAME_TOO_LONG: `A name can have at most ${NAME_MAX_LENGTH} characters.`,
 	INVALID_SESSION: 'Your session could not be verified.',
 	NOT_FACILITATOR: 'Only the facilitator can do that.',
 	SPECTATOR_CANNOT_VOTE: 'Spectators cannot vote.',

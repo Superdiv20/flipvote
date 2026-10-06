@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { DECKS } from '@flipvote/protocol';
+import { DECKS, NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { join, participantIdForToken } from '../../../room/participants/join';
 import { createRoom } from '../../../room/room';
 import { applyPure, seatedRoom, unwrap } from '../test-helpers';
@@ -49,6 +49,13 @@ describe('join', () => {
 		expect(applyPure(room, (r) => join(r, 'ana', 'Mallory', 'token-mallory'))).toEqual({
 			ok: false,
 			code: 'INVALID_SESSION',
+		});
+	});
+
+	test('rejects a name over the maximum length', () => {
+		expect(join(seatedRoom(), 'dan', 'x'.repeat(NAME_MAX_LENGTH + 1), 'token-dan')).toEqual({
+			ok: false,
+			code: 'NAME_TOO_LONG',
 		});
 	});
 

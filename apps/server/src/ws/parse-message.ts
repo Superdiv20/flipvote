@@ -71,6 +71,12 @@ export function parseMessage(raw: string | Buffer): ClientMessage | null {
 			if (!isNonEmptyString(participantId)) return null;
 			return { type: 'transferFacilitator', participantId };
 		}
+		case 'setName': {
+			// A blank or too long name is the rule's call (`NAME_REQUIRED`, `NAME_TOO_LONG`).
+			const { name } = data;
+			if (typeof name !== 'string') return null;
+			return { type: 'setName', name };
+		}
 		default:
 			return null;
 	}

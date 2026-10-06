@@ -1,4 +1,5 @@
 import { fail, ok, type Room, type RoomResult } from '../room';
+import { displayName } from '../../shared/display-name';
 
 /**
  * Seats a new participant, or rejoins an existing one (same id) in the same seat with their vote
@@ -9,8 +10,9 @@ import { fail, ok, type Room, type RoomResult } from '../room';
  * A rejoin with a token that doesn't own the seat is rejected, so a public id alone can't take it over.
  */
 export function join(room: Room, participantId: string, name: string, sessionToken: string): RoomResult {
-	const trimmed = name.trim();
-	if (!trimmed) return fail('NAME_REQUIRED');
+	const checked = displayName(name);
+	if (!checked.ok) return fail(checked.code);
+	const trimmed = checked.name;
 
 	const existing = room.participants.get(participantId);
 	if (existing && existing.sessionToken !== sessionToken) return fail('INVALID_SESSION');

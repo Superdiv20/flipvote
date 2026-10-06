@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
-import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
+import { form, FormField, FormRoot, maxLength, pattern, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import type { DeckId } from '@flipvote/protocol';
+import { type DeckId, NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -75,7 +75,9 @@ const NAME_MESSAGE = 'Give the room a name.';
             [attr.aria-describedby]="nameInvalid('roomName') ? 'room-name-error' : null"
           />
           @if (nameInvalid('roomName')) {
-            <hlm-field-error id="room-name-error" forceShow>{{ nameMessage }}</hlm-field-error>
+            <hlm-field-error id="room-name-error" forceShow>{{
+              fieldError('roomName')
+            }}</hlm-field-error>
           }
         </hlm-field>
 
@@ -94,7 +96,7 @@ const NAME_MESSAGE = 'Give the room a name.';
           />
           @if (nameInvalid('userDisplayName')) {
             <hlm-field-error id="user-display-name-error" forceShow>{{
-              nameMessage
+              fieldError('userDisplayName')
             }}</hlm-field-error>
           }
         </hlm-field>
@@ -153,7 +155,6 @@ export class CreateRoomPage {
   private readonly router = inject(Router);
 
   protected readonly decks = DECK_OPTIONS;
-  protected readonly nameMessage = NAME_MESSAGE;
 
   private readonly _model = signal<{ roomName: string; userDisplayName: string; deck: DeckId }>({
     roomName: '',
@@ -168,6 +169,9 @@ export class CreateRoomPage {
       required(schemaPath.userDisplayName, { message: 'Display name is required.' });
       // `required` accepts a name of only spaces.
       pattern(schemaPath.userDisplayName, /\S/, { message: 'Display name is required.' });
+      maxLength(schemaPath.userDisplayName, NAME_MAX_LENGTH, {
+        message: `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
+      });
       // `required` accepts a name of only spaces.
       pattern(schemaPath.roomName, /\S/, { message: NAME_MESSAGE });
     },
@@ -191,5 +195,10 @@ export class CreateRoomPage {
   protected nameInvalid(fieldName: 'roomName' | 'userDisplayName'): boolean {
     const field = this.createForm[fieldName]();
     return field.touched() && field.invalid();
+  }
+
+  /** The first error of that field, so each field shows its own message. */
+  protected fieldError(fieldName: 'roomName' | 'userDisplayName'): string {
+    return this.createForm[fieldName]().errors()[0]?.message ?? NAME_MESSAGE;
   }
 }

@@ -238,6 +238,21 @@ describe('RoomPage', () => {
       expect(page.querySelector('flipvote-poker-table')).not.toBeNull();
     });
 
+    it('does not join with a name over the maximum length', async () => {
+      const fixture = render();
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+
+      const input = page.querySelector<HTMLInputElement>('#display-name')!;
+      input.value = 'x'.repeat(41);
+      input.dispatchEvent(new Event('input'));
+      page.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+      await fixture.whenStable();
+
+      expect(TestBed.inject(SessionService).name()).toBeNull();
+      expect(page.querySelector('#display-name-error')?.textContent).toContain('under 41');
+    });
+
     it('does not join with a blank name', async () => {
       const fixture = render();
       await fixture.whenStable();

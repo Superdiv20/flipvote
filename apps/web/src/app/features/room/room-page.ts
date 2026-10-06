@@ -69,6 +69,7 @@ import { RoomNotFound } from './room-not-found';
           (setDeck)="roomStore.setDeck($event)"
           (transferFacilitator)="roomStore.transferFacilitator($event)"
           (setSpectator)="roomStore.setSpectator($event)"
+          (rename)="roomStore.rename($event)"
           [theme]="theme.theme()"
           [themePreference]="theme.preference()"
           (themePreferenceChange)="theme.setPreference($event)"
