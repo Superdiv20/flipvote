@@ -1,27 +1,23 @@
 import { leave } from '../room/participants/leave';
 import { setConnected } from '../room/participants/set-connected';
 import { registry } from '../room/room-registry';
-import { toSharedState } from '../room/to-shared-state';
-import { publish, type Publisher } from './send';
+import type { StatePublisher } from './state-publisher';
+import { realTimers, type Schedule } from './timers';
 import { seatTopic } from './topics';
-
-/** Runs `task` after `ms` and returns a function that calls it off. Injected so tests control time. */
-export type Schedule = (task: () => void, ms: number) => () => void;
 
 /** How long a seat waits for its owner to come back, e.g. after a refresh or a dropped network. */
 export const SEAT_GRACE_MS = 30_000;
-
-const realTimers: Schedule = (task, ms) => {
-	const timer = setTimeout(task, ms);
-	return () => clearTimeout(timer);
-};
 
 /**
  * Keeps seats while their owner is away. When the last tab of a seat closes, the seat shows as
  * disconnected; if nobody comes back within the grace period, the participant leaves (handing the
  * facilitator role on), and a room left without anyone is removed.
  */
-export function createPresence(server: Publisher, schedule: Schedule = realTimers, graceMs = SEAT_GRACE_MS) {
+export function createPresence(
+	states: StatePublisher,
+	schedule: Schedule = realTimers,
+	graceMs = SEAT_GRACE_MS,
+) {
 	/** Seat topic → call off the pending removal. */
 	const pendingRemovals = new Map<string, () => void>();
 
@@ -42,7 +38,7 @@ export function createPresence(server: Publisher, schedule: Schedule = realTimer
 			return;
 		}
 		registry.updateRoom(result.room);
-		publish(server, roomId, { type: 'state', room: toSharedState(result.room) });
+		states.publishState(result.room);
 	}
 
 	return {
@@ -59,7 +55,7 @@ export function createPresence(server: Publisher, schedule: Schedule = realTimer
 			if (!result.ok) return;
 
 			registry.updateRoom(result.room);
-			publish(server, roomId, { type: 'state', room: toSharedState(result.room) });
+			states.publishState(result.room);
 
 			const key = seatTopic(roomId, participantId);
 			callOffRemoval(key);

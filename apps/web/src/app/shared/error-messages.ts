@@ -18,6 +18,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   SPECTATOR_CANNOT_VOTE: 'You’re watching only. Turn off “Watch only” to vote.',
   INVALID_CARD: 'That card isn’t in this room’s deck.',
   ALREADY_REVEALED: 'The cards are already revealed. Start a new round to vote again.',
+  VOTES_LOCKED: 'Everyone has voted, so the votes are locked until the cards flip.',
   NOT_REVEALED: 'The cards aren’t revealed yet.',
   NO_VOTES: 'Nobody has voted yet, so there is nothing to reveal.',
   ISSUE_NOT_FOUND: 'That issue was removed in the meantime.',

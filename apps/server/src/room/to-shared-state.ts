@@ -5,8 +5,10 @@ import type { Room } from './room';
  * The state every client in the room sees, identical for all of them, so it can be published
  * once to the room's topic. Every field is mapped explicitly, so server-only fields on `Room` or
  * `Participant` can never leak. Vote values and the result appear only once revealed.
+ *
+ * `flipInMs` is the auto flip's countdown, which lives outside the room, as a timer.
  */
-export function toSharedState(room: Room): RoomState {
+export function toSharedState(room: Room, flipInMs: number | null = null): RoomState {
 	// Only rooms with participants are ever sent, and those always have a facilitator.
 	if (room.facilitatorId === null) {
 		throw new Error(`Room ${room.id} has nobody in it to send its state to`);
@@ -40,6 +42,8 @@ export function toSharedState(room: Room): RoomState {
 		})),
 		currentIssueId: room.currentIssueId,
 		result: revealed && room.result ? structuredClone(room.result) : null,
+		autoFlip: room.autoFlip,
+		flipInMs: revealed ? null : flipInMs,
 	};
 }
 

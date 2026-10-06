@@ -2,10 +2,11 @@ import type { ClientMessage } from '@flipvote/protocol';
 import type { ServerWebSocket } from 'bun';
 import { join, participantIdForToken } from '../room/participants/join';
 import { registry } from '../room/room-registry';
-import { ownVote, toSharedState } from '../room/to-shared-state';
+import { ownVote } from '../room/to-shared-state';
 import type { Presence } from './presence';
-import { publish, type Publisher, send, sendError } from './send';
+import { send, sendError } from './send';
 import type { SocketData } from './socket-data';
+import type { StatePublisher } from './state-publisher';
 import { seatTopic } from './topics';
 
 type JoiningSocket = Pick<ServerWebSocket<SocketData>, 'send' | 'subscribe' | 'data'>;
@@ -19,7 +20,7 @@ type JoiningSocket = Pick<ServerWebSocket<SocketData>, 'send' | 'subscribe' | 'd
 export function handleJoin(
 	ws: JoiningSocket,
 	msg: Extract<ClientMessage, { type: 'join' }>,
-	server: Publisher,
+	states: StatePublisher,
 	presence: Pick<Presence, 'seated'>,
 ): void {
 	if (ws.data.roomId !== null && ws.data.roomId !== msg.roomId) {
@@ -52,5 +53,5 @@ export function handleJoin(
 	presence.seated(room.id, participantId);
 
 	send(ws, { type: 'welcome', participantId, myVote: ownVote(room, participantId) });
-	publish(server, room.id, { type: 'state', room: toSharedState(room) });
+	states.publishState(room);
 }

@@ -152,6 +152,10 @@ export class MockRoomServer {
           ),
         };
         return null;
+      case 'setAutoFlip':
+        if (!isFacilitator) return facilitatorOnly;
+        this.room = { ...this.room, autoFlip: message.enabled };
+        return null;
       case 'setName': {
         const name = message.name.trim();
         if (!name) return { code: 'NAME_REQUIRED', message: 'A name is required.' };

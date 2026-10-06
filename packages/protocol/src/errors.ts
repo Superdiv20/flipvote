@@ -12,6 +12,8 @@ export type ErrorCode =
 	| 'SPECTATOR_CANNOT_VOTE'
 	| 'INVALID_CARD'
 	| 'ALREADY_REVEALED'
+	/** The auto flip's countdown runs: votes are locked until the cards are revealed. */
+	| 'VOTES_LOCKED'
 	| 'NOT_REVEALED'
 	| 'NO_VOTES'
 	| 'ISSUE_NOT_FOUND'

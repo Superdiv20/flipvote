@@ -6,6 +6,7 @@ import { handleIntent } from './ws/handle-intent';
 import { handleClose } from './ws/handle-close';
 import { handleJoin } from './ws/handle-join';
 import { createPresence } from './ws/presence';
+import { createStatePublisher } from './ws/state-publisher';
 import { registry } from './room/room-registry';
 
 /** A room nobody has joined within this time is removed, e.g. when it was created and the tab closed. */
@@ -40,10 +41,10 @@ const server = Bun.serve({
 			}
 			switch (msg.type) {
 				case 'join':
-					handleJoin(ws, msg, server, presence);
+					handleJoin(ws, msg, states, presence);
 					break;
 				default:
-					handleIntent(ws, msg, server);
+					handleIntent(ws, msg, server, states);
 					break;
 			}
 		},
@@ -53,7 +54,8 @@ const server = Bun.serve({
 	},
 });
 
-const presence = createPresence(server);
+const states = createStatePublisher(server);
+const presence = createPresence(states);
 
 setInterval(() => registry.removeEmptyRooms(Date.now() - UNJOINED_ROOM_MS), SWEEP_INTERVAL_MS);
 

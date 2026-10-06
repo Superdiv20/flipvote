@@ -36,6 +36,11 @@ type RoomStoreState = {
   joinError: ErrorCode | null;
   /** No display name was saved, so nothing has been sent yet and the page asks for one. */
   awaitingName: boolean;
+  /**
+   * When the cards flip by themselves, on this browser's clock. The server sends how long is left,
+   * so the deadline is taken from our own clock the moment the state arrives.
+   */
+  flipDeadline: number | null;
 };
 
 const initialState: RoomStoreState = {
@@ -44,6 +49,7 @@ const initialState: RoomStoreState = {
   myVote: null,
   joinError: null,
   awaitingName: false,
+  flipDeadline: null,
 };
 
 /** What the room page shows. */
@@ -79,6 +85,9 @@ export const RoomStore = signalStore(
       roomName: computed(() => room()?.name ?? ''),
       deck: computed(() => room()?.deck.cards ?? []),
       deckId: computed(() => room()?.deck.id ?? null),
+      autoFlip: computed(() => room()?.autoFlip ?? false),
+      /** The auto flip's countdown runs: votes are locked until the cards flip. */
+      countingDown: computed(() => room()?.flipInMs != null),
       facilitatorId: computed(() => room()?.facilitatorId ?? null),
       isSpectator: computed(
         () => participants().find((p) => p.id === participantId())?.isSpectator ?? false,
@@ -155,6 +164,11 @@ export const RoomStore = signalStore(
         send({ type: 'setDeck', deckId });
       },
 
+      /** Facilitator. Flip by itself, after a short countdown, once everyone has voted. */
+      setAutoFlip(enabled: boolean): void {
+        send({ type: 'setAutoFlip', enabled });
+      },
+
       /** Facilitator. Hands the role to another connected participant. */
       transferFacilitator(participantId: string): void {
         send({ type: 'transferFacilitator', participantId });
@@ -187,8 +201,10 @@ export const RoomStore = signalStore(
             // A new round clears every vote without a `myVote` message. The shared state shows it:
             // once our seat says `hasVoted: false`, we have no vote either.
             const self = message.room.participants.find((p) => p.id === store.participantId());
+            const { flipInMs } = message.room;
             patchState(store, {
               room: message.room,
+              flipDeadline: flipInMs === null ? null : Date.now() + flipInMs,
               ...(self && !self.hasVoted ? { myVote: null } : {}),
             });
             break;

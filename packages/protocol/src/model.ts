@@ -68,4 +68,12 @@ export type RoomState = {
 	currentIssueId: string | null;
 	/** Only set when the phase is `revealed`. */
 	result: RoundResult | null;
+	/** The cards flip by themselves shortly after everyone who can vote has voted. */
+	autoFlip: boolean;
+	/**
+	 * How long until the cards flip by themselves, measured when this state was sent. `null` when
+	 * no countdown runs. A duration rather than a time, so a client whose clock is off still counts
+	 * down correctly.
+	 */
+	flipInMs: number | null;
 };

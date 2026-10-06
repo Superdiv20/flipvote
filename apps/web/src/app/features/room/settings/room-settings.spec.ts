@@ -22,9 +22,12 @@ async function open(
   fixture.componentRef.setInput('selfId', 'ana');
   fixture.componentRef.setInput('votedCount', inputs.votedCount ?? 0);
   fixture.componentRef.setInput('flipped', inputs.flipped ?? false);
+  fixture.componentRef.setInput('autoFlip', false);
 
   const decks: DeckId[] = [];
   const transfers: string[] = [];
+  const autoFlips: boolean[] = [];
+  fixture.componentInstance.setAutoFlip.subscribe((enabled) => autoFlips.push(enabled));
   fixture.componentInstance.setDeck.subscribe((deckId) => decks.push(deckId));
   fixture.componentInstance.transferFacilitator.subscribe((id) => transfers.push(id));
 
@@ -42,7 +45,7 @@ async function open(
     [...sheet().querySelectorAll('button')].find((b) =>
       b.textContent?.includes(text),
     ) as HTMLButtonElement;
-  return { fixture, sheet, radio, button, decks, transfers };
+  return { fixture, sheet, radio, button, decks, transfers, autoFlips };
 }
 
 describe('RoomSettings', () => {
@@ -108,6 +111,13 @@ describe('RoomSettings', () => {
       await fixture.whenStable();
       expect(decks).toEqual([]);
     });
+  });
+
+  it('turns the auto flip on with its switch', async () => {
+    const { fixture, sheet, autoFlips } = await open();
+    sheet().querySelector<HTMLButtonElement>('#auto-flip')!.click();
+    await fixture.whenStable();
+    expect(autoFlips).toEqual([true]);
   });
 
   describe('handing over the role', () => {

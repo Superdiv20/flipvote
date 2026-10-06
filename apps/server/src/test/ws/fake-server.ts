@@ -1,7 +1,9 @@
 import { type ClientMessage, DECKS, type ServerMessage } from '@flipvote/protocol';
 import { registry } from '../../room/room-registry';
 import { handleClose } from '../../ws/handle-close';
-import { createPresence, type Schedule } from '../../ws/presence';
+import { createPresence } from '../../ws/presence';
+import { createStatePublisher } from '../../ws/state-publisher';
+import type { Schedule } from '../../ws/timers';
 import type { SocketData } from '../../ws/socket-data';
 
 /** Everything that left the server, in order: `send` to one socket, or `publish` to a topic. */
@@ -9,8 +11,10 @@ export type Outgoing =
 	| { to: 'socket'; message: ServerMessage }
 	| { to: 'topic'; topic: string; message: ServerMessage };
 
-/** The grace period the fakeServer's presence uses. Only `clock.advance` lets it pass. */
+/** The grace period the fake server's presence uses. Only `clock.advance` lets it pass. */
 export const TEST_GRACE_MS = 1000;
+/** The auto flip's countdown on the fake server. */
+export const TEST_AUTO_FLIP_MS = 300;
 
 /** A clock that only moves when the test says so. */
 export function manualClock() {
@@ -27,6 +31,7 @@ export function manualClock() {
 
 	return {
 		schedule,
+		now: () => now,
 		/** How many tasks are still waiting to run. */
 		pending(): number {
 			return tasks.filter((t) => !t.cancelled).length;
@@ -60,7 +65,8 @@ export function fakeServer() {
 		},
 	};
 	const clock = manualClock();
-	const presence = createPresence(server, clock.schedule, TEST_GRACE_MS);
+	const states = createStatePublisher(server, clock.schedule, clock.now, TEST_AUTO_FLIP_MS);
+	const presence = createPresence(states, clock.schedule, TEST_GRACE_MS);
 
 	function socket(data: SocketData = { roomId: null, participantId: null }) {
 		const topics: string[] = [];
@@ -85,7 +91,7 @@ export function fakeServer() {
 		return { ws, topics, close };
 	}
 
-	return { log, server, presence, clock, socket };
+	return { log, server, states, presence, clock, socket };
 }
 
 /** A fresh room in the registry. Each test makes its own, so tests don't share state. */

@@ -5,6 +5,7 @@ import type { DeckId, Participant } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmSheetImports } from '@spartan-ng/helm/sheet';
+import { HlmSwitchImports } from '@spartan-ng/helm/switch';
 import { DECK_OPTIONS } from '../../../shared/deck-options';
 
 /**
@@ -13,7 +14,7 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
  */
 @Component({
   selector: 'flipvote-room-settings',
-  imports: [NgIcon, HlmButtonImports, HlmFieldImports, HlmSheetImports],
+  imports: [NgIcon, HlmButtonImports, HlmFieldImports, HlmSheetImports, HlmSwitchImports],
   providers: [provideIcons({ lucideCrown, lucideSlidersHorizontal, lucideTriangleAlert })],
   template: `
     <hlm-sheet side="right">
@@ -79,6 +80,21 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
             }
           </fieldset>
 
+          <div class="flex items-start justify-between gap-4">
+            <label for="auto-flip" class="flex flex-col gap-1">
+              <span class="text-sm font-medium">Flip automatically</span>
+              <span class="text-sm text-muted-foreground">
+                Once everyone has voted, a short countdown starts and the cards flip by themselves.
+                Votes are locked during the countdown.
+              </span>
+            </label>
+            <hlm-switch
+              inputId="auto-flip"
+              [checked]="autoFlip()"
+              (checkedChange)="setAutoFlip.emit($event)"
+            />
+          </div>
+
           <section class="flex flex-col gap-3" aria-labelledby="facilitator-heading">
             <div class="flex flex-col gap-1">
               <h3 id="facilitator-heading" class="text-sm font-medium">Facilitator</h3>
@@ -129,9 +145,11 @@ export class RoomSettings {
   /** Votes cast this round. A deck switch starts a new round and clears them. */
   readonly votedCount = input.required<number>();
   readonly flipped = input.required<boolean>();
+  readonly autoFlip = input.required<boolean>();
 
   readonly setDeck = output<DeckId>();
   readonly transferFacilitator = output<string>();
+  readonly setAutoFlip = output<boolean>();
 
   protected readonly decks = DECK_OPTIONS;
 

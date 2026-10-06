@@ -14,8 +14,8 @@ function seated() {
 	const h = fakeServer();
 	const ana = h.socket();
 	const ben = h.socket();
-	handleJoin(ana.ws, joinMessage(room.id, 'Ana', 'token-creator'), h.server, h.presence);
-	handleJoin(ben.ws, joinMessage(room.id, 'Ben', 'token-ben'), h.server, h.presence);
+	handleJoin(ana.ws, joinMessage(room.id, 'Ana', 'token-creator'), h.states, h.presence);
+	handleJoin(ben.ws, joinMessage(room.id, 'Ben', 'token-ben'), h.states, h.presence);
 	h.log.length = 0;
 	return { ...h, roomId: room.id, ana, ben };
 }
@@ -41,9 +41,9 @@ describe('presence', () => {
 		});
 
 		test('another open tab of the same seat keeps it connected', () => {
-			const { log, server, presence, socket, roomId, ben } = seated();
+			const { log, server, states, presence, socket, roomId, ben } = seated();
 			const secondTab = socket();
-			handleJoin(secondTab.ws, joinMessage(roomId, 'Ben', 'token-ben'), server, presence);
+			handleJoin(secondTab.ws, joinMessage(roomId, 'Ben', 'token-ben'), states, presence);
 			log.length = 0;
 
 			ben.close();
@@ -61,8 +61,8 @@ describe('presence', () => {
 
 	describe('the grace period', () => {
 		test('keeps the seat and the vote until it runs out', () => {
-			const { log, server, clock, roomId, ben } = seated();
-			handleIntent(ben.ws, { type: 'vote', value: '5' }, server);
+			const { log, server, states, clock, roomId, ben } = seated();
+			handleIntent(ben.ws, { type: 'vote', value: '5' }, server, states);
 			ben.close();
 			log.length = 0;
 
@@ -73,8 +73,8 @@ describe('presence', () => {
 		});
 
 		test('removes the seat and its vote once it runs out', () => {
-			const { log, server, clock, roomId, ben } = seated();
-			handleIntent(ben.ws, { type: 'vote', value: '5' }, server);
+			const { log, server, states, clock, roomId, ben } = seated();
+			handleIntent(ben.ws, { type: 'vote', value: '5' }, server, states);
 			ben.close();
 
 			clock.advance(TEST_GRACE_MS);
@@ -91,13 +91,13 @@ describe('presence', () => {
 		});
 
 		test('coming back in time keeps the seat, the vote and the role', () => {
-			const { log, server, presence, socket, clock, roomId, ana } = seated();
-			handleIntent(ana.ws, { type: 'vote', value: '3' }, server);
+			const { log, server, states, presence, socket, clock, roomId, ana } = seated();
+			handleIntent(ana.ws, { type: 'vote', value: '3' }, server, states);
 			const participantId = ana.ws.data.participantId!;
 			ana.close();
 
 			const afterRefresh = socket();
-			handleJoin(afterRefresh.ws, joinMessage(roomId, 'Ana', 'token-creator'), server, presence);
+			handleJoin(afterRefresh.ws, joinMessage(roomId, 'Ana', 'token-creator'), states, presence);
 			clock.advance(TEST_GRACE_MS * 2);
 
 			const room = registry.getRoom(roomId)!;
@@ -108,22 +108,22 @@ describe('presence', () => {
 		});
 
 		test('coming back calls off the pending removal right away', () => {
-			const { server, presence, socket, clock, roomId, ben } = seated();
+			const { server, states, presence, socket, clock, roomId, ben } = seated();
 			ben.close();
 			expect(clock.pending()).toBe(1);
 
-			handleJoin(socket().ws, joinMessage(roomId, 'Ben', 'token-ben'), server, presence);
+			handleJoin(socket().ws, joinMessage(roomId, 'Ben', 'token-ben'), states, presence);
 
 			expect(clock.pending()).toBe(0);
 		});
 
 		test('leaving again after coming back starts a fresh grace period', () => {
-			const { server, presence, socket, clock, roomId, ben } = seated();
+			const { server, states, presence, socket, clock, roomId, ben } = seated();
 			ben.close();
 			clock.advance(TEST_GRACE_MS / 2);
 
 			const back = socket();
-			handleJoin(back.ws, joinMessage(roomId, 'Ben', 'token-ben'), server, presence);
+			handleJoin(back.ws, joinMessage(roomId, 'Ben', 'token-ben'), states, presence);
 			back.close();
 			clock.advance(TEST_GRACE_MS / 2);
 
@@ -162,12 +162,12 @@ describe('presence', () => {
 	});
 
 	test('myVote reaches every tab of the voter’s seat', () => {
-		const { log, server, presence, socket, roomId, ben } = seated();
+		const { log, server, states, presence, socket, roomId, ben } = seated();
 		const secondTab = socket();
-		handleJoin(secondTab.ws, joinMessage(roomId, 'Ben', 'token-ben'), server, presence);
+		handleJoin(secondTab.ws, joinMessage(roomId, 'Ben', 'token-ben'), states, presence);
 		log.length = 0;
 
-		handleIntent(ben.ws, { type: 'vote', value: '8' }, server);
+		handleIntent(ben.ws, { type: 'vote', value: '8' }, server, states);
 
 		const seat = seatTopic(roomId, ben.ws.data.participantId!);
 		expect(log[0]).toEqual({ to: 'topic', topic: seat, message: { type: 'myVote', value: '8' } });

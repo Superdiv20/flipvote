@@ -65,6 +65,8 @@ import { RoomNotFound } from './room-not-found';
           [votedCount]="roomStore.votedCount()"
           [connection]="roomStore.connection()"
           [deckId]="roomStore.deckId()"
+          [autoFlip]="roomStore.autoFlip()"
+          (setAutoFlip)="roomStore.setAutoFlip($event)"
           [facilitatorId]="roomStore.facilitatorId()"
           (setDeck)="roomStore.setDeck($event)"
           (transferFacilitator)="roomStore.transferFacilitator($event)"
@@ -102,6 +104,7 @@ import { RoomNotFound } from './room-not-found';
                 [flipped]="roomStore.flipped()"
                 [votedCount]="roomStore.votedCount()"
                 [consensus]="!!results()?.consensus"
+                [flipDeadline]="roomStore.flipDeadline()"
                 (flip)="roomStore.flip()"
                 (reset)="roomStore.reset()"
               />
@@ -127,7 +130,7 @@ import { RoomNotFound } from './room-not-found';
               class="px-4 pb-8"
               [deck]="roomStore.deck()"
               [selectedValue]="roomStore.myVote()"
-              [locked]="roomStore.flipped() || roomStore.isSpectator()"
+              [locked]="roomStore.flipped() || roomStore.isSpectator() || roomStore.countingDown()"
               (pick)="roomStore.vote($event)"
             />
           </main>

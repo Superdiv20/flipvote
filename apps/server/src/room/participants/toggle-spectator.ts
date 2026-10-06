@@ -7,6 +7,8 @@ import { fail, ok, type Room, type RoomResult } from '../room';
 export function toggleSpectator(room: Room, participantId: string, spectator: boolean): RoomResult {
 	const participant = room.participants.get(participantId);
 	if (!participant) return fail('NOT_JOINED');
+	// Watching would drop the vote, which is locked during the countdown.
+	if (room.countingDown) return fail('VOTES_LOCKED');
 
 	const participants = new Map(room.participants);
 	participants.set(participantId, { ...participant, isSpectator: spectator });

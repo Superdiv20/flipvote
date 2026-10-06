@@ -60,6 +60,8 @@ function shared(participants: Participant[], phase: RoomState['phase'] = 'voting
     issues: [],
     currentIssueId: null,
     result: null,
+    autoFlip: false,
+    flipInMs: null,
   };
 }
 
@@ -342,6 +344,34 @@ describe('RoomStore', () => {
       expect(store.myVote()).toBe('5');
       expect(store.selfId()).toBe('ben');
       expect(store.votedCount()).toBe(1);
+    });
+  });
+
+  describe('auto flip', () => {
+    it('turns the time left into a deadline on our own clock', () => {
+      const store = setup();
+      vi.spyOn(Date, 'now').mockReturnValue(10_000);
+      socket.receive({
+        type: 'state',
+        room: { ...shared([seat('ana', true)]), autoFlip: true, flipInMs: 3000 },
+      });
+      expect(store.flipDeadline()).toBe(13_000);
+      expect(store.countingDown()).toBe(true);
+      vi.restoreAllMocks();
+    });
+
+    it('has no deadline without a countdown', () => {
+      const store = setup();
+      socket.receive({ type: 'state', room: { ...shared([seat('ana', true)]), autoFlip: true } });
+      expect(store.flipDeadline()).toBeNull();
+      expect(store.countingDown()).toBe(false);
+      expect(store.autoFlip()).toBe(true);
+    });
+
+    it('sends the switch', () => {
+      const store = setup();
+      store.setAutoFlip(true);
+      expect(socket.sent).toEqual([{ type: 'setAutoFlip', enabled: true }]);
     });
   });
 

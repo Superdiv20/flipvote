@@ -17,6 +17,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
 	SPECTATOR_CANNOT_VOTE: 'Spectators cannot vote.',
 	INVALID_CARD: 'That card is not in this deck.',
 	ALREADY_REVEALED: 'The cards are already revealed.',
+	VOTES_LOCKED: 'Everyone has voted; the votes are locked until the cards flip.',
 	NOT_REVEALED: 'The cards are not revealed yet.',
 	NO_VOTES: 'Nobody has voted yet.',
 	ISSUE_NOT_FOUND: 'That issue does not exist.',

@@ -41,6 +41,8 @@ export const MOCK_ROOM: RoomState = {
   issues: MOCK_ISSUES,
   currentIssueId: 'atl-214',
   result: null,
+  autoFlip: false,
+  flipInMs: null,
 };
 
 /** The other participants' votes, which only the server knows until the flip. */

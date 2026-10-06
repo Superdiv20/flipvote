@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, effect, input, output, signal } from '@angular/core';
 import type { Participant } from '@flipvote/protocol';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideEye, lucideRotateCcw } from '@ng-icons/lucide';
@@ -31,9 +31,17 @@ const TABLE_HEIGHT = 300;
           <ng-icon name="lucideEye" data-icon="inline-start" />
           Reveal cards
         </button>
-        <span class="text-muted-foreground text-sm" role="status">
-          {{ votedCount() }} of {{ participants().length }} voted
-        </span>
+        @if (countdown(); as seconds) {
+          <span class="text-brand text-sm font-medium tabular-nums" aria-hidden="true">
+            Revealing in {{ seconds }}…
+          </span>
+          <!-- Announced once, not every second. -->
+          <span class="sr-only" role="status">Everyone has voted. The cards flip in a moment.</span>
+        } @else {
+          <span class="text-muted-foreground text-sm" role="status">
+            {{ votedCount() }} of {{ participants().length }} voted
+          </span>
+        }
       }
     </div>
     <div role="list" aria-label="Participants">
@@ -60,9 +68,30 @@ export class PokerTable {
   readonly flipped = input.required<boolean>();
   readonly votedCount = input.required<number>();
   readonly consensus = input(false);
+  /** When the cards flip by themselves, on this browser's clock, or `null` without a countdown. */
+  readonly flipDeadline = input<number | null>(null);
 
   readonly flip = output();
   readonly reset = output();
+
+  private readonly now = signal(Date.now());
+
+  /** Whole seconds left, never below 1, so the last moment reads "1" until the cards flip. */
+  protected readonly countdown = computed(() => {
+    const deadline = this.flipDeadline();
+    if (deadline === null) return null;
+    return Math.max(1, Math.ceil((deadline - this.now()) / 1000));
+  });
+
+  constructor() {
+    // Ticks only while a countdown runs.
+    effect((onCleanup) => {
+      if (this.flipDeadline() === null) return;
+      this.now.set(Date.now());
+      const timer = setInterval(() => this.now.set(Date.now()), 200);
+      onCleanup(() => clearInterval(timer));
+    });
+  }
 
   protected readonly seats = computed(() => {
     const participants = this.participants();

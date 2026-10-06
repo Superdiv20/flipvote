@@ -208,6 +208,16 @@ describe('parseMessage: setName', () => {
 	});
 });
 
+describe('parseMessage: setAutoFlip', () => {
+	test.each([true, false])('accepts %p', (enabled) => {
+		expect(parseMessage(frame({ type: 'setAutoFlip', enabled }))).toEqual({ type: 'setAutoFlip', enabled });
+	});
+
+	test.each(['true', 1, null, undefined])('rejects %p, which is not a boolean', (enabled) => {
+		expect(parseMessage(frame({ type: 'setAutoFlip', enabled }))).toBeNull();
+	});
+});
+
 describe('parseMessage: coverage', () => {
 	// One valid example per message type. The `Record` makes this fail to compile when the
 	// protocol gains a type without an example here, and the test fails when the parser lacks a case.
@@ -224,6 +234,7 @@ describe('parseMessage: coverage', () => {
 		setSpectator: { type: 'setSpectator', spectator: true },
 		transferFacilitator: { type: 'transferFacilitator', participantId: 'ben' },
 		setName: { type: 'setName', name: 'Ana K' },
+		setAutoFlip: { type: 'setAutoFlip', enabled: true },
 	};
 
 	test.each(Object.values(examples))('parses every message type: $type', (message) => {

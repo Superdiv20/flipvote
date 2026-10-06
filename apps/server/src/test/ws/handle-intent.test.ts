@@ -15,8 +15,8 @@ function seated() {
 	const h = fakeServer();
 	const ana = h.socket();
 	const ben = h.socket();
-	handleJoin(ana.ws, joinMessage(room.id, 'Ana', 'token-creator'), h.server, h.presence);
-	handleJoin(ben.ws, joinMessage(room.id, 'Ben', 'token-ben'), h.server, h.presence);
+	handleJoin(ana.ws, joinMessage(room.id, 'Ana', 'token-creator'), h.states, h.presence);
+	handleJoin(ben.ws, joinMessage(room.id, 'Ben', 'token-ben'), h.states, h.presence);
 	h.log.length = 0;
 	return { ...h, roomId: room.id, ana: ana.ws, ben: ben.ws };
 }
@@ -36,25 +36,25 @@ const error = (code: ErrorCode): Outgoing => ({
 describe('handleIntent', () => {
 	describe('before the rule runs', () => {
 		test('rejects a socket that has not joined', () => {
-			const { log, server, socket } = fakeServer();
-			handleIntent(socket().ws, { type: 'flip' }, server);
+			const { log, server, states, socket } = fakeServer();
+			handleIntent(socket().ws, { type: 'flip' }, server, states);
 			expect(log).toEqual([error('NOT_JOINED')]);
 		});
 
 		test('rejects a socket whose room is gone', () => {
-			const { log, server, socket } = fakeServer();
+			const { log, server, states, socket } = fakeServer();
 			const { ws } = socket({ roomId: 'gone', participantId: 'ana' });
-			handleIntent(ws, { type: 'flip' }, server);
+			handleIntent(ws, { type: 'flip' }, server, states);
 			expect(log).toEqual([error('ROOM_NOT_FOUND')]);
 		});
 	});
 
 	describe('when the rule fails', () => {
 		test('answers only the sender with the rule’s code and changes nothing', () => {
-			const { log, server, roomId, ben } = seated();
+			const { log, server, states, roomId, ben } = seated();
 			const before = registry.getRoom(roomId);
 
-			handleIntent(ben, { type: 'flip' }, server);
+			handleIntent(ben, { type: 'flip' }, server, states);
 
 			expect(log).toEqual([error('NOT_FACILITATOR')]);
 			expect(registry.getRoom(roomId)).toBe(before);
@@ -66,17 +66,17 @@ describe('handleIntent', () => {
 			['an unknown issue', { type: 'selectIssue', issueId: 'nope' }, 'ISSUE_NOT_FOUND'],
 			['a blank title', { type: 'addIssue', issue: { title: '  ' } }, 'TITLE_REQUIRED'],
 		] as const)('passes the code through for %s', (_, msg, code) => {
-			const { log, server, ana } = seated();
-			handleIntent(ana, msg, server);
+			const { log, server, states, ana } = seated();
+			handleIntent(ana, msg, server, states);
 			expect(log).toEqual([error(code)]);
 		});
 	});
 
 	describe('voting', () => {
 		test('tells only the voter’s seat the value, then publishes that they voted', () => {
-			const { log, server, roomId, ben } = seated();
+			const { log, server, states, roomId, ben } = seated();
 
-			handleIntent(ben, { type: 'vote', value: '5' }, server);
+			handleIntent(ben, { type: 'vote', value: '5' }, server, states);
 
 			expect(log).toHaveLength(2);
 			expect(log[0]).toEqual({
@@ -91,9 +91,9 @@ describe('handleIntent', () => {
 		});
 
 		test('withdrawing sends null as the own vote', () => {
-			const { log, server, roomId, ben } = seated();
-			handleIntent(ben, { type: 'vote', value: '5' }, server);
-			handleIntent(ben, { type: 'vote', value: null }, server);
+			const { log, server, states, roomId, ben } = seated();
+			handleIntent(ben, { type: 'vote', value: '5' }, server, states);
+			handleIntent(ben, { type: 'vote', value: null }, server, states);
 			expect(log.at(-2)).toEqual({
 				to: 'topic',
 				topic: seatTopic(roomId, ben.data.participantId!),
@@ -103,20 +103,20 @@ describe('handleIntent', () => {
 		});
 
 		test('stores the vote in the registry', () => {
-			const { server, roomId, ben } = seated();
-			handleIntent(ben, { type: 'vote', value: '8' }, server);
+			const { server, states, roomId, ben } = seated();
+			handleIntent(ben, { type: 'vote', value: '8' }, server, states);
 			expect([...registry.getRoom(roomId)!.votes.values()]).toEqual(['8']);
 		});
 	});
 
 	describe('everything else only publishes the state', () => {
 		test('flip reveals every vote', () => {
-			const { log, server, ana, ben } = seated();
-			handleIntent(ana, { type: 'vote', value: '3' }, server);
-			handleIntent(ben, { type: 'vote', value: '5' }, server);
+			const { log, server, states, ana, ben } = seated();
+			handleIntent(ana, { type: 'vote', value: '3' }, server, states);
+			handleIntent(ben, { type: 'vote', value: '5' }, server, states);
 			log.length = 0;
 
-			handleIntent(ana, { type: 'flip' }, server);
+			handleIntent(ana, { type: 'flip' }, server, states);
 
 			expect(log).toHaveLength(1);
 			const state = lastState(log);
@@ -126,19 +126,19 @@ describe('handleIntent', () => {
 		});
 
 		test('reset starts a new round', () => {
-			const { log, server, ana } = seated();
-			handleIntent(ana, { type: 'vote', value: '3' }, server);
-			handleIntent(ana, { type: 'flip' }, server);
-			handleIntent(ana, { type: 'reset' }, server);
+			const { log, server, states, ana } = seated();
+			handleIntent(ana, { type: 'vote', value: '3' }, server, states);
+			handleIntent(ana, { type: 'flip' }, server, states);
+			handleIntent(ana, { type: 'reset' }, server, states);
 			const state = lastState(log);
 			expect(state.phase).toBe('voting');
 			expect(state.participants.every((p) => !p.hasVoted)).toBe(true);
 		});
 
 		test('addIssue gives each new issue its own id', () => {
-			const { log, server, ben } = seated();
-			handleIntent(ben, { type: 'addIssue', issue: { key: 'ATL-1', title: 'Export' } }, server);
-			handleIntent(ben, { type: 'addIssue', issue: { title: 'Import' } }, server);
+			const { log, server, states, ben } = seated();
+			handleIntent(ben, { type: 'addIssue', issue: { key: 'ATL-1', title: 'Export' } }, server, states);
+			handleIntent(ben, { type: 'addIssue', issue: { title: 'Import' } }, server, states);
 			const [first, second] = lastState(log).issues;
 			expect(first).toMatchObject({ key: 'ATL-1', title: 'Export' });
 			expect(second).toMatchObject({ title: 'Import' });
@@ -147,55 +147,64 @@ describe('handleIntent', () => {
 		});
 
 		test('updateIssue, selectIssue and removeIssue work on the issue id', () => {
-			const { log, server, ana } = seated();
-			handleIntent(ana, { type: 'addIssue', issue: { title: 'First' } }, server);
-			handleIntent(ana, { type: 'addIssue', issue: { title: 'Second' } }, server);
+			const { log, server, states, ana } = seated();
+			handleIntent(ana, { type: 'addIssue', issue: { title: 'First' } }, server, states);
+			handleIntent(ana, { type: 'addIssue', issue: { title: 'Second' } }, server, states);
 			const [first, second] = lastState(log).issues.map((issue) => issue.id);
 
-			handleIntent(ana, { type: 'updateIssue', issueId: second!, changes: { title: 'Renamed' } }, server);
+			handleIntent(ana, { type: 'updateIssue', issueId: second!, changes: { title: 'Renamed' } }, server, states);
 			expect(lastState(log).issues[1]?.title).toBe('Renamed');
 
-			handleIntent(ana, { type: 'selectIssue', issueId: second! }, server);
+			handleIntent(ana, { type: 'selectIssue', issueId: second! }, server, states);
 			expect(lastState(log).currentIssueId).toBe(second);
 
-			handleIntent(ana, { type: 'removeIssue', issueId: first! }, server);
+			handleIntent(ana, { type: 'removeIssue', issueId: first! }, server, states);
 			expect(lastState(log).issues.map((issue) => issue.id)).toEqual([second]);
 		});
 
 		test('setDeck switches the deck', () => {
-			const { log, server, ana } = seated();
-			handleIntent(ana, { type: 'setDeck', deckId: 't-shirt' }, server);
+			const { log, server, states, ana } = seated();
+			handleIntent(ana, { type: 'setDeck', deckId: 't-shirt' }, server, states);
 			expect(lastState(log).deck).toEqual(DECKS['t-shirt']);
 		});
 
 		test('setSpectator changes the sender’s own seat', () => {
-			const { log, server, ben } = seated();
-			handleIntent(ben, { type: 'setSpectator', spectator: true }, server);
+			const { log, server, states, ben } = seated();
+			handleIntent(ben, { type: 'setSpectator', spectator: true }, server, states);
 			expect(lastState(log).participants.find((p) => p.name === 'Ben')?.isSpectator).toBe(true);
 		});
 
 		test('setName renames the sender’s seat for everyone', () => {
-			const { log, server, ben } = seated();
-			handleIntent(ben, { type: 'setName', name: '  Ben K ' }, server);
+			const { log, server, states, ben } = seated();
+			handleIntent(ben, { type: 'setName', name: '  Ben K ' }, server, states);
 			const names = lastState(log).participants.map((p) => p.name);
 			expect(names).toEqual(['Ana', 'Ben K']);
 		});
 
 		test('setName answers a name that is too long with the rule’s code', () => {
-			const { log, server, ben } = seated();
-			handleIntent(ben, { type: 'setName', name: 'x'.repeat(NAME_MAX_LENGTH + 1) }, server);
+			const { log, server, states, ben } = seated();
+			handleIntent(ben, { type: 'setName', name: 'x'.repeat(NAME_MAX_LENGTH + 1) }, server, states);
 			expect(log).toEqual([error('NAME_TOO_LONG')]);
 		});
 
+		test('setAutoFlip is published to everyone, and only the facilitator may change it', () => {
+			const { log, server, states, ana, ben } = seated();
+			handleIntent(ben, { type: 'setAutoFlip', enabled: true }, server, states);
+			expect(log).toEqual([error('NOT_FACILITATOR')]);
+
+			handleIntent(ana, { type: 'setAutoFlip', enabled: true }, server, states);
+			expect(lastState(log).autoFlip).toBe(true);
+		});
+
 		test('transferFacilitator hands the role over', () => {
-			const { log, server, ana, ben } = seated();
-			handleIntent(ana, { type: 'transferFacilitator', participantId: ben.data.participantId! }, server);
+			const { log, server, states, ana, ben } = seated();
+			handleIntent(ana, { type: 'transferFacilitator', participantId: ben.data.participantId! }, server, states);
 			expect(lastState(log).facilitatorId).toBe(ben.data.participantId!);
 		});
 
 		test('publishes to the sender’s room only', () => {
-			const { log, server, roomId, ana } = seated();
-			handleIntent(ana, { type: 'setDeck', deckId: 't-shirt' }, server);
+			const { log, server, states, roomId, ana } = seated();
+			handleIntent(ana, { type: 'setDeck', deckId: 't-shirt' }, server, states);
 			expect(log).toEqual([expect.objectContaining({ to: 'topic', topic: roomId })]);
 		});
 	});

@@ -5,6 +5,7 @@ import { DECKS } from '@flipvote/protocol';
 import { SessionService } from '../../core/session';
 import { type ConnectionStatus, SocketService } from '../../core/socket';
 import { MockSession, provideMockSession } from './+store/mock-session';
+import { MOCK_ROOM } from '../../shared/mock-room';
 import { RoomStore } from './+store/room-store';
 import { RoomPage } from './room-page';
 
@@ -322,6 +323,33 @@ describe('RoomPage', () => {
       const cards = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
         'flipvote-card-hand button',
       );
+      expect([...cards].every((card) => card.disabled)).toBe(true);
+    });
+  });
+
+  describe('auto flip countdown', () => {
+    async function counting() {
+      const { store, fixture } = setup();
+      await fixture.whenStable();
+      const socket = TestBed.inject(SocketService) as unknown as MockSession;
+      socket.deliver({
+        type: 'state',
+        room: { ...MOCK_ROOM, autoFlip: true, flipInMs: 2500 },
+      });
+      await fixture.whenStable();
+      return { store, page: fixture.nativeElement as HTMLElement };
+    }
+
+    it('counts down on the table instead of the vote count', async () => {
+      const { page } = await counting();
+      const table = page.querySelector('flipvote-poker-table')!;
+      expect(table.textContent).toContain('Revealing in 3');
+      expect(table.querySelector('[role="status"]')?.textContent).toContain('Everyone has voted');
+    });
+
+    it('locks the card hand', async () => {
+      const { page } = await counting();
+      const cards = page.querySelectorAll<HTMLButtonElement>('flipvote-card-hand button');
       expect([...cards].every((card) => card.disabled)).toBe(true);
     });
   });

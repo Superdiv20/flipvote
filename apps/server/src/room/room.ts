@@ -29,6 +29,10 @@ export interface Room {
 	currentIssueId: string | null;
 	/** Calculated once at the flip, so later changes (someone leaving) don't alter it. */
 	result: RoundResult | null;
+	/** Flip by itself once everyone who can vote has voted. Off until the facilitator turns it on. */
+	autoFlip: boolean;
+	/** The auto flip's countdown runs. Votes are locked until the cards are revealed. */
+	countingDown: boolean;
 }
 
 export type RoomResult = { ok: true; room: Room } | { ok: false; code: ErrorCode };
@@ -46,6 +50,8 @@ export function createRoom(init: { id: string; name: string; deck: Deck; creator
 		issues: [],
 		currentIssueId: null,
 		result: null,
+		autoFlip: false,
+		countingDown: false,
 	};
 }
 
@@ -59,5 +65,5 @@ export function fail(code: ErrorCode): RoomResult {
 
 /** Back to voting with no votes and no result. */
 export function newRound(room: Room): Room {
-	return { ...room, phase: 'voting', votes: new Map(), result: null };
+	return { ...room, phase: 'voting', votes: new Map(), result: null, countingDown: false };
 }

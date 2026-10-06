@@ -12,11 +12,13 @@ import { changeDeck } from '../room/round/change-deck';
 import { flip } from '../room/round/flip';
 import { reset } from '../room/round/reset';
 import { vote } from '../room/round/vote';
-import { ownVote, toSharedState } from '../room/to-shared-state';
+import { ownVote } from '../room/to-shared-state';
 import { publish, type Publisher, sendError } from './send';
 import type { SocketData } from './socket-data';
+import type { StatePublisher } from './state-publisher';
 import { seatTopic } from './topics';
 import { setName } from '../room/participants/set-name';
+import { setAutoFlip } from '../room/round/auto-flip';
 
 /** Intents only read who is sending; only `join` writes it. */
 type IntentSocket = Pick<ServerWebSocket<SocketData>, 'send'> & {
@@ -35,6 +37,7 @@ export function handleIntent(
 	ws: IntentSocket,
 	msg: Intent,
 	server: Publisher,
+	states: StatePublisher,
 ): void {
 	const { roomId, participantId } = ws.data;
 	if (roomId === null || participantId === null) {
@@ -64,7 +67,7 @@ export function handleIntent(
 			value: ownVote(result.room, participantId),
 		});
 	}
-	publish(server, roomId, { type: 'state', room: toSharedState(result.room) });
+	states.publishState(result.room);
 }
 
 /**
@@ -99,5 +102,7 @@ function applyIntent(
 			return transferFacilitator(room, participantId, msg.participantId);
 		case 'setName':
 			return setName(room, participantId, msg.name);
+		case 'setAutoFlip':
+			return setAutoFlip(room, participantId, msg.enabled);
 	}
 }
