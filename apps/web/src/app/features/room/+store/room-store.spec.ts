@@ -331,6 +331,40 @@ describe('RoomStore', () => {
     });
   });
 
+  describe('room settings', () => {
+    it('reads the deck and the facilitator from the shared state', () => {
+      const store = setup();
+      socket.receive({
+        type: 'state',
+        room: { ...shared([seat('ana', false)]), deck: DECKS['t-shirt'] },
+      });
+      expect(store.deckId()).toBe('t-shirt');
+      expect(store.facilitatorId()).toBe('ana');
+    });
+
+    it('knows whether we are watching only', () => {
+      const store = setup();
+      socket.receive({ type: 'welcome', participantId: 'ben', myVote: null });
+      socket.receive({
+        type: 'state',
+        room: shared([seat('ana', false), { ...seat('ben', false), isSpectator: true }]),
+      });
+      expect(store.isSpectator()).toBe(true);
+    });
+
+    it('sends the deck, the hand-over and watch only', () => {
+      const store = setup();
+      store.setDeck('modified-fibonacci');
+      store.transferFacilitator('ben');
+      store.setSpectator(true);
+      expect(socket.sent).toEqual([
+        { type: 'setDeck', deckId: 'modified-fibonacci' },
+        { type: 'transferFacilitator', participantId: 'ben' },
+        { type: 'setSpectator', spectator: true },
+      ]);
+    });
+  });
+
   describe('voting', () => {
     it('sends the picked card', () => {
       const store = setup();

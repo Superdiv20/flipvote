@@ -142,9 +142,33 @@ export class MockRoomServer {
         this.newRound();
         return null;
       case 'setSpectator':
-      case 'transferFacilitator':
-        // No UI sends these yet.
-        return { code: 'INVALID_MESSAGE', message: `${message.type} is not mocked yet.` };
+        // Watching drops the own vote, as on the server.
+        if (message.spectator) this.votes.delete(self);
+        this.room = {
+          ...this.room,
+          participants: this.room.participants.map((p) =>
+            p.id === self ? { ...p, isSpectator: message.spectator } : p,
+          ),
+        };
+        return null;
+      case 'transferFacilitator': {
+        if (!isFacilitator) return facilitatorOnly;
+        const target = this.participant(message.participantId);
+        if (!target) {
+          return {
+            code: 'PARTICIPANT_NOT_FOUND',
+            message: 'That participant is not in this room.',
+          };
+        }
+        if (!target.connected) {
+          return {
+            code: 'PARTICIPANT_NOT_CONNECTED',
+            message: 'That participant is not connected.',
+          };
+        }
+        this.room = { ...this.room, facilitatorId: target.id };
+        return null;
+      }
     }
   }
 

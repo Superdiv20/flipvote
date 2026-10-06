@@ -2,6 +2,7 @@ import { computed, inject } from '@angular/core';
 import type {
   CardValue,
   ClientMessage,
+  DeckId,
   ErrorCode,
   RoomState,
   ServerMessage,
@@ -75,6 +76,11 @@ export const RoomStore = signalStore(
       selfId: computed(() => participantId() ?? ''),
       roomName: computed(() => room()?.name ?? ''),
       deck: computed(() => room()?.deck.cards ?? []),
+      deckId: computed(() => room()?.deck.id ?? null),
+      facilitatorId: computed(() => room()?.facilitatorId ?? null),
+      isSpectator: computed(
+        () => participants().find((p) => p.id === participantId())?.isSpectator ?? false,
+      ),
       participants,
       flipped: computed(() => room()?.phase === 'revealed'),
       results: computed(() => room()?.result ?? null),
@@ -140,6 +146,21 @@ export const RoomStore = signalStore(
       createIssue(details: IssueDetails): void {
         const parsed = parseIssueTitle(details.title);
         if (parsed) send({ type: 'addIssue', issue: { ...details, ...parsed } });
+      },
+
+      /** Facilitator. Starts a new round with the new deck, so every vote so far is cleared. */
+      setDeck(deckId: DeckId): void {
+        send({ type: 'setDeck', deckId });
+      },
+
+      /** Facilitator. Hands the role to another connected participant. */
+      transferFacilitator(participantId: string): void {
+        send({ type: 'transferFacilitator', participantId });
+      },
+
+      /** For ourselves: watch the round without a card. Becoming a spectator drops our vote. */
+      setSpectator(spectator: boolean): void {
+        send({ type: 'setSpectator', spectator });
       },
 
       updateIssue(id: string, details: IssueDetails): void {

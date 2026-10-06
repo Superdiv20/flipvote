@@ -1,9 +1,11 @@
 import { Component, computed, DOCUMENT, inject, input, output, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers } from '@ng-icons/lucide';
-import type { Participant } from '@flipvote/protocol';
+import type { DeckId, Participant } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
+import { HlmSwitchImports } from '@spartan-ng/helm/switch';
+import { RoomSettings } from '../settings/room-settings';
 import type { Account } from '../../../core/account';
 import type { ConnectionStatus } from '../../../core/socket';
 import type { Theme, ThemePreference } from '../../../core/theme';
@@ -13,7 +15,16 @@ import { ParticipantList } from './participant-list';
 
 @Component({
   selector: 'flipvote-room-header',
-  imports: [HlmButtonImports, HlmPopoverImports, NgIcon, Logo, ParticipantList, AccountMenu],
+  imports: [
+    HlmButtonImports,
+    HlmPopoverImports,
+    HlmSwitchImports,
+    NgIcon,
+    Logo,
+    ParticipantList,
+    AccountMenu,
+    RoomSettings,
+  ],
   providers: [provideIcons({ lucideCheck, lucideLink, lucideMoon, lucideSun, lucideUsers })],
   host: {
     class: 'flex h-16 shrink-0 items-center gap-4 px-6 shadow-[inset_0_-1px_0_var(--border)]',
@@ -65,6 +76,18 @@ import { ParticipantList } from './participant-list';
             }}
           </p>
         </hlm-popover-header>
+        <!-- Personal, so it lives here and not in the room settings: anyone can sit a round out. -->
+        <div class="flex items-center justify-between gap-3 rounded-md bg-muted/50 px-2 py-1.5">
+          <label for="watch-only" class="flex flex-col">
+            <span class="text-sm font-medium">Watch only</span>
+            <span class="text-xs text-muted-foreground">Follow the round without a card.</span>
+          </label>
+          <hlm-switch
+            inputId="watch-only"
+            [checked]="isSpectator()"
+            (checkedChange)="setSpectator.emit($event)"
+          />
+        </div>
         <flipvote-participant-list
           [participants]="participants()"
           [selfId]="selfId()"
@@ -80,6 +103,17 @@ import { ParticipantList } from './participant-list';
       <ng-icon [name]="copied() ? 'lucideCheck' : 'lucideLink'" data-icon="inline-start" />
       <span aria-live="polite">{{ copied() ? 'Link copied' : 'Invite' }}</span>
     </button>
+    @if (isFacilitator()) {
+      <flipvote-room-settings
+        [deckId]="deckId()"
+        [participants]="participants()"
+        [selfId]="selfId()"
+        [votedCount]="votedCount()"
+        [flipped]="flipped()"
+        (setDeck)="setDeck.emit($event)"
+        (transferFacilitator)="transferFacilitator.emit($event)"
+      />
+    }
     <div class="bg-border h-5 w-px" aria-hidden="true"></div>
     <flipvote-account-menu
       [account]="account()"
@@ -101,16 +135,26 @@ export class RoomHeader {
   readonly selfId = input.required<string>();
   readonly flipped = input.required<boolean>();
   readonly votedCount = input.required<number>();
+  readonly deckId = input.required<DeckId | null>();
+  readonly facilitatorId = input.required<string | null>();
   readonly connection = input.required<ConnectionStatus>();
   readonly theme = input.required<Theme>();
   readonly themePreference = input.required<ThemePreference>();
   readonly account = input.required<Account | null>();
   readonly guestName = input.required<string>();
   readonly toggleTheme = output();
+  readonly setDeck = output<DeckId>();
+  readonly transferFacilitator = output<string>();
+  readonly setSpectator = output<boolean>();
   readonly themePreferenceChange = output<ThemePreference>();
   readonly openSettings = output();
   readonly signIn = output();
   readonly signOut = output();
+
+  protected readonly isFacilitator = computed(() => this.facilitatorId() === this.selfId());
+  protected readonly isSpectator = computed(
+    () => this.participants().find((p) => p.id === this.selfId())?.isSpectator ?? false,
+  );
 
   protected readonly connectionLabel = computed(() => CONNECTION_LABELS[this.connection()]);
   protected readonly connectionDotClass = computed(() => CONNECTION_DOTS[this.connection()]);

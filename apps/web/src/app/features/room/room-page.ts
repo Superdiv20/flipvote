@@ -64,6 +64,11 @@ import { RoomNotFound } from './room-not-found';
           [flipped]="roomStore.flipped()"
           [votedCount]="roomStore.votedCount()"
           [connection]="roomStore.connection()"
+          [deckId]="roomStore.deckId()"
+          [facilitatorId]="roomStore.facilitatorId()"
+          (setDeck)="roomStore.setDeck($event)"
+          (transferFacilitator)="roomStore.transferFacilitator($event)"
+          (setSpectator)="roomStore.setSpectator($event)"
           [theme]="theme.theme()"
           [themePreference]="theme.preference()"
           (themePreferenceChange)="theme.setPreference($event)"
@@ -121,7 +126,7 @@ import { RoomNotFound } from './room-not-found';
               class="px-4 pb-8"
               [deck]="roomStore.deck()"
               [selectedValue]="roomStore.myVote()"
-              [locked]="roomStore.flipped()"
+              [locked]="roomStore.flipped() || roomStore.isSpectator()"
               (pick)="roomStore.vote($event)"
             />
           </main>

@@ -276,4 +276,38 @@ describe('RoomPage', () => {
     expect(alert?.textContent).toContain('Your session doesn’t match your seat');
     expect(alert?.querySelector('a[href="/"]')?.textContent).toContain('Back to start');
   });
+
+  describe('room settings', () => {
+    const settingsButton = (page: HTMLElement) =>
+      page.querySelector('flipvote-room-header button[aria-label="Room settings"]');
+
+    it('are there for the facilitator and gone once the role is handed over', async () => {
+      const { store, fixture } = setup();
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+      expect(settingsButton(page)).not.toBeNull();
+
+      store.transferFacilitator('maya');
+      await fixture.whenStable();
+
+      expect(store.facilitatorId()).toBe('maya');
+      expect(settingsButton(page)).toBeNull();
+    });
+
+    it('watch only drops the own vote and locks the hand', async () => {
+      const { store, fixture } = setup();
+      store.vote('5');
+      await fixture.whenStable();
+
+      store.setSpectator(true);
+      await fixture.whenStable();
+
+      expect(store.isSpectator()).toBe(true);
+      expect(store.myVote()).toBeNull();
+      const cards = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+        'flipvote-card-hand button',
+      );
+      expect([...cards].every((card) => card.disabled)).toBe(true);
+    });
+  });
 });

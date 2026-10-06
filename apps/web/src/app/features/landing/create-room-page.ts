@@ -1,24 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { COFFEE_CARD, DECKS, type DeckId, UNSURE_CARD } from '@flipvote/protocol';
+import type { DeckId } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { SessionService } from '../../core/session';
+import { DECK_OPTIONS } from '../../shared/deck-options';
 import { Logo } from '../../shared/logo';
 import { CreateRoomStore } from './create-room.store';
 
 const NAME_MESSAGE = 'Give the room a name.';
-
-/** The estimate cards of each deck, without `?` and coffee, which every deck has. */
-const DECK_OPTIONS = Object.values(DECKS).map((deck) => ({
-  id: deck.id,
-  name: deck.name,
-  preview: deck.cards.filter((card) => card !== UNSURE_CARD && card !== COFFEE_CARD),
-}));
 
 /** Landing page: name the room, pick a deck, and go straight into the new room. */
 @Component({
