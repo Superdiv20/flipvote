@@ -401,6 +401,12 @@ describe('RoomStore', () => {
       expect(setup().canFlip()).toBe(false);
     });
 
+    it('sends the removal of an issue', () => {
+      const store = setup();
+      store.removeIssue('i1');
+      expect(socket.sent).toEqual([{ type: 'removeIssue', issueId: 'i1' }]);
+    });
+
     it('sends the setting', () => {
       const store = setup();
       store.setOnlyFacilitatorCanFlip(false);

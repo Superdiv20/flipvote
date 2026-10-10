@@ -422,4 +422,43 @@ describe('RoomPage', () => {
       expect(hasNewRound).toBe(false);
     });
   });
+
+  describe('removing issues', () => {
+    const trashButtons = (page: HTMLElement) =>
+      [...page.querySelectorAll<HTMLButtonElement>('flipvote-issue-list button')].filter((b) =>
+        b.getAttribute('aria-label')?.startsWith('Delete '),
+      );
+
+    it('the facilitator removes an issue with its delete button', async () => {
+      const { store, fixture } = setup();
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+      const button = trashButtons(page).find((b) =>
+        b.getAttribute('aria-label')?.startsWith('Delete ATL-220'),
+      )!;
+      button.click();
+      await fixture.whenStable();
+      expect(store.issues().some((issue) => issue.id === 'atl-220')).toBe(false);
+    });
+
+    it('removing the current issue moves on to the next open one and clears the votes', async () => {
+      const { store, fixture } = setup();
+      store.vote('5');
+      await fixture.whenStable();
+      store.removeIssue('atl-214');
+      expect(store.currentIssueId()).toBe('atl-217');
+      expect(store.myVote()).toBeNull();
+    });
+
+    it('everyone else sees no delete buttons', async () => {
+      const { fixture } = setup();
+      await fixture.whenStable();
+      (TestBed.inject(SocketService) as unknown as MockSession).deliver({
+        type: 'state',
+        room: { ...MOCK_ROOM, facilitatorId: 'maya' },
+      });
+      await fixture.whenStable();
+      expect(trashButtons(fixture.nativeElement as HTMLElement)).toEqual([]);
+    });
+  });
 });

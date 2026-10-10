@@ -202,6 +202,11 @@ export const RoomStore = signalStore(
         send({ type: 'setSpectator', spectator });
       },
 
+      /** Facilitator. Removing the current issue moves on to the next open one and starts a new round. */
+      removeIssue(id: string): void {
+        send({ type: 'removeIssue', issueId: id });
+      },
+
       updateIssue(id: string, details: IssueDetails): void {
         send({ type: 'updateIssue', issueId: id, changes: details });
       },

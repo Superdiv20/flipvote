@@ -88,11 +88,13 @@ import { RoomNotFound } from './room-not-found';
             [issues]="roomStore.issues()"
             [currentId]="roomStore.currentIssueId()"
             [collapsed]="drawerCollapsed()"
+            [canRemove]="roomStore.isFacilitator()"
             (toggle)="toggleDrawer()"
             (select)="roomStore.selectIssue($event)"
             (add)="roomStore.addIssue($event)"
             (create)="roomStore.createIssue($event)"
             (update)="roomStore.updateIssue($event.id, $event.details)"
+            (remove)="roomStore.removeIssue($event)"
           />
           <main class="flex min-w-0 flex-1 flex-col">
             <!-- The results slide in right beside the table while the drawer closes on the left, so the table keeps its size. -->

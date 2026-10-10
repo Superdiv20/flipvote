@@ -130,13 +130,19 @@ export class MockRoomServer {
       case 'removeIssue':
         if (!isFacilitator) return facilitatorOnly;
         if (!this.issue(message.issueId)) return issueNotFound;
-        this.room = {
-          ...this.room,
-          issues: this.room.issues.filter((issue) => issue.id !== message.issueId),
-          currentIssueId:
-            this.room.currentIssueId === message.issueId ? null : this.room.currentIssueId,
-        };
-        return null;
+        {
+          // As on the server: removing the current issue moves on to the next open one and starts a
+          // new round, since the votes belonged to it.
+          const wasCurrent = this.room.currentIssueId === message.issueId;
+          const next = wasCurrent ? this.nextOpenIssue(message.issueId) : this.room.currentIssueId;
+          this.room = {
+            ...this.room,
+            issues: this.room.issues.filter((issue) => issue.id !== message.issueId),
+            currentIssueId: next === message.issueId ? null : next,
+          };
+          if (wasCurrent) this.newRound();
+          return null;
+        }
       case 'setDeck':
         if (!isFacilitator) return facilitatorOnly;
         this.room = { ...this.room, deck: DECKS[message.deckId] };

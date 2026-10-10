@@ -57,6 +57,7 @@ import type { IssueDetails } from './issue-types';
           class="min-h-0 flex-1 overflow-y-auto px-2"
           [issues]="issues()"
           [currentId]="currentId()"
+          [canRemove]="canRemove()"
           (select)="select.emit($event)"
           (open)="openIssue($event)"
           (remove)="remove.emit($event)"
@@ -83,6 +84,8 @@ export class IssueDrawer {
   readonly issues = input.required<Issue[]>();
   readonly currentId = input.required<string | null>();
   readonly collapsed = input.required<boolean>();
+  /** Whether issues may be removed here: only the facilitator may. */
+  readonly canRemove = input(false);
 
   /** The user asked to collapse or expand. */
   readonly toggle = output();

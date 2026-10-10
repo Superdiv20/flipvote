@@ -84,10 +84,8 @@ apps/web/src/app/
 1. **MVP:** create room without account, join via link, vote, flip, new round. Fibonacci, modified Fibonacci and T-shirt decks. Facilitator role, spectator mode. Results: average, distribution, consensus indicator.
 2. **Usability:** issue list per session with final estimates, round timer, custom decks, CSV export, robust reconnect.
 3. **SaaS:** accounts, persistent teams, session history, billing (feature-flagged off in self-hosted builds).
-4. **Integrations:** import issues from Jira, Azure DevOps, GitHub; write estimates back.
 
 ## Docker
 
 - Multi-stage build: build Angular, then copy the static output into an `oven/bun` runtime image.
 - The image must include `packages/protocol` alongside `apps/server`, since the server resolves it via `tsconfig` paths.
-- Configuration via environment variables; SQLite database on a mounted volume.

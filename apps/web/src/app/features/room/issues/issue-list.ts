@@ -5,11 +5,12 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import type { Issue } from '@flipvote/protocol';
 import { issueLabel, issueStatus } from './issue-types';
 import { HlmItemImports } from '@spartan-ng/helm/item';
+import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 
 /** The expanded list: finished issues with their estimate, the current one, then what's up next. */
 @Component({
   selector: 'flipvote-issue-list',
-  imports: [NgIcon, HlmButtonImports, HlmItemImports],
+  imports: [NgIcon, HlmButtonImports, HlmItemImports, HlmTooltipImports],
   providers: [provideIcons({ lucideSquarePen, lucideTrash2 })],
   host: { class: 'block' },
   template: `
@@ -25,9 +26,15 @@ import { HlmItemImports } from '@spartan-ng/helm/item';
               : 'hover:bg-muted'
           "
         >
-          <!-- Covers the whole row so a click anywhere selects the issue; the actions sit above it. -->
+          <!--
+            Covers the whole row so a click anywhere selects the issue; the actions sit above it.
+            It also gets the hover, so it carries the tooltip with the full title, which the row cuts off.
+          -->
           <button
             type="button"
+            [hlmTooltip]="issue.title"
+            position="right"
+            [showDelay]="400"
             class="focus-visible:ring-ring/50 absolute inset-0 rounded-md outline-none focus-visible:ring-3"
             [class]="status === 'current' ? 'cursor-default' : 'cursor-pointer'"
             [attr.aria-current]="status === 'current' ? 'true' : null"
@@ -90,16 +97,19 @@ import { HlmItemImports } from '@spartan-ng/helm/item';
               >
                 <ng-icon name="lucideSquarePen" />
               </button>
-              <button
-                hlmBtn
-                variant="ghost"
-                size="icon-sm"
-                class="hover:text-destructive"
-                [attr.aria-label]="'Delete ' + issueLabel(issue)"
-                (click)="remove.emit(issue.id)"
-              >
-                <ng-icon name="lucideTrash2" />
-              </button>
+              <!-- Only the facilitator may remove issues. -->
+              @if (canRemove()) {
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon-sm"
+                  class="hover:text-destructive"
+                  [attr.aria-label]="'Delete ' + issueLabel(issue)"
+                  (click)="remove.emit(issue.id)"
+                >
+                  <ng-icon name="lucideTrash2" />
+                </button>
+              }
             </div>
           </hlm-item-actions>
         </hlm-item>
@@ -114,6 +124,7 @@ import { HlmItemImports } from '@spartan-ng/helm/item';
 export class IssueList {
   readonly issues = input.required<Issue[]>();
   readonly currentId = input.required<string | null>();
+  readonly canRemove = input(false);
   readonly select = output<string>();
   readonly open = output<Issue>();
   readonly remove = output<string>();
