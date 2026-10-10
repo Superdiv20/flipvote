@@ -77,7 +77,7 @@ describe('ProfileSettings', () => {
     await type('x'.repeat(41));
     await save();
     expect(renames).toEqual([]);
-    expect(sheet()!.querySelector('#profile-name-error')?.textContent).toContain('under 41');
+    expect(sheet()!.querySelector('#profile-name-error')?.textContent).toContain('at most 40');
   });
 
   it('starts from the current name again after a cancelled edit', async () => {

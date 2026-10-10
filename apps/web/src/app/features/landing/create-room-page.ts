@@ -173,14 +173,14 @@ export class CreateRoomPage {
       lengthLimit(
         schemaPath.userDisplayName,
         NAME_MAX_LENGTH,
-        `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
+        `Names can have at most ${NAME_MAX_LENGTH} characters.`,
       );
       // `required` accepts a name of only spaces.
       pattern(schemaPath.roomName, /\S/, { message: NAME_MESSAGE });
       lengthLimit(
         schemaPath.roomName,
         ROOM_NAME_MAX_LENGTH,
-        `Keep it under ${ROOM_NAME_MAX_LENGTH + 1} characters.`,
+        `Room names can have at most ${ROOM_NAME_MAX_LENGTH} characters.`,
       );
     },
     {

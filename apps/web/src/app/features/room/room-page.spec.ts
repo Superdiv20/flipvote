@@ -259,7 +259,7 @@ describe('RoomPage', () => {
       await fixture.whenStable();
 
       expect(TestBed.inject(SessionService).name()).toBeNull();
-      expect(page.querySelector('#display-name-error')?.textContent).toContain('under 41');
+      expect(page.querySelector('#display-name-error')?.textContent).toContain('at most 40');
     });
 
     it('does not join with a blank name', async () => {

@@ -77,7 +77,7 @@ export class JoinRoom {
       lengthLimit(
         schemaPath.name,
         NAME_MAX_LENGTH,
-        `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
+        `Names can have at most ${NAME_MAX_LENGTH} characters.`,
       );
     },
     {

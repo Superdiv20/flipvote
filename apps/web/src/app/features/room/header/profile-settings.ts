@@ -76,7 +76,11 @@ export class ProfileSettings {
       required(path.name, { message: NAME_REQUIRED });
       // `required` accepts a name of only spaces.
       pattern(path.name, /\S/, { message: NAME_REQUIRED });
-      lengthLimit(path.name, NAME_MAX_LENGTH, `Keep it under ${NAME_MAX_LENGTH + 1} characters.`);
+      lengthLimit(
+        path.name,
+        NAME_MAX_LENGTH,
+        `Names can have at most ${NAME_MAX_LENGTH} characters.`,
+      );
     },
     {
       submission: {

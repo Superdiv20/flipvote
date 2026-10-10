@@ -7,7 +7,7 @@
 export const NAME_MAX_LENGTH = 40;
 
 /** Room names, after trimming. */
-export const ROOM_NAME_MAX_LENGTH = 80;
+export const ROOM_NAME_MAX_LENGTH = 50;
 
 /** The fields of an issue, after trimming. Long enough for real tickets, short enough for every state. */
 export const ISSUE_LIMITS = {
