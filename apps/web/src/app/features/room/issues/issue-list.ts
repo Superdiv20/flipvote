@@ -39,7 +39,7 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
             [class]="status === 'current' ? 'cursor-default' : 'cursor-pointer'"
             [attr.aria-current]="status === 'current' ? 'true' : null"
             [attr.aria-label]="ariaLabel(issue, status)"
-            (click)="status !== 'current' && select.emit(issue.id)"
+            (click)="status !== 'current' && selectIssue.emit(issue.id)"
           ></button>
           <hlm-item-media>
             <div class="h-full flex items-center">
@@ -126,7 +126,8 @@ export class IssueList {
   readonly issues = input.required<Issue[]>();
   readonly currentId = input.required<string | null>();
   readonly canRemove = input(false);
-  readonly select = output<string>();
+  /** Named so no native DOM event (like `select` from an input) can be mistaken for it. */
+  readonly selectIssue = output<string>();
   readonly open = output<Issue>();
   readonly remove = output<string>();
 

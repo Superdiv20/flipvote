@@ -50,7 +50,7 @@ const TOOLTIP_TITLE_LENGTH = 32;
             position="right"
             [attr.aria-current]="status === 'current' ? 'true' : null"
             [attr.aria-label]="issueLabel(issue)"
-            (click)="status !== 'current' && select.emit(issue.id)"
+            (click)="status !== 'current' && selectIssue.emit(issue.id)"
           >
             @switch (status) {
               @case ('current') {
@@ -77,7 +77,8 @@ export class IssueRail {
   readonly issues = input.required<Issue[]>();
   readonly currentId = input.required<string | null>();
   readonly expand = output();
-  readonly select = output<string>();
+  /** Named so no native DOM event (like `select` from an input) can be mistaken for it. */
+  readonly selectIssue = output<string>();
 
   protected readonly issueLabel = issueLabel;
 

@@ -44,6 +44,8 @@ const server = Bun.serve({
 		message(ws, raw) {
 			const msg = parseMessage(raw);
 			if (!msg) {
+				// A frame the protocol doesn't know points to a bug in a client, so it's worth seeing.
+				console.warn('[ws] rejected frame:', String(raw).slice(0, 200));
 				sendError(ws, 'INVALID_MESSAGE');
 				return;
 			}

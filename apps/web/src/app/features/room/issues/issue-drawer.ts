@@ -58,7 +58,7 @@ import type { IssueDetails } from './issue-types';
           [issues]="issues()"
           [currentId]="currentId()"
           [canRemove]="canRemove()"
-          (select)="select.emit($event)"
+          (selectIssue)="selectIssue.emit($event)"
           (open)="openIssue($event)"
           (remove)="remove.emit($event)"
         />
@@ -75,7 +75,7 @@ import type { IssueDetails } from './issue-types';
         [issues]="issues()"
         [currentId]="currentId()"
         (expand)="toggle.emit()"
-        (select)="select.emit($event)"
+        (selectIssue)="selectIssue.emit($event)"
       />
     </div>
   `,
@@ -89,7 +89,8 @@ export class IssueDrawer {
 
   /** The user asked to collapse or expand. */
   readonly toggle = output();
-  readonly select = output<string>();
+  /** Named so no native DOM event (like `select` from an input) can be mistaken for it. */
+  readonly selectIssue = output<string>();
   readonly add = output<string>();
   readonly create = output<IssueDetails>();
   readonly update = output<{ id: string; details: IssueDetails }>();

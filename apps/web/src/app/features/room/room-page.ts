@@ -90,7 +90,7 @@ import { RoomNotFound } from './room-not-found';
             [collapsed]="drawerCollapsed()"
             [canRemove]="roomStore.isFacilitator()"
             (toggle)="toggleDrawer()"
-            (select)="roomStore.selectIssue($event)"
+            (selectIssue)="roomStore.selectIssue($event)"
             (add)="roomStore.addIssue($event)"
             (create)="roomStore.createIssue($event)"
             (update)="roomStore.updateIssue($event.id, $event.details)"

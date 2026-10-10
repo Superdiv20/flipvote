@@ -470,6 +470,24 @@ describe('RoomPage', () => {
     });
   });
 
+  it('selecting text in the quick add field does not select an issue', async () => {
+    const { store, fixture } = setup();
+    await fixture.whenStable();
+    const socket = TestBed.inject(SocketService) as unknown as MockSession;
+    const send = vi.spyOn(socket, 'send');
+    const before = store.currentIssueId();
+
+    // A double click selects the text, and the browser fires a native `select` that bubbles up.
+    const input = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+      '#add-issue',
+    )!;
+    input.dispatchEvent(new Event('select', { bubbles: true }));
+    await fixture.whenStable();
+
+    expect(send).not.toHaveBeenCalled();
+    expect(store.currentIssueId()).toBe(before);
+  });
+
   describe('quick add limits', () => {
     const limit = ISSUE_LIMITS.title;
 
