@@ -7,7 +7,6 @@ Realtime planning poker for agile teams. Users create a room, share the link, vo
 - **Runtime / package manager:** Bun (workspaces, one `bun.lock` in the root)
 - **Backend:** Bun (`Bun.serve()` with native WebSockets and pub/sub), no framework
 - **Frontend:** Angular (always the latest version), Spartan UI (brain/helm) on Tailwind
-- **Persistence:** in-memory room state; completed rounds saved to SQLite via `bun:sqlite`
 - **Deployment:** single Docker image (Bun serves API, WebSocket and the built Angular app)
 
 ## Repo layout
@@ -36,15 +35,16 @@ Run from the repo root:
 - Never add `workspace:*` dependencies. Angular/Spartan generators run npm internally, and npm fails on the `workspace:` protocol.
 - If a generator creates `package-lock.json` or nested `node_modules`, delete them and run `bun install` from the root. `bun.lock` in the root is the only lockfile.
 - The protocol package exports TypeScript source directly. No build step.
+- After changing anything in `packages/protocol`, restart the web dev server. Angular doesn't watch files outside `apps/web`, so it keeps serving the old version (the Bun server's `--watch` picks changes up by itself).
 
 ## Realtime protocol
 
 - The server is the single source of truth. Clients send intents (`join`, `vote`, `flip`, `reset`); the server validates them and broadcasts the full room state.
 - **Vote values never leave the server before the flip.** Before the flip, clients only receive `hasVoted: boolean` per participant. This is a hard rule, not an optimization.
 - Every message type lives in `packages/protocol` as a discriminated union (`ClientMessage`, `ServerMessage`). Add new messages there first, then implement both sides.
-- Rooms map to Bun pub/sub topics (`ws.subscribe(roomId)`, `server.publish(roomId, …)`).
+- Rooms map to Bun pub/sub topics (`ws.subscribe(roomId)`, `server.publish(roomId, …)`). The `state` published there is the same for everyone in the room; personal data goes to the one client only: its seat in `welcome`, its own vote in `welcome` and `myVote`. `myVote` goes to a per-seat topic (`roomId:participantId`), so every tab of the same seat gets it. Use `server.publish`, not `ws.publish`, which skips the sender.
 - Guest identity is a session token stored in the browser, so a page refresh rejoins the same seat.
-- Presence via heartbeat; disconnected users are removed after a grace period. If the facilitator leaves, facilitator role is handed over to another participant.
+- Presence: Bun pings idle sockets and closes dead ones (`idleTimeout`). When a seat's last tab closes, the seat shows as away; after a 30 s grace period the participant is removed, and if they were the facilitator, the role is handed over to another participant. Coming back within the grace period keeps the seat and the vote.
 
 ## Frontend conventions
 
@@ -62,8 +62,9 @@ apps/web/src/app/
   shared/        # used by 2+ features only (playing card, logo, deck definitions)
 ```
 
-- `RoomStore` is provided in the room route's `providers`, not in root, so each room visit gets a fresh store.
+- `RoomStore` is provided in `RoomPage`'s `providers`, not in the route or in root, so each room visit gets a fresh store. Route `providers` live as long as the router does, so the next visit would get the previous room's store.
 - `room-page` is the only room component that injects the store. Child components are presentational (inputs/outputs only).
+- Never name an output after a native DOM event (`select`, `reset`, `submit`, `input`, `change`, …). A bubbling DOM event of that name reaches the parent's `(name)` binding as well, so the handler gets an `Event` instead of the output's value.
 - Move something into `shared/` only when a second feature needs it. Split `features/room/` into subfolders only once it grows past ~15 files.
 - The WebSocket service in `core/` knows nothing about rooms; it sends `ClientMessage`s and exposes incoming `ServerMessage`s.
 
