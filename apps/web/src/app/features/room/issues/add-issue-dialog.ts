@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot, required } from '@angular/forms/signals';
+import { ISSUE_LIMITS } from '@flipvote/protocol';
 import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import {
@@ -12,7 +13,11 @@ import {
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
+import { fieldError, lengthLimit } from '../../../shared/length-limit';
+import { issueTitleLimits } from './issue-title-limits';
 import type { IssueDetails } from './issue-types';
+
+const DESCRIPTION_FIELD_MAX_LENGTH = ISSUE_LIMITS.description;
 
 export interface AddIssueDialogContext {
   /** Prefills the title when adding. */
@@ -56,11 +61,29 @@ export interface AddIssueDialogContext {
       <hlm-field-group>
         <hlm-field>
           <label hlmFieldLabel for="title">Title</label>
-          <input hlmInput id="title" type="text" [formField]="fullIssueForm.title" />
+          <input
+            hlmInput
+            id="title"
+            type="text"
+            [formField]="fullIssueForm.title"
+            [attr.aria-describedby]="fieldError(fullIssueForm.title) ? 'title-error' : null"
+          />
+          @if (fieldError(fullIssueForm.title); as message) {
+            <hlm-field-error id="title-error" forceShow>{{ message }}</hlm-field-error>
+          }
         </hlm-field>
         <hlm-field>
           <label hlmFieldLabel for="link">Link</label>
-          <input hlmInput id="link" type="url" [formField]="fullIssueForm.link" />
+          <input
+            hlmInput
+            id="link"
+            type="url"
+            [formField]="fullIssueForm.link"
+            [attr.aria-describedby]="fieldError(fullIssueForm.link) ? 'link-error' : null"
+          />
+          @if (fieldError(fullIssueForm.link); as message) {
+            <hlm-field-error id="link-error" forceShow>{{ message }}</hlm-field-error>
+          }
         </hlm-field>
         <hlm-field>
           <label hlmFieldLabel for="description">Description</label>
@@ -69,7 +92,27 @@ export interface AddIssueDialogContext {
             id="description"
             placeholder="Add your description here."
             [formField]="fullIssueForm.description"
+            [attr.aria-describedby]="
+              fieldError(fullIssueForm.description)
+                ? 'description-error description-count'
+                : 'description-count'
+            "
           ></textarea>
+          @if (fieldError(fullIssueForm.description); as message) {
+            <hlm-field-error id="description-error" forceShow>{{ message }}</hlm-field-error>
+          }
+          <p
+            hlmFieldDescription
+            id="description-count"
+            [class.text-destructive]="
+              (fullIssueForm.description().value()?.trim().length || 0) >
+              DESCRIPTION_FIELD_MAX_LENGTH
+            "
+          >
+            Characters: {{ fullIssueForm.description().value()?.length || 0 }}/{{
+              DESCRIPTION_FIELD_MAX_LENGTH
+            }}
+          </p>
         </hlm-field>
       </hlm-field-group>
 
@@ -92,10 +135,27 @@ export class AddIssueDialog {
     description: this._dialogContext.issue?.description ?? '',
   });
 
+  public readonly DESCRIPTION_FIELD_MAX_LENGTH = DESCRIPTION_FIELD_MAX_LENGTH;
+  protected readonly fieldError = fieldError;
+
   public readonly fullIssueForm = form(
     this._model,
     (schemaPath) => {
-      required(schemaPath.title);
+      required(schemaPath.title, { message: 'Give the issue a title.' });
+      // The same limits as the server, so the form says what's too long and doesn't submit; the
+      // server's ISSUE_TOO_LONG stays as the fallback. The title may start with a tracker key,
+      // which is measured on its own.
+      issueTitleLimits(schemaPath.title);
+      lengthLimit(
+        schemaPath.link,
+        ISSUE_LIMITS.link,
+        `Links can have at most ${ISSUE_LIMITS.link} characters.`,
+      );
+      lengthLimit(
+        schemaPath.description,
+        ISSUE_LIMITS.description,
+        `Descriptions can have at most ${ISSUE_LIMITS.description} characters.`,
+      );
     },
     {
       submission: {

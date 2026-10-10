@@ -1,5 +1,6 @@
 import type { Issue, IssueInput } from '@flipvote/protocol';
 import { fail, ok, type Room, type RoomResult } from '../room';
+import { fitsIssueLimits } from './issue-fields';
 
 /**
  * Anyone. Changes the given fields; a blank optional field is removed. Only the fields of
@@ -17,6 +18,7 @@ export function editIssue(
 
 	const title = changes.title === undefined ? existing.title : changes.title.trim();
 	if (!title) return fail('TITLE_REQUIRED');
+	if (!fitsIssueLimits(changes)) return fail('ISSUE_TOO_LONG');
 
 	const updated: Issue = { id: existing.id, title };
 	const key = pick(changes.key, existing.key);

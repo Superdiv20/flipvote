@@ -18,5 +18,11 @@ export type ErrorCode =
 	| 'NO_VOTES'
 	| 'ISSUE_NOT_FOUND'
 	| 'TITLE_REQUIRED'
+	/** An issue field is longer than its limit in `ISSUE_LIMITS`. */
+	| 'ISSUE_TOO_LONG'
+	/** The room already has `MAX_ISSUES_PER_ROOM` issues. */
+	| 'TOO_MANY_ISSUES'
+	/** Longer than `ROOM_NAME_MAX_LENGTH` after trimming. */
+	| 'ROOM_NAME_TOO_LONG'
 	| 'PARTICIPANT_NOT_FOUND'
 	| 'PARTICIPANT_NOT_CONNECTED';

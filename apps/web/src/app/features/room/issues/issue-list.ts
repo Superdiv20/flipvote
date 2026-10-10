@@ -50,7 +50,8 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
               </span>
             </div>
           </hlm-item-media>
-          <hlm-item-content>
+          <!-- min-w-0: lets the content shrink, so a title without spaces is cut off with an ellipsis too. -->
+          <hlm-item-content class="min-w-0">
             <hlm-item-title>
               <div class="flex gap-2">
                 @if (issue.key) {
@@ -71,7 +72,7 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
             </hlm-item-title>
             <span
               hlmItemDescription
-              class="line-clamp-1 text-sm"
+              class="line-clamp-1 text-sm wrap-break-word"
               [class]="
                 status === 'done'
                   ? 'text-muted-foreground'

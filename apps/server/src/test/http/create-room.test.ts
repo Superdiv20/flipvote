@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { DECKS } from '@flipvote/protocol';
+import { DECKS, ROOM_NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { registry } from '../../room/room-registry';
 import { ERROR_MESSAGES } from '../../shared/error-messages';
 import { createRoomHandler } from '../../http/create-room';
@@ -36,6 +36,17 @@ describe('POST /api/rooms', () => {
 	test('sends the text that belongs to the error code', async () => {
 		const response = await createRoomHandler(post({ name: 'R', deckId: 'fibonacci' }, null));
 		expect(await response.json()).toEqual({ code: 'INVALID_SESSION', message: ERROR_MESSAGES.INVALID_SESSION });
+	});
+
+	test('rejects a room name over the limit', async () => {
+		const response = await createRoomHandler(post({ name: 'x'.repeat(ROOM_NAME_MAX_LENGTH + 1), deckId: 'fibonacci' }));
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'ROOM_NAME_TOO_LONG' });
+	});
+
+	test('accepts a room name of exactly the limit', async () => {
+		const response = await createRoomHandler(post({ name: 'x'.repeat(ROOM_NAME_MAX_LENGTH), deckId: 'fibonacci' }));
+		expect(response.status).toBe(201);
 	});
 
 	test('rejects a blank name', async () => {

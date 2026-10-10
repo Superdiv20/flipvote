@@ -12,6 +12,8 @@ import { registry } from './room/room-registry';
 /** A room nobody has joined within this time is removed, e.g. when it was created and the tab closed. */
 const UNJOINED_ROOM_MS = 10 * 60_000;
 const SWEEP_INTERVAL_MS = 60_000;
+const MAX_FRAME_BYTES = 16 * 1024;
+const IDLE_TIMEOUT_SECONDS = 30;
 
 const server = Bun.serve({
 	port: 3000,
@@ -30,6 +32,12 @@ const server = Bun.serve({
 	},
 	websocket: {
 		data: {} as SocketData,
+		// Our largest message (an issue at its limits) stays well below this; anything bigger is not
+		// ours, and Bun closes the connection.
+		maxPayloadLength: MAX_FRAME_BYTES,
+		// Bun pings idle sockets by itself. One that doesn't answer within this time is closed, so a
+		// dropped network shows up as "away" within seconds instead of after two minutes.
+		idleTimeout: IDLE_TIMEOUT_SECONDS,
 		open(ws) {
 			console.log('client connected');
 		},

@@ -14,10 +14,16 @@ import { Logo } from '../../shared/logo';
   host: { class: 'flex flex-1 flex-col items-center justify-center gap-8 px-4 py-12' },
   template: `
     <flipvote-logo />
-    @if (connection() === 'closed') {
+    @if (connection() === 'closed' || connection() === 'reconnecting') {
       <div class="flex max-w-sm flex-col items-center gap-4 text-center" role="alert">
         <h1 class="text-lg font-semibold">Can’t reach the server</h1>
-        <p class="text-sm text-muted-foreground">Check your connection and try again.</p>
+        <p class="text-sm text-muted-foreground">
+          @if (connection() === 'reconnecting') {
+            Trying again in a moment. Check your connection.
+          } @else {
+            Check your connection and try again.
+          }
+        </p>
         <button hlmBtn variant="outline" type="button" (click)="retry.emit()">Try again</button>
       </div>
     } @else {

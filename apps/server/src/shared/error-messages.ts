@@ -1,4 +1,9 @@
-import { type ErrorCode, NAME_MAX_LENGTH } from '@flipvote/protocol';
+import {
+	type ErrorCode,
+	MAX_ISSUES_PER_ROOM,
+	NAME_MAX_LENGTH,
+	ROOM_NAME_MAX_LENGTH,
+} from '@flipvote/protocol';
 
 /**
  * The human-readable text sent along with each error code, over HTTP and the socket alike, so the
@@ -21,6 +26,9 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
 	NOT_REVEALED: 'The cards are not revealed yet.',
 	NO_VOTES: 'Nobody has voted yet.',
 	ISSUE_NOT_FOUND: 'That issue does not exist.',
+	ISSUE_TOO_LONG: 'An issue field is longer than allowed.',
+	TOO_MANY_ISSUES: `A room can have at most ${MAX_ISSUES_PER_ROOM} issues.`,
+	ROOM_NAME_TOO_LONG: `A room name can have at most ${ROOM_NAME_MAX_LENGTH} characters.`,
 	TITLE_REQUIRED: 'Give the issue a title.',
 	PARTICIPANT_NOT_FOUND: 'That participant is not in this room.',
 	PARTICIPANT_NOT_CONNECTED: 'That participant is not connected.',

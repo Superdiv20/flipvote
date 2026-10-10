@@ -1,4 +1,9 @@
-import { type ErrorCode, NAME_MAX_LENGTH } from '@flipvote/protocol';
+import {
+  type ErrorCode,
+  MAX_ISSUES_PER_ROOM,
+  NAME_MAX_LENGTH,
+  ROOM_NAME_MAX_LENGTH,
+} from '@flipvote/protocol';
 
 /**
  * What each server error means to the person who caused it, in the client's words. A `Record`
@@ -23,6 +28,9 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   NO_VOTES: 'Nobody has voted yet, so there is nothing to reveal.',
   ISSUE_NOT_FOUND: 'That issue was removed in the meantime.',
   TITLE_REQUIRED: 'Give the issue a title.',
+  ISSUE_TOO_LONG: 'That issue is too long. Shorten the title, link or description.',
+  TOO_MANY_ISSUES: `This room already has ${MAX_ISSUES_PER_ROOM} issues. Remove some to add more.`,
+  ROOM_NAME_TOO_LONG: `Room names can have at most ${ROOM_NAME_MAX_LENGTH} characters.`,
   PARTICIPANT_NOT_FOUND: 'That person has left the room.',
   PARTICIPANT_NOT_CONNECTED: 'That person is away right now. Try again once they’re back.',
 };

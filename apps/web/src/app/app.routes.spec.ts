@@ -16,6 +16,7 @@ function silentSocket() {
     connect() {},
     disconnect() {},
     send() {},
+    onReconnect: () => () => {},
     onMessage(handler: (message: ServerMessage) => void) {
       handlers.add(handler);
       return () => handlers.delete(handler);

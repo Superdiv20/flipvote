@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
-import { form, FormField, FormRoot, maxLength, pattern, required } from '@angular/forms/signals';
+import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
+import { lengthLimit } from '../../shared/length-limit';
 import { Router } from '@angular/router';
-import { type DeckId, NAME_MAX_LENGTH } from '@flipvote/protocol';
+import { type DeckId, NAME_MAX_LENGTH, ROOM_NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -169,11 +170,18 @@ export class CreateRoomPage {
       required(schemaPath.userDisplayName, { message: 'Display name is required.' });
       // `required` accepts a name of only spaces.
       pattern(schemaPath.userDisplayName, /\S/, { message: 'Display name is required.' });
-      maxLength(schemaPath.userDisplayName, NAME_MAX_LENGTH, {
-        message: `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
-      });
+      lengthLimit(
+        schemaPath.userDisplayName,
+        NAME_MAX_LENGTH,
+        `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
+      );
       // `required` accepts a name of only spaces.
       pattern(schemaPath.roomName, /\S/, { message: NAME_MESSAGE });
+      lengthLimit(
+        schemaPath.roomName,
+        ROOM_NAME_MAX_LENGTH,
+        `Keep it under ${ROOM_NAME_MAX_LENGTH + 1} characters.`,
+      );
     },
     {
       submission: {
@@ -194,7 +202,7 @@ export class CreateRoomPage {
 
   protected nameInvalid(fieldName: 'roomName' | 'userDisplayName'): boolean {
     const field = this.createForm[fieldName]();
-    return field.touched() && field.invalid();
+    return (field.touched() || field.dirty()) && field.invalid();
   }
 
   /** The first error of that field, so each field shows its own message. */

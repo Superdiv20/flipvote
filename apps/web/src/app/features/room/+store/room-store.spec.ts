@@ -16,7 +16,7 @@ import { RoomStore } from './room-store';
 /** Records what the store sends and lets a test deliver server messages by hand. */
 class FakeSocket implements Pick<
   SocketService,
-  'status' | 'connect' | 'disconnect' | 'send' | 'onMessage'
+  'status' | 'connect' | 'disconnect' | 'send' | 'onMessage' | 'onReconnect'
 > {
   readonly status = signal<ConnectionStatus>('idle');
   readonly sent: ClientMessage[] = [];
@@ -38,6 +38,18 @@ class FakeSocket implements Pick<
   onMessage(handler: (message: ServerMessage) => void): () => void {
     this.handlers.add(handler);
     return () => this.handlers.delete(handler);
+  }
+
+  readonly reconnectHandlers = new Set<() => void>();
+
+  onReconnect(handler: () => void): () => void {
+    this.reconnectHandlers.add(handler);
+    return () => this.reconnectHandlers.delete(handler);
+  }
+
+  /** The dropped connection is back. */
+  reconnect(): void {
+    for (const handler of this.reconnectHandlers) handler();
   }
 
   receive(message: ServerMessage): void {
@@ -107,6 +119,41 @@ describe('RoomStore', () => {
       expect(store.selfId()).toBe('');
       expect(store.myVote()).toBeNull();
       expect(store.participants()).toEqual([]);
+    });
+  });
+
+  describe('after a reconnect', () => {
+    it('joins the same room again under the current name', () => {
+      const store = setup();
+      const session = TestBed.inject(SessionService);
+      session.setName('Ana');
+      store.enter('room-1');
+      session.setName('Ana K');
+      socket.sent.length = 0;
+
+      socket.reconnect();
+
+      expect(socket.sent).toEqual([
+        { type: 'join', roomId: 'room-1', name: 'Ana K', sessionToken: session.token },
+      ]);
+    });
+
+    it('does nothing before a room was entered', () => {
+      setup();
+      socket.reconnect();
+      expect(socket.sent).toEqual([]);
+    });
+
+    it('does not retry a join that failed', () => {
+      const store = setup();
+      TestBed.inject(SessionService).setName('Ana');
+      store.enter('no-such-room');
+      socket.receive({ type: 'error', code: 'ROOM_NOT_FOUND', message: 'gone' });
+      socket.sent.length = 0;
+
+      socket.reconnect();
+
+      expect(socket.sent).toEqual([]);
     });
   });
 

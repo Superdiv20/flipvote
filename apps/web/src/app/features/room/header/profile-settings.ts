@@ -1,5 +1,6 @@
 import { Component, input, output, signal, viewChild } from '@angular/core';
-import { form, FormField, FormRoot, maxLength, pattern, required } from '@angular/forms/signals';
+import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
+import { lengthLimit } from '../../../shared/length-limit';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
@@ -75,9 +76,7 @@ export class ProfileSettings {
       required(path.name, { message: NAME_REQUIRED });
       // `required` accepts a name of only spaces.
       pattern(path.name, /\S/, { message: NAME_REQUIRED });
-      maxLength(path.name, NAME_MAX_LENGTH, {
-        message: `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
-      });
+      lengthLimit(path.name, NAME_MAX_LENGTH, `Keep it under ${NAME_MAX_LENGTH + 1} characters.`);
     },
     {
       submission: {
@@ -99,7 +98,7 @@ export class ProfileSettings {
 
   protected nameError(): string | null {
     const field = this.profileForm.name();
-    if (!field.touched() || !field.invalid()) return null;
+    if (!(field.touched() || field.dirty()) || !field.invalid()) return null;
     return field.errors()[0]?.message ?? NAME_REQUIRED;
   }
 }

@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { DECKS } from '@flipvote/protocol';
+import { DECKS, ISSUE_LIMITS } from '@flipvote/protocol';
 import { SessionService } from '../../core/session';
 import { type ConnectionStatus, SocketService } from '../../core/socket';
 import { MockSession, provideMockSession } from './+store/mock-session';
@@ -173,6 +173,7 @@ describe('RoomPage', () => {
         disconnect() {},
         send() {},
         onMessage: () => () => {},
+        onReconnect: () => () => {},
       };
     }
 
@@ -193,6 +194,13 @@ describe('RoomPage', () => {
       const page = fixture.nativeElement as HTMLElement;
       expect(page.querySelector('[role="status"]')?.textContent).toContain('Joining the room');
       expect(page.querySelector('flipvote-poker-table')).toBeNull();
+    });
+
+    it('says it is trying again while the connection reconnects', async () => {
+      const fixture = render('reconnecting');
+      await fixture.whenStable();
+      const alert = (fixture.nativeElement as HTMLElement).querySelector('[role="alert"]');
+      expect(alert?.textContent).toContain('Trying again in a moment');
     });
 
     it('offers to try again when the server cannot be reached', async () => {
@@ -459,6 +467,46 @@ describe('RoomPage', () => {
       });
       await fixture.whenStable();
       expect(trashButtons(fixture.nativeElement as HTMLElement)).toEqual([]);
+    });
+  });
+
+  describe('quick add limits', () => {
+    const limit = ISSUE_LIMITS.title;
+
+    async function typeAndPressEnter(text: string) {
+      const { store, fixture } = setup();
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+      const input = page.querySelector<HTMLInputElement>('#add-issue')!;
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      await fixture.whenStable();
+      return { store, page, input };
+    }
+
+    it('says the title is too long, adds nothing and keeps the text', async () => {
+      const text = 'x'.repeat(limit + 1);
+      const { store, page, input } = await typeAndPressEnter(text);
+      expect(page.querySelector('#add-issue-error')?.textContent).toContain(
+        'Titles can have at most',
+      );
+      expect(store.issues().some((issue) => issue.title === text)).toBe(false);
+      expect(input.value).toBe(text);
+    });
+
+    it('measures the title without its key, as the server does', async () => {
+      const { store, page } = await typeAndPressEnter(`ATL-300 ${'x'.repeat(limit)}`);
+      expect(page.querySelector('#add-issue-error')).toBeNull();
+      expect(store.issues().at(-1)).toMatchObject({ key: 'ATL-300', title: 'x'.repeat(limit) });
+    });
+
+    it('adds a title of exactly the limit', async () => {
+      const text = 'x'.repeat(limit);
+      const { store, page } = await typeAndPressEnter(text);
+      expect(page.querySelector('#add-issue-error')).toBeNull();
+      expect(store.issues().at(-1)?.title).toBe(text);
     });
   });
 });

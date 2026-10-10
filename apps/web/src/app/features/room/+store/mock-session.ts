@@ -7,7 +7,7 @@ import { MockRoomServer } from './mock-room-server';
 /** Stands in for `Session` in tests. `MockRoomServer` answers each message synchronously instead of a socket. */
 export class MockSession implements Pick<
   SocketService,
-  'status' | 'connect' | 'disconnect' | 'send' | 'onMessage'
+  'status' | 'connect' | 'disconnect' | 'send' | 'onMessage' | 'onReconnect'
 > {
   readonly status = signal<ConnectionStatus>('open').asReadonly();
   private readonly server = new MockRoomServer(MOCK_ROOM, MOCK_HIDDEN_VOTES, SELF_ID);
@@ -24,6 +24,11 @@ export class MockSession implements Pick<
   /** Hands a server message to the listeners, for cases the mock server doesn't produce itself. */
   deliver(message: ServerMessage): void {
     for (const handler of this.handlers) handler(message);
+  }
+
+  /** The mock never drops its connection, so there is nothing to reconnect. */
+  onReconnect(): () => void {
+    return () => {};
   }
 
   onMessage(handler: (message: ServerMessage) => void): () => void {

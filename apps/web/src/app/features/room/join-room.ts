@@ -1,5 +1,6 @@
 import { Component, output, signal } from '@angular/core';
-import { form, FormField, FormRoot, maxLength, pattern, required } from '@angular/forms/signals';
+import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
+import { lengthLimit } from '../../shared/length-limit';
 import { NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
@@ -73,9 +74,11 @@ export class JoinRoom {
       required(schemaPath.name, { message: NAME_MESSAGE });
       // `required` accepts a name of only spaces.
       pattern(schemaPath.name, /\S/, { message: NAME_MESSAGE });
-      maxLength(schemaPath.name, NAME_MAX_LENGTH, {
-        message: `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
-      });
+      lengthLimit(
+        schemaPath.name,
+        NAME_MAX_LENGTH,
+        `Keep it under ${NAME_MAX_LENGTH + 1} characters.`,
+      );
     },
     {
       submission: {
@@ -89,7 +92,7 @@ export class JoinRoom {
 
   protected nameInvalid(): boolean {
     const name = this.joinForm.name();
-    return name.touched() && name.invalid();
+    return (name.touched() || name.dirty()) && name.invalid();
   }
 
   /** The first error of the name field, e.g. too long, rather than one fixed text. */

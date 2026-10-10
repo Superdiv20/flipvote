@@ -68,7 +68,7 @@ import { ParticipantList } from './participant-list';
       >
         <!-- Live indicator: steady when connected, pulsing while connecting, grey when the connection is gone. -->
         <span class="relative flex size-2" aria-hidden="true">
-          @if (connection() === 'connecting') {
+          @if (connection() === 'connecting' || connection() === 'reconnecting') {
             <span
               class="absolute inline-flex size-full animate-ping rounded-full bg-amber-500 opacity-75 motion-reduce:animate-none"
             ></span>
@@ -114,7 +114,7 @@ import { ParticipantList } from './participant-list';
     </hlm-popover>
     <!-- Announces a dropped connection once; the dot alone would only be visible. -->
     <span class="sr-only" aria-live="polite">
-      {{ connection() === 'closed' ? 'Connection to the room lost' : '' }}
+      {{ connection() === 'reconnecting' ? 'Connection to the room lost. Reconnecting…' : '' }}
     </span>
     <button hlmBtn variant="outline" size="lg" class="px-4" (click)="copyInvite()">
       <ng-icon [name]="copied() ? 'lucideCheck' : 'lucideLink'" data-icon="inline-start" />
@@ -188,6 +188,7 @@ export class RoomHeader {
 const CONNECTION_LABELS: Record<ConnectionStatus, string> = {
   open: 'Connected',
   connecting: 'Connecting…',
+  reconnecting: 'Reconnecting…',
   idle: 'Disconnected',
   closed: 'Disconnected',
 };
@@ -195,6 +196,7 @@ const CONNECTION_LABELS: Record<ConnectionStatus, string> = {
 const CONNECTION_DOTS: Record<ConnectionStatus, string> = {
   open: 'bg-emerald-500',
   connecting: 'bg-amber-500',
+  reconnecting: 'bg-amber-500',
   idle: 'bg-muted-foreground/60',
   closed: 'bg-muted-foreground/60',
 };

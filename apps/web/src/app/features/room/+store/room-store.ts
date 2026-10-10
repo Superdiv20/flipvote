@@ -41,6 +41,8 @@ type RoomStoreState = {
    * so the deadline is taken from our own clock the moment the state arrives.
    */
   flipDeadline: number | null;
+  /** The room we joined or are joining, so a reconnect can join it again. */
+  roomId: string | null;
 };
 
 const initialState: RoomStoreState = {
@@ -50,6 +52,7 @@ const initialState: RoomStoreState = {
   joinError: null,
   awaitingName: false,
   flipDeadline: null,
+  roomId: null,
 };
 
 /** What the room page shows. */
@@ -124,7 +127,7 @@ export const RoomStore = signalStore(
       /** Takes a seat, or the same seat again after a refresh. Remembers the name for the next visit. */
       join(roomId: string, name: string): void {
         session.setName(name);
-        patchState(store, { awaitingName: false, joinError: null });
+        patchState(store, { awaitingName: false, joinError: null, roomId });
         send({ type: 'join', roomId, name, sessionToken: session.token });
       },
 
@@ -138,6 +141,7 @@ export const RoomStore = signalStore(
           patchState(store, { awaitingName: true });
           return;
         }
+        patchState(store, { roomId });
         send({ type: 'join', roomId, name, sessionToken: session.token });
       },
 
@@ -211,6 +215,14 @@ export const RoomStore = signalStore(
         send({ type: 'updateIssue', issueId: id, changes: details });
       },
 
+      /** After a reconnect: the same room, under the current name. Nothing when the join had failed. */
+      _rejoin(): void {
+        const roomId = store.roomId();
+        const name = session.name();
+        if (!roomId || !name || store.joinError()) return;
+        send({ type: 'join', roomId, name, sessionToken: session.token });
+      },
+
       _handleRoomUpdate(message: ServerMessage): void {
         switch (message.type) {
           case 'welcome':
@@ -248,15 +260,20 @@ export const RoomStore = signalStore(
   withHooks((store) => {
     const socket = inject(SocketService);
     let stopListening: (() => void) | undefined;
+    let stopRejoining: (() => void) | undefined;
 
     return {
       onInit(): void {
         // Listen first, so no message that arrives right after connecting is missed.
         stopListening = socket.onMessage((message) => store._handleRoomUpdate(message));
+        // A new connection is a stranger to the server: join again, which within the grace
+        // period gives back the same seat and vote.
+        stopRejoining = socket.onReconnect(() => store._rejoin());
         socket.connect();
       },
       onDestroy(): void {
         stopListening?.();
+        stopRejoining?.();
         socket.disconnect();
       },
     };

@@ -3,6 +3,7 @@ import {
 	type CreateRoomResponse,
 	DECKS,
 	type ErrorCode,
+	ROOM_NAME_MAX_LENGTH,
 } from '@flipvote/protocol';
 import { registry } from '../room/room-registry';
 import { ERROR_MESSAGES } from '../shared/error-messages';
@@ -22,6 +23,7 @@ export async function createRoomHandler(req: Request): Promise<Response> {
 
 	const name = typeof body.name === 'string' ? body.name.trim() : '';
 	if (!name) return error(400, 'NAME_REQUIRED');
+	if (name.length > ROOM_NAME_MAX_LENGTH) return error(400, 'ROOM_NAME_TOO_LONG');
 
 	const { deckId } = body;
 	if (!isDeckId(deckId)) return error(400, 'INVALID_MESSAGE');
