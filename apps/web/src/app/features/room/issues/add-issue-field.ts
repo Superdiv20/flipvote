@@ -6,6 +6,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideArrowRight, lucidePlus, lucideShieldAlert } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 import { AddIssueDialog, type AddIssueDialogContext } from './add-issue-dialog';
 import { fieldError } from '../../../shared/length-limit';
 import { issueTitleLimits } from './issue-title-limits';
@@ -14,7 +15,14 @@ import type { IssueDetails } from './issue-types';
 /** Quick add: one issue from a single line on Enter. The plus button opens the full dialog. */
 @Component({
   selector: 'flipvote-add-issue-field',
-  imports: [HlmInputImports, HlmInputGroupImports, FormField, NgIcon, HlmButtonImports],
+  imports: [
+    HlmInputImports,
+    HlmInputGroupImports,
+    FormField,
+    NgIcon,
+    HlmButtonImports,
+    HlmTooltipImports,
+  ],
   providers: [provideIcons({ lucideArrowRight, lucidePlus, lucideShieldAlert })],
   host: { class: 'flex flex-col gap-1.5' },
   template: `
@@ -34,7 +42,15 @@ import type { IssueDetails } from './issue-types';
         />
         <hlm-input-group-addon align="inline-end">
           @if (error(); as message) {
-            <ng-icon name="lucideShieldAlert" class="text-destructive" />
+            <!-- The icon shows the reason on hover; the hidden text says it to screen readers. -->
+            <ng-icon
+              name="lucideShieldAlert"
+              class="text-destructive"
+              aria-hidden="true"
+              [hlmTooltip]="message"
+              position="top"
+            />
+            <span id="add-issue-error" class="sr-only" role="alert">{{ message }}</span>
           } @else {
             <button
               hlmInputGroupButton

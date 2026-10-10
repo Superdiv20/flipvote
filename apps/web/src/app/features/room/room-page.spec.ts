@@ -502,6 +502,20 @@ describe('RoomPage', () => {
       expect(store.issues().at(-1)).toMatchObject({ key: 'ATL-300', title: 'x'.repeat(limit) });
     });
 
+    it('shows the reason on the warning icon, in place of the submit button', async () => {
+      const { page } = await typeAndPressEnter('x'.repeat(limit + 1));
+      const icon = page.querySelector(
+        'flipvote-add-issue-field ng-icon[name="lucideShieldAlert"]',
+      )!;
+      expect(page.querySelector('flipvote-add-issue-field button[aria-label="Submit"]')).toBeNull();
+
+      icon.dispatchEvent(Object.assign(new Event('pointerenter'), { pointerType: 'mouse' }));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(document.querySelector('[role="tooltip"]')?.textContent).toContain(
+        'Titles can have at most',
+      );
+    });
+
     it('adds a title of exactly the limit', async () => {
       const text = 'x'.repeat(limit);
       const { store, page } = await typeAndPressEnter(text);

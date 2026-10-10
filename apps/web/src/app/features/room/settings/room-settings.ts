@@ -6,6 +6,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmSheetImports } from '@spartan-ng/helm/sheet';
 import { HlmSwitchImports } from '@spartan-ng/helm/switch';
+import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 import { DECK_OPTIONS } from '../../../shared/deck-options';
 
 /**
@@ -14,11 +15,26 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
  */
 @Component({
   selector: 'flipvote-room-settings',
-  imports: [NgIcon, HlmButtonImports, HlmFieldImports, HlmSheetImports, HlmSwitchImports],
+  imports: [
+    NgIcon,
+    HlmButtonImports,
+    HlmFieldImports,
+    HlmSheetImports,
+    HlmSwitchImports,
+    HlmTooltipImports,
+  ],
   providers: [provideIcons({ lucideCrown, lucideSlidersHorizontal, lucideTriangleAlert })],
   template: `
     <hlm-sheet side="right">
-      <button hlmSheetTrigger hlmBtn variant="ghost" size="icon" aria-label="Room settings">
+      <button
+        hlmSheetTrigger
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        aria-label="Room settings"
+        hlmTooltip="Room settings"
+        position="bottom"
+      >
         <ng-icon name="lucideSlidersHorizontal" />
       </button>
 

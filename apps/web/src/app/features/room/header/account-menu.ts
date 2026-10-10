@@ -12,6 +12,7 @@ import {
   lucideUser,
 } from '@ng-icons/lucide';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import type { Account } from '../../../core/account';
 import type { ThemePreference } from '../../../core/theme';
@@ -19,7 +20,7 @@ import type { ThemePreference } from '../../../core/theme';
 /** Avatar button in the top bar with the account dropdown. Guests get a person icon and a Sign in action. */
 @Component({
   selector: 'flipvote-account-menu',
-  imports: [NgTemplateOutlet, NgIcon, HlmAvatarImports, HlmDropdownMenuImports],
+  imports: [NgTemplateOutlet, NgIcon, HlmAvatarImports, HlmBadgeImports, HlmDropdownMenuImports],
   providers: [
     provideIcons({
       lucideChevronDown,
@@ -61,11 +62,13 @@ import type { ThemePreference } from '../../../core/theme';
           <button disabled hlmDropdownMenuItem (triggered)="signIn.emit()">
             <ng-icon name="lucideLogIn" />
             Sign in
+            <span hlmBadge variant="secondary" class="ms-auto">Soon</span>
           </button>
         }
         <button disabled hlmDropdownMenuItem (triggered)="signUp.emit()">
           <ng-icon name="lucideUser" />
           Sign up
+          <span hlmBadge variant="secondary" class="ms-auto">Soon</span>
         </button>
         <button hlmDropdownMenuItem (triggered)="openSettings.emit()">
           <ng-icon name="lucideSettings" />

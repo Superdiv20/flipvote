@@ -58,6 +58,27 @@ describe('RoomSettings', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((el) => (el.innerHTML = '')),
   );
 
+  it('explains the settings button in a tooltip on hover', async () => {
+    const fixture = TestBed.createComponent(RoomSettings);
+    fixture.componentRef.setInput('deckId', 'fibonacci');
+    fixture.componentRef.setInput('participants', [seat('ana')]);
+    fixture.componentRef.setInput('selfId', 'ana');
+    fixture.componentRef.setInput('votedCount', 0);
+    fixture.componentRef.setInput('flipped', false);
+    fixture.componentRef.setInput('autoFlip', false);
+    fixture.componentRef.setInput('onlyFacilitatorCanFlip', true);
+    await fixture.whenStable();
+
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector(
+      'button[aria-label="Room settings"]',
+    )!;
+    trigger.dispatchEvent(Object.assign(new Event('pointerenter'), { pointerType: 'mouse' }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await fixture.whenStable();
+
+    expect(document.querySelector('[role="tooltip"]')?.textContent?.trim()).toBe('Room settings');
+  });
+
   it('opens a sheet with a title and every deck, the current one picked', async () => {
     const { sheet, radio } = await open();
     expect(sheet().querySelector('h2')?.textContent).toContain('Room settings');
