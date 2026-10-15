@@ -57,3 +57,41 @@ describe('room route', () => {
     expect(second.view()).toBe('joining');
   });
 });
+
+describe('unknown addresses', () => {
+  async function visit(url: string) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes, withComponentInputBinding()),
+        { provide: SocketService, useValue: silentSocket() },
+      ],
+    });
+    TestBed.inject(SessionService).setName('Ana');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl(url);
+    return harness.routeNativeElement as HTMLElement;
+  }
+
+  it.each(['/does-not-exist', '/r', '/r/abc/extra', '/createRoom/again'])(
+    'shows the 404 page for %p',
+    async (url) => {
+      const page = await visit(url);
+      expect(page.querySelector('h1')?.textContent).toContain('Page not found');
+      expect(page.querySelector('a[href="/"]')?.textContent).toContain('Create a new room');
+    },
+  );
+
+  it('names the tab after it', async () => {
+    await visit('/does-not-exist');
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(document.title).toBe('Page not found · Flipvote');
+  });
+
+  it.each([
+    ['/createRoom', 'flipvote-create-room-page'],
+    ['/r/abc', 'flipvote-room-page'],
+  ])('leaves %p to its own page', async (url, selector) => {
+    const page = await visit(url);
+    expect(page.tagName.toLowerCase()).toBe(selector);
+  });
+});

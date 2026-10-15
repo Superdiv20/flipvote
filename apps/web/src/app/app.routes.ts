@@ -15,4 +15,10 @@ export const routes: Routes = [
     // would hand the next visit the previous room's store.
     loadComponent: () => import('./features/room/room-page').then((m) => m.RoomPage),
   },
+  {
+    // Last, as the router takes the first match: everything no route above knows.
+    path: '**',
+    title: 'Page not found · Flipvote',
+    loadComponent: () => import('./features/not-found/not-found-page').then((m) => m.NotFoundPage),
+  },
 ];
