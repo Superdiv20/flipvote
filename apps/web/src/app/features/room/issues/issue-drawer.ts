@@ -7,6 +7,7 @@ import { AddIssueDialog, type AddIssueDialogContext } from './add-issue-dialog';
 import { AddIssueField } from './add-issue-field';
 import { IssueList } from './issue-list';
 import { IssueRail } from './issue-rail';
+import { TranslocoPipe } from '@jsverse/transloco';
 import type { Issue } from '@flipvote/protocol';
 import type { IssueDetails } from './issue-types';
 
@@ -16,7 +17,7 @@ import type { IssueDetails } from './issue-types';
  */
 @Component({
   selector: 'flipvote-issue-drawer',
-  imports: [NgIcon, HlmButtonImports, AddIssueField, IssueList, IssueRail],
+  imports: [NgIcon, HlmButtonImports, AddIssueField, IssueList, IssueRail, TranslocoPipe],
   providers: [provideIcons({ lucideChevronsLeft })],
   host: {
     class:
@@ -35,10 +36,12 @@ import type { IssueDetails } from './issue-types';
         aria-labelledby="issues-title"
       >
         <div class="flex h-14 shrink-0 items-center gap-2 pr-2.5 pl-4">
-          <h2 id="issues-title" class="text-sm font-semibold">Issues</h2>
+          <h2 id="issues-title" class="text-sm font-semibold">
+            {{ 'room.issues.title' | transloco }}
+          </h2>
           <span
             class="bg-muted flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold"
-            [attr.aria-label]="issues().length + ' issues'"
+            [attr.aria-label]="'room.issues.count' | transloco: { count: issues().length }"
           >
             {{ issues().length }}
           </span>
@@ -47,7 +50,7 @@ import type { IssueDetails } from './issue-types';
             hlmBtn
             variant="ghost"
             size="icon"
-            aria-label="Collapse issues"
+            [attr.aria-label]="'room.issues.collapse' | transloco"
             (click)="toggle.emit()"
           >
             <ng-icon name="lucideChevronsLeft" />

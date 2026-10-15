@@ -11,6 +11,9 @@ import {
 } from '@angular/core';
 import { AccountService } from '../../core/account';
 import { SessionService } from '../../core/session';
+import { LanguageService } from '../../core/i18n';
+import { translateSignal } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { ThemeService } from '../../core/theme';
 import { CardHand } from './hand/card-hand';
 import { IssueDrawer } from './issues/issue-drawer';
@@ -77,6 +80,8 @@ import { RoomNotFound } from './room-not-found';
           [theme]="theme.theme()"
           [themePreference]="theme.preference()"
           (themePreferenceChange)="theme.setPreference($event)"
+          [language]="languages.language()"
+          (languageChange)="languages.use($event)"
           [account]="account.account()"
           [guestName]="guestName()"
           (toggleTheme)="theme.toggle()"
@@ -153,10 +158,12 @@ export class RoomPage implements OnInit {
   protected readonly theme = inject(ThemeService);
   protected readonly account = inject(AccountService);
   private readonly session = inject(SessionService);
+  protected readonly languages = inject(LanguageService);
   private readonly document = inject(DOCUMENT);
 
   /** Without an account, the menu shows the name saved in the session. */
-  protected readonly guestName = computed(() => this.session.name() ?? 'Guest');
+  private readonly guest = translateSignal(marker('account.guest'));
+  protected readonly guestName = computed(() => this.session.name() ?? this.guest());
 
   protected readonly results = computed(() => {
     const results = this.roomStore.results();

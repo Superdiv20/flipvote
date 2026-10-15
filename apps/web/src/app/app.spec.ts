@@ -1,6 +1,9 @@
 import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { TRANSLOCO_LOADER } from '@jsverse/transloco';
+import { of } from 'rxjs';
+import en from '../../public/i18n/en.json';
 import { App } from './app';
 import { appConfig } from './app.config';
 
@@ -34,7 +37,13 @@ describe('app start', () => {
       removeEventListener: () => {},
     }));
 
-    TestBed.configureTestingModule({ providers: appConfig.providers });
+    TestBed.configureTestingModule({
+      // The real config, with the translation files read from disk instead of over HTTP.
+      providers: [
+        ...appConfig.providers,
+        { provide: TRANSLOCO_LOADER, useValue: { getTranslation: () => of(en) } },
+      ],
+    });
     await TestBed.inject(ApplicationInitStatus).donePromise;
     TestBed.tick();
 

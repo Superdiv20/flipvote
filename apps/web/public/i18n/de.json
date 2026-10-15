@@ -1,0 +1,225 @@
+{
+  "account": {
+    "guest": "Gast",
+    "guestHint": "Gast · nur in diesem Browser",
+    "language": "Sprache",
+    "languages": {
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "menu": "Kontomenü",
+    "profileSettings": "Profileinstellungen",
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "signUp": "Registrieren",
+    "soon": "Bald",
+    "theme": "Darstellung",
+    "themes": {
+      "dark": "Dunkel",
+      "light": "Hell",
+      "system": "System"
+    }
+  },
+  "app": {
+    "title": "Flipvote"
+  },
+  "cards": {
+    "coffee": "Kaffeepause"
+  },
+  "common": {
+    "backToStart": "Zurück zum Start",
+    "cancel": "Abbrechen",
+    "createNewRoom": "Neuen Raum erstellen",
+    "save": "Speichern",
+    "tryAgain": "Erneut versuchen"
+  },
+  "decks": {
+    "fibonacci": "Fibonacci",
+    "modified-fibonacci": "Modifizierte Fibonacci",
+    "t-shirt": "T-Shirt-Größen"
+  },
+  "errors": {
+    "ALREADY_IN_ROOM": "Dieser Tab ist schon mit einem anderen Raum verbunden.",
+    "ALREADY_REVEALED": "Die Karten sind schon aufgedeckt. Starte eine neue Runde, um wieder abzustimmen.",
+    "INVALID_CARD": "Diese Karte gibt es im Kartenset dieses Raums nicht.",
+    "INVALID_MESSAGE": "Der Server hat das nicht verstanden. Lade die Seite neu und versuch es noch einmal.",
+    "INVALID_SESSION": "Deine Sitzung passt nicht zu deinem Platz. Lade die Seite neu und versuch es noch einmal.",
+    "ISSUE_NOT_FOUND": "Dieses Issue wurde inzwischen entfernt.",
+    "ISSUE_TOO_LONG": "Dieses Issue ist zu lang. Kürze Titel, Link oder Beschreibung.",
+    "NAME_REQUIRED": "Gib einen Namen ein.",
+    "NAME_TOO_LONG": "Namen dürfen höchstens {nameMax} Zeichen haben.",
+    "NOT_FACILITATOR": "Das kann nur der Facilitator.",
+    "NOT_JOINED": "Du sitzt nicht mehr in diesem Raum. Lade die Seite neu, um wieder beizutreten.",
+    "NOT_REVEALED": "Die Karten sind noch nicht aufgedeckt.",
+    "NO_VOTES": "Noch hat niemand abgestimmt, es gibt also nichts aufzudecken.",
+    "PARTICIPANT_NOT_CONNECTED": "Diese Person ist gerade abwesend. Versuch es noch einmal, wenn sie zurück ist.",
+    "PARTICIPANT_NOT_FOUND": "Diese Person hat den Raum verlassen.",
+    "ROOM_NAME_TOO_LONG": "Raumnamen dürfen höchstens {roomNameMax} Zeichen haben.",
+    "ROOM_NOT_FOUND": "Diesen Raum gibt es nicht mehr.",
+    "SPECTATOR_CANNOT_VOTE": "Du schaust nur zu. Schalte „Nur zuschauen“ aus, um abzustimmen.",
+    "TITLE_REQUIRED": "Gib dem Issue einen Titel.",
+    "TOO_MANY_ISSUES": "Dieser Raum hat schon {maxIssues} Issues. Entferne welche, um neue hinzuzufügen.",
+    "UNKNOWN": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
+    "VOTES_LOCKED": "Alle haben abgestimmt, deshalb sind die Stimmen bis zum Aufdecken gesperrt."
+  },
+  "forms": {
+    "namePlaceholder": "Ana",
+    "nameRequired": "Gib den Namen ein, den die anderen sehen.",
+    "nameTooLong": "Namen dürfen höchstens {max} Zeichen haben.",
+    "roomNameRequired": "Gib dem Raum einen Namen.",
+    "roomNameTooLong": "Raumnamen dürfen höchstens {max} Zeichen haben.",
+    "tooLong": "Höchstens {max} Zeichen.",
+    "yourName": "Dein Name"
+  },
+  "landing": {
+    "anyoneCanJoin": "Alle mit dem Link können beitreten.",
+    "create": "Raum erstellen",
+    "creating": "Raum wird erstellt…",
+    "description": "Erstelle einen Raum, teile den Link und stimmt verdeckt ab. Ganz ohne Konto.",
+    "displayNamePlaceholder": "Dein Anzeigename",
+    "errors": {
+      "INVALID_MESSAGE": "Der Server hat die Raumeinstellungen nicht akzeptiert. Prüfe Name und Kartenset.",
+      "INVALID_SESSION": "Deine Sitzung konnte nicht bestätigt werden. Lade die Seite neu und versuch es noch einmal.",
+      "NAME_REQUIRED": "Gib dem Raum einen Namen.",
+      "failed": "Der Raum konnte nicht erstellt werden. Bitte versuch es noch einmal.",
+      "serverError": "Beim Server ist ein Problem aufgetreten. Versuch es gleich noch einmal.",
+      "unreachable": "Der Server ist nicht erreichbar. Prüfe deine Verbindung."
+    },
+    "roomName": "Raumname",
+    "roomNamePlaceholder": "Sprint-42-Planning",
+    "title": "Starte eine Planning-Session"
+  },
+  "notFound": {
+    "description": "Unter dieser Adresse gibt es nichts. Um einem Raum beizutreten, öffne den Link, den du bekommen hast.",
+    "pageTitle": "Seite nicht gefunden · Flipvote",
+    "title": "Seite nicht gefunden"
+  },
+  "profile": {
+    "description": "Nur dieser Browser merkt sie sich.",
+    "nameHint": "Wird am Tisch und in der Teilnehmerliste angezeigt."
+  },
+  "room": {
+    "connection": {
+      "lost": "Verbindung zum Raum verloren. Verbinde neu…",
+      "status": "{status, select, open {Verbunden} connecting {Verbinde…} reconnecting {Verbinde neu…} other {Getrennt}}"
+    },
+    "hand": {
+      "label": "Deine Karten",
+      "locked": "Runde beendet – starte eine neue Runde, um wieder abzustimmen",
+      "pick": "Wähle deine Schätzung",
+      "voteFor": "{card} wählen",
+      "yourVote": "Deine Stimme: {card} · nochmal klicken zum Zurückziehen"
+    },
+    "header": {
+      "invite": "Einladen",
+      "linkCopied": "Link kopiert",
+      "noIssueSelected": "Kein Issue ausgewählt"
+    },
+    "issueDialog": {
+      "add": "Issue hinzufügen",
+      "addDescription": "Füge ein neues Issue mit Link und Beschreibung hinzu.",
+      "addTitle": "Issue hinzufügen",
+      "characterCount": "Zeichen: {count}/{max}",
+      "descriptionLabel": "Beschreibung",
+      "descriptionPlaceholder": "Beschreibung hier eingeben.",
+      "editDescription": "Ändere Titel, Link oder Beschreibung.",
+      "editTitle": "Issue bearbeiten",
+      "linkLabel": "Link",
+      "save": "Änderungen speichern",
+      "titleLabel": "Titel"
+    },
+    "issues": {
+      "add": "Issue hinzufügen",
+      "addPlaceholder": "Issue hinzufügen…",
+      "collapse": "Issues einklappen",
+      "count": "{count, plural, one {# Issue} other {# Issues}}",
+      "delete": "{issue} löschen",
+      "descriptionTooLong": "Beschreibungen dürfen höchstens {max} Zeichen haben.",
+      "empty": "Noch keine Issues. Füge unten eines hinzu.",
+      "expand": "Issues ausklappen",
+      "keyTooLong": "Keys dürfen höchstens {max} Zeichen haben.",
+      "linkTooLong": "Links dürfen höchstens {max} Zeichen haben.",
+      "open": "{issue} öffnen",
+      "openDialog": "Dialog zum Hinzufügen öffnen",
+      "rowLabel": "{issue}, {status, select, current {wird gerade geschätzt} done {geschätzt mit {estimate}} other {dieses Issue schätzen}}",
+      "submit": "Hinzufügen",
+      "title": "Issues",
+      "titleRequired": "Gib dem Issue einen Titel.",
+      "titleTooLong": "Titel dürfen höchstens {max} Zeichen haben.",
+      "voting": "Wird geschätzt"
+    },
+    "join": {
+      "description": "Wähle einen Namen für den Tisch. Dieser Browser merkt ihn sich für das nächste Mal.",
+      "submit": "Raum betreten",
+      "title": "Der Planning-Session beitreten"
+    },
+    "joinFailed": {
+      "reasons": {
+        "ALREADY_IN_ROOM": "Dieser Tab ist schon mit einem anderen Raum verbunden.",
+        "INVALID_SESSION": "Deine Sitzung passt nicht zu deinem Platz in diesem Raum.",
+        "NAME_REQUIRED": "Der Raum braucht deinen Namen, um ihn am Tisch zu zeigen.",
+        "NAME_TOO_LONG": "Dieser Name ist zu lang. Wähle einen kürzeren.",
+        "UNKNOWN": "Beim Beitreten ist etwas schiefgelaufen. Bitte versuch es noch einmal."
+      },
+      "title": "Beitritt nicht möglich"
+    },
+    "joining": {
+      "checkConnection": "Prüfe deine Verbindung und versuch es noch einmal.",
+      "connecting": "Verbinde…",
+      "joining": "Raum wird betreten…",
+      "retrying": "Gleich ein neuer Versuch. Prüfe deine Verbindung.",
+      "unreachable": "Server nicht erreichbar"
+    },
+    "notFound": {
+      "description": "Vielleicht hat sich im Link ein Tippfehler eingeschlichen, oder der Raum wurde geschlossen.",
+      "title": "Raum nicht gefunden"
+    },
+    "participants": {
+      "buttonLabel": "{count, plural, one {# Person} other {# Personen}}, {status, select, open {verbunden} connecting {verbindet} reconnecting {verbindet neu} other {getrennt}}, Liste anzeigen",
+      "cardsRevealed": "Karten aufgedeckt",
+      "noVote": "Keine Stimme",
+      "title": "Teilnehmende",
+      "voted": "Abgestimmt",
+      "votedCount": "{voted} von {total} {voted, plural, one {hat} other {haben}} abgestimmt",
+      "votedFor": "Hat {card} gewählt",
+      "waiting": "Wartet",
+      "watchOnly": "Nur zuschauen",
+      "watchOnlyHint": "Verfolge die Runde ohne eigene Karte.",
+      "you": "(du)"
+    },
+    "results": {
+      "average": "Durchschnitt",
+      "consensus": "Konsens!",
+      "distribution": "Verteilung",
+      "everyoneVoted": "Alle haben {card} gewählt",
+      "label": "Ergebnis",
+      "rowLabel": "{card}: {count, plural, one {# Stimme} other {# Stimmen}}",
+      "voteCount": "{count, plural, one {# Stimme} other {# Stimmen}}"
+    },
+    "settings": {
+      "autoFlip": "Automatisch aufdecken",
+      "autoFlipHint": "Sobald alle abgestimmt haben, startet ein kurzer Countdown und die Karten werden von selbst aufgedeckt. Während des Countdowns sind die Stimmen gesperrt.",
+      "away": "abwesend",
+      "deck": "Kartenset",
+      "description": "Änderungen gelten für alle im Raum.",
+      "facilitator": "Facilitator",
+      "facilitatorHint": "Gib die Rolle an jemand anderen ab. Du behältst deinen Platz und deine Stimme.",
+      "keepDeck": "Aktuelles Kartenset behalten",
+      "makeFacilitator": "Zum Facilitator machen",
+      "makeFacilitatorLabel": "{name} zum Facilitator machen",
+      "nobodyElse": "Sonst ist noch niemand im Raum.",
+      "onlyFacilitatorCanFlip": "Nur der Facilitator deckt auf",
+      "onlyFacilitatorCanFlipHint": "Wenn aktiv, kann nur der Facilitator die Karten von Hand aufdecken.",
+      "switchDeck": "Kartenset wechseln",
+      "switchWarning": "{phase, select, revealed {Ein Wechsel des Kartensets beendet diese Runde und löscht ihr Ergebnis.} other {Ein Wechsel des Kartensets startet eine neue Runde und löscht {count, plural, one {# Stimme} other {# Stimmen}}.}}",
+      "title": "Raumeinstellungen"
+    },
+    "table": {
+      "countdownStarted": "Alle haben abgestimmt. Gleich werden die Karten aufgedeckt.",
+      "newRound": "Neue Runde",
+      "reveal": "Karten aufdecken",
+      "revealingIn": "Aufdecken in {seconds}…",
+      "seatLabel": "{name}{self, select, yes { (du)} other {}}{state, select, card {: {card}} noVote {: keine Stimme} voted {: hat abgestimmt} other {: hat noch nicht abgestimmt}}"
+    }
+  }
+}

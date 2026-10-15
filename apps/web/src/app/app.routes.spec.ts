@@ -5,6 +5,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import type { ServerMessage } from '@flipvote/protocol';
 import { SessionService } from './core/session';
 import { SocketService } from './core/socket';
+import { provideTranslatedTitles } from './core/translated-title';
 import { RoomStore } from './features/room/+store/room-store';
 import { routes } from './app.routes';
 
@@ -63,6 +64,7 @@ describe('unknown addresses', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes, withComponentInputBinding()),
+        provideTranslatedTitles(),
         { provide: SocketService, useValue: silentSocket() },
       ],
     });

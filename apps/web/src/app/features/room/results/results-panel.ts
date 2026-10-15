@@ -2,18 +2,21 @@ import { Component, computed, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePartyPopper } from '@ng-icons/lucide';
 import { CardValue } from '../hand/card-value';
-import { cardLabel } from '../hand/card-label';
+import { translateSignal, TranslocoPipe } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
+import { TranslocoDecimalPipe } from '@jsverse/transloco-locale';
+import { CardNamePipe } from '../hand/card-name';
 import type { RoundResult } from '@flipvote/protocol';
 
 @Component({
   selector: 'flipvote-results-panel',
-  imports: [NgIcon, CardValue],
+  imports: [NgIcon, CardValue, TranslocoPipe, TranslocoDecimalPipe, CardNamePipe],
   providers: [provideIcons({ lucidePartyPopper })],
   host: {
     class:
       'bg-background shadow-float flex w-62 flex-col gap-4 rounded-lg p-5 inset-ring inset-ring-border',
     role: 'region',
-    'aria-label': 'Results',
+    '[attr.aria-label]': 'regionLabel()',
   },
   template: `
     @if (results().consensus; as consensus) {
@@ -22,28 +25,40 @@ import type { RoundResult } from '@flipvote/protocol';
       >
         <ng-icon name="lucidePartyPopper" size="18px" aria-hidden="true" />
         <div class="flex flex-col">
-          <span class="text-sm font-bold">Consensus!</span>
-          <span class="text-xs text-slate-600 dark:text-slate-300"
-            >Everyone voted {{ label(consensus) }}</span
-          >
+          <span class="text-sm font-bold">{{ 'room.results.consensus' | transloco }}</span>
+          <span class="text-xs text-slate-600 dark:text-slate-300">{{
+            'room.results.everyoneVoted' | transloco: { card: consensus | cardName }
+          }}</span>
         </div>
       </div>
     }
     <div class="flex items-end justify-between">
       <div class="flex flex-col gap-0.5">
-        <span class="text-muted-foreground text-xs font-medium">Average</span>
-        <span class="text-4xl font-extrabold tracking-[-0.012em]">{{ average() }}</span>
+        <span class="text-muted-foreground text-xs font-medium">{{
+          'room.results.average' | transloco
+        }}</span>
+        <!-- Formatted for the active language (5.5 / 5,5), which Angular's static LOCALE_ID can't follow. -->
+        <span class="text-4xl font-extrabold tracking-[-0.012em]">
+          @let average = results().average;
+          @if (average !== null) {
+            {{ average | translocoDecimal: { maximumFractionDigits: 1 } }}
+          } @else {
+            –
+          }
+        </span>
       </div>
       <span class="text-muted-foreground pb-1.5 text-xs font-medium">
-        {{ results().voteCount }} {{ results().voteCount === 1 ? 'vote' : 'votes' }}
+        {{ 'room.results.voteCount' | transloco: { count: results().voteCount } }}
       </span>
     </div>
     <div class="bg-border h-px" aria-hidden="true"></div>
-    <ul class="flex flex-col gap-2" aria-label="Distribution">
+    <ul class="flex flex-col gap-2" [attr.aria-label]="'room.results.distribution' | transloco">
       @for (row of rows(); track row.value) {
         <li
           class="grid grid-cols-[28px_1fr_16px] items-center gap-2.5"
-          [attr.aria-label]="row.ariaLabel"
+          [attr.aria-label]="
+            'room.results.rowLabel' | transloco: { card: row.value | cardName, count: row.count }
+          "
         >
           <flipvote-card-value
             class="justify-end [&_span]:text-sm! [&_span]:font-bold"
@@ -69,11 +84,7 @@ import type { RoundResult } from '@flipvote/protocol';
 export class ResultsPanel {
   readonly results = input.required<RoundResult>();
 
-  protected readonly average = computed(() => {
-    const average = this.results().average;
-    if (average === null) return '–';
-    return Number.isInteger(average) ? String(average) : average.toFixed(1);
-  });
+  protected readonly regionLabel = translateSignal(marker('room.results.label'));
 
   protected readonly rows = computed(() => {
     const distribution = this.results().distribution;
@@ -82,11 +93,6 @@ export class ResultsPanel {
       ...row,
       top: row.count === max,
       width: (row.count / max) * 100,
-      ariaLabel: `${cardLabel(row.value)}: ${row.count} ${row.count === 1 ? 'vote' : 'votes'}`,
     }));
   });
-
-  protected label(value: string): string {
-    return cardLabel(value);
-  }
 }

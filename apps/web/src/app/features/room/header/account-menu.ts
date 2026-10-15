@@ -4,6 +4,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideChevronDown,
   lucideLogIn,
+  lucideLanguages,
   lucideLogOut,
   lucideMonitor,
   lucideMoon,
@@ -15,16 +16,27 @@ import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import type { Account } from '../../../core/account';
+import type { Language } from '../../../core/languages';
 import type { ThemePreference } from '../../../core/theme';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 
 /** Avatar button in the top bar with the account dropdown. Guests get a person icon and a Sign in action. */
 @Component({
   selector: 'flipvote-account-menu',
-  imports: [NgTemplateOutlet, NgIcon, HlmAvatarImports, HlmBadgeImports, HlmDropdownMenuImports],
+  imports: [
+    NgTemplateOutlet,
+    NgIcon,
+    HlmAvatarImports,
+    HlmBadgeImports,
+    HlmDropdownMenuImports,
+    TranslocoPipe,
+  ],
   providers: [
     provideIcons({
       lucideChevronDown,
       lucideLogIn,
+      lucideLanguages,
       lucideLogOut,
       lucideMonitor,
       lucideMoon,
@@ -38,7 +50,7 @@ import type { ThemePreference } from '../../../core/theme';
     <button
       type="button"
       class="bg-muted text-muted-foreground focus-visible:ring-ring/50 flex items-center gap-1 rounded-full py-0.5 pr-1.5 pl-0.5 outline-none focus-visible:ring-3"
-      aria-label="Account menu"
+      [attr.aria-label]="'account.menu' | transloco"
       [hlmDropdownMenuTrigger]="menu"
       align="end"
     >
@@ -53,7 +65,7 @@ import type { ThemePreference } from '../../../core/theme';
           <div class="flex min-w-0 flex-col">
             <span class="truncate text-sm font-semibold">{{ displayName() }}</span>
             <span class="text-muted-foreground truncate text-xs">
-              {{ account()?.email ?? 'Guest · this browser only' }}
+              {{ account()?.email ?? ('account.guestHint' | transloco) }}
             </span>
           </div>
         </div>
@@ -61,22 +73,24 @@ import type { ThemePreference } from '../../../core/theme';
         @if (!account()) {
           <button disabled hlmDropdownMenuItem (triggered)="signIn.emit()">
             <ng-icon name="lucideLogIn" />
-            Sign in
-            <span hlmBadge variant="secondary" class="ms-auto">Soon</span>
+            {{ 'account.signIn' | transloco }}
+            <span hlmBadge variant="secondary" class="ms-auto">{{
+              'account.soon' | transloco
+            }}</span>
           </button>
         }
         <button disabled hlmDropdownMenuItem (triggered)="signUp.emit()">
           <ng-icon name="lucideUser" />
-          Sign up
-          <span hlmBadge variant="secondary" class="ms-auto">Soon</span>
+          {{ 'account.signUp' | transloco }}
+          <span hlmBadge variant="secondary" class="ms-auto">{{ 'account.soon' | transloco }}</span>
         </button>
         <button hlmDropdownMenuItem (triggered)="openSettings.emit()">
           <ng-icon name="lucideSettings" />
-          Profile settings
+          {{ 'account.profileSettings' | transloco }}
         </button>
         <hlm-dropdown-menu-separator />
         <hlm-dropdown-menu-group>
-          <hlm-dropdown-menu-label>Theme</hlm-dropdown-menu-label>
+          <hlm-dropdown-menu-label>{{ 'account.theme' | transloco }}</hlm-dropdown-menu-label>
           @for (option of themeOptions; track option.value) {
             <button
               hlmDropdownMenuRadio
@@ -84,7 +98,24 @@ import type { ThemePreference } from '../../../core/theme';
               (triggered)="themePreferenceChange.emit(option.value)"
             >
               <ng-icon [name]="option.icon" />
-              {{ option.label }}
+              {{ option.labelKey | transloco }}
+              <hlm-dropdown-menu-radio-indicator />
+            </button>
+          }
+        </hlm-dropdown-menu-group>
+        <hlm-dropdown-menu-separator />
+        <!-- Switches in place: no reload, and the room's connection stays open. -->
+        <hlm-dropdown-menu-group>
+          <hlm-dropdown-menu-label>{{ 'account.language' | transloco }}</hlm-dropdown-menu-label>
+          @for (option of languageOptions; track option.value) {
+            <button
+              hlmDropdownMenuRadio
+              [checked]="language() === option.value"
+              [attr.lang]="option.value"
+              (triggered)="languageChange.emit(option.value)"
+            >
+              <ng-icon name="lucideLanguages" />
+              {{ option.labelKey | transloco }}
               <hlm-dropdown-menu-radio-indicator />
             </button>
           }
@@ -93,7 +124,7 @@ import type { ThemePreference } from '../../../core/theme';
           <hlm-dropdown-menu-separator />
           <button hlmDropdownMenuItem (triggered)="signOut.emit()">
             <ng-icon name="lucideLogOut" />
-            Sign out
+            {{ 'account.signOut' | transloco }}
           </button>
         }
       </hlm-dropdown-menu>
@@ -124,6 +155,8 @@ export class AccountMenu {
   readonly themePreference = input.required<ThemePreference>();
 
   readonly themePreferenceChange = output<ThemePreference>();
+  readonly language = input.required<Language>();
+  readonly languageChange = output<Language>();
 
   readonly openSettings = output();
   readonly signIn = output();
@@ -131,6 +164,7 @@ export class AccountMenu {
   readonly signOut = output();
 
   protected readonly themeOptions = THEME_OPTIONS;
+  protected readonly languageOptions = LANGUAGE_OPTIONS;
 
   protected readonly displayName = computed(() => this.account()?.name ?? this.guestName());
   protected readonly initials = computed(() =>
@@ -143,8 +177,14 @@ export class AccountMenu {
   );
 }
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; icon: string }[] = [
-  { value: 'light', label: 'Light', icon: 'lucideSun' },
-  { value: 'dark', label: 'Dark', icon: 'lucideMoon' },
-  { value: 'system', label: 'System', icon: 'lucideMonitor' },
+const THEME_OPTIONS: { value: ThemePreference; labelKey: string; icon: string }[] = [
+  { value: 'light', labelKey: marker('account.themes.light'), icon: 'lucideSun' },
+  { value: 'dark', labelKey: marker('account.themes.dark'), icon: 'lucideMoon' },
+  { value: 'system', labelKey: marker('account.themes.system'), icon: 'lucideMonitor' },
+];
+
+/** Each language named in itself, so everyone finds theirs whatever is active. */
+const LANGUAGE_OPTIONS: { value: Language; labelKey: string }[] = [
+  { value: 'en', labelKey: marker('account.languages.en') },
+  { value: 'de', labelKey: marker('account.languages.de') },
 ];

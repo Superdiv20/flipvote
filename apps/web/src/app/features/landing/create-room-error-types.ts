@@ -1,8 +1,9 @@
 import type { ErrorCode } from '@flipvote/protocol';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 
-/** Messages for the codes `POST /api/rooms` can answer with. */
+/** Wording for the codes `POST /api/rooms` can answer with. Other codes use the shared error keys. */
 export const CREATE_ROOM_ERRORS: Partial<Record<ErrorCode, string>> = {
-  NAME_REQUIRED: 'Give the room a name.',
-  INVALID_MESSAGE: 'The server did not accept the room settings. Check the name and the deck.',
-  INVALID_SESSION: 'Your session could not be verified. Reload the page and try again.',
+  NAME_REQUIRED: marker('landing.errors.NAME_REQUIRED'),
+  INVALID_MESSAGE: marker('landing.errors.INVALID_MESSAGE'),
+  INVALID_SESSION: marker('landing.errors.INVALID_SESSION'),
 };

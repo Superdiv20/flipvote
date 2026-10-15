@@ -2,7 +2,10 @@ import { Component, computed, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck } from '@ng-icons/lucide';
 import { CardValue } from '../hand/card-value';
-import { cardLabel } from '../hand/card-label';
+import { COFFEE_CARD } from '@flipvote/protocol';
+import { translateSignal } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
+import { cardText } from '../hand/card-label';
 
 /** One participant at the table: their card (empty, face down, or flipped) and name. */
 @Component({
@@ -93,11 +96,22 @@ export class Seat {
 
   protected readonly revealed = computed(() => this.flipped() && this.vote() !== undefined);
 
-  protected readonly ariaLabel = computed(() => {
-    const name = this.isSelf() ? `${this.name()} (you)` : this.name();
-    const vote = this.vote();
-    if (this.flipped())
-      return vote === undefined ? `${name}: no vote` : `${name}: ${cardLabel(vote)}`;
-    return `${name}: ${this.hasVoted() ? 'voted' : 'not voted yet'}`;
-  });
+  private readonly coffee = translateSignal(marker('cards.coffee'));
+
+  // A host binding can't use pipes, so the label is a translated signal that follows the language.
+  protected readonly ariaLabel = translateSignal(
+    marker('room.table.seatLabel'),
+    computed(() => {
+      const vote = this.vote();
+      const state = this.flipped()
+        ? vote === undefined
+          ? 'noVote'
+          : 'card'
+        : this.hasVoted()
+          ? 'voted'
+          : 'waiting';
+      const card = vote === undefined ? '' : vote === COFFEE_CARD ? this.coffee() : cardText(vote);
+      return { name: this.name(), self: this.isSelf() ? 'yes' : 'no', state, card };
+    }),
+  );
 }

@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import type { ErrorCode } from '@flipvote/protocol';
-import { ERROR_MESSAGES } from '../../shared/error-messages';
 import { RoomJoinFailed } from './room-join-failed';
 
 async function reasonFor(code: ErrorCode | null): Promise<string> {
@@ -20,7 +19,9 @@ describe('RoomJoinFailed', () => {
   });
 
   it('falls back to the shared message for any other code', async () => {
-    expect(await reasonFor('NOT_JOINED')).toBe(ERROR_MESSAGES.NOT_JOINED);
+    expect(await reasonFor('NOT_JOINED')).toBe(
+      'You’re no longer seated in this room. Reload the page to join again.',
+    );
   });
 
   it('has a sentence for a missing code', async () => {

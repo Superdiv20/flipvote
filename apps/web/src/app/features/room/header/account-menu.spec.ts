@@ -6,6 +6,7 @@ async function openMenu() {
   fixture.componentRef.setInput('account', null);
   fixture.componentRef.setInput('guestName', 'Ana');
   fixture.componentRef.setInput('themePreference', 'system');
+  fixture.componentRef.setInput('language', 'en');
   await fixture.whenStable();
   (fixture.nativeElement as HTMLElement)
     .querySelector<HTMLButtonElement>('button[aria-label="Account menu"]')!

@@ -18,7 +18,8 @@ import {
 } from '@ngrx/signals';
 import { toast } from '@spartan-ng/brain/sonner';
 import { SessionService } from '../../../core/session';
-import { ERROR_MESSAGES } from '../../../shared/error-messages';
+import { ERROR_PARAMS, errorKey } from '../../../shared/error-keys';
+import { TranslocoService } from '@jsverse/transloco';
 import { SocketService } from '../../../core/socket';
 import { type IssueDetails, issueLabel, parseIssueTitle } from '../issues/issue-types';
 
@@ -120,143 +121,150 @@ export const RoomStore = signalStore(
       }),
     };
   }),
-  withMethods((store, socket = inject(SocketService), session = inject(SessionService)) => {
-    const send = (message: ClientMessage) => socket.send(message);
+  withMethods(
+    (
+      store,
+      socket = inject(SocketService),
+      session = inject(SessionService),
+      transloco = inject(TranslocoService),
+    ) => {
+      const send = (message: ClientMessage) => socket.send(message);
 
-    return {
-      /** Takes a seat, or the same seat again after a refresh. Remembers the name for the next visit. */
-      join(roomId: string, name: string): void {
-        session.setName(name);
-        patchState(store, { awaitingName: false, joinError: null, roomId });
-        send({ type: 'join', roomId, name, sessionToken: session.token });
-      },
+      return {
+        /** Takes a seat, or the same seat again after a refresh. Remembers the name for the next visit. */
+        join(roomId: string, name: string): void {
+          session.setName(name);
+          patchState(store, { awaitingName: false, joinError: null, roomId });
+          send({ type: 'join', roomId, name, sessionToken: session.token });
+        },
 
-      /**
-       * Joins with the saved display name, e.g. right after creating the room or after a refresh.
-       * Without a saved name it sends nothing and switches to the name prompt instead.
-       */
-      enter(roomId: string): void {
-        const name = session.name();
-        if (!name) {
-          patchState(store, { awaitingName: true });
-          return;
-        }
-        patchState(store, { roomId });
-        send({ type: 'join', roomId, name, sessionToken: session.token });
-      },
-
-      /** Picks a card, or withdraws the vote when the same card is picked again. */
-      vote(value: string): void {
-        send({ type: 'vote', value: store.myVote() === value ? null : value });
-      },
-
-      flip(): void {
-        send({ type: 'flip' });
-      },
-
-      /** Starts a new round. The server records the estimate and moves on to the next open issue. */
-      reset(): void {
-        send({ type: 'reset' });
-      },
-
-      selectIssue(id: string): void {
-        send({ type: 'selectIssue', issueId: id });
-      },
-
-      /** Quick add: one issue from a single line. */
-      addIssue(text: string): void {
-        const parsed = parseIssueTitle(text);
-        if (parsed) send({ type: 'addIssue', issue: parsed });
-      },
-
-      /** Adds an issue from the full dialog. A leading tracker key in the title is split off like in quick add. */
-      createIssue(details: IssueDetails): void {
-        const parsed = parseIssueTitle(details.title);
-        if (parsed) send({ type: 'addIssue', issue: { ...details, ...parsed } });
-      },
-
-      /** Facilitator. Starts a new round with the new deck, so every vote so far is cleared. */
-      setDeck(deckId: DeckId): void {
-        send({ type: 'setDeck', deckId });
-      },
-
-      /** Facilitator. Flip by itself, after a short countdown, once everyone has voted. */
-      setAutoFlip(enabled: boolean): void {
-        send({ type: 'setAutoFlip', enabled });
-      },
-
-      /** Facilitator. Whether only the facilitator, or everyone, may reveal the cards by hand. */
-      setOnlyFacilitatorCanFlip(enabled: boolean): void {
-        send({ type: 'setOnlyFacilitatorCanFlip', enabled });
-      },
-
-      /** Facilitator. Hands the role to another connected participant. */
-      transferFacilitator(participantId: string): void {
-        send({ type: 'transferFacilitator', participantId });
-      },
-
-      /** For ourselves: the name at the table. Saved for the next visit right away. */
-      rename(name: string): void {
-        session.setName(name);
-        send({ type: 'setName', name });
-      },
-
-      /** For ourselves: watch the round without a card. Becoming a spectator drops our vote. */
-      setSpectator(spectator: boolean): void {
-        send({ type: 'setSpectator', spectator });
-      },
-
-      /** Facilitator. Removing the current issue moves on to the next open one and starts a new round. */
-      removeIssue(id: string): void {
-        send({ type: 'removeIssue', issueId: id });
-      },
-
-      updateIssue(id: string, details: IssueDetails): void {
-        send({ type: 'updateIssue', issueId: id, changes: details });
-      },
-
-      /** After a reconnect: the same room, under the current name. Nothing when the join had failed. */
-      _rejoin(): void {
-        const roomId = store.roomId();
-        const name = session.name();
-        if (!roomId || !name || store.joinError()) return;
-        send({ type: 'join', roomId, name, sessionToken: session.token });
-      },
-
-      _handleRoomUpdate(message: ServerMessage): void {
-        switch (message.type) {
-          case 'welcome':
-            patchState(store, { participantId: message.participantId, myVote: message.myVote });
-            break;
-          case 'myVote':
-            patchState(store, { myVote: message.value });
-            break;
-          case 'state': {
-            // A new round clears every vote without a `myVote` message. The shared state shows it:
-            // once our seat says `hasVoted: false`, we have no vote either.
-            const self = message.room.participants.find((p) => p.id === store.participantId());
-            const { flipInMs } = message.room;
-            patchState(store, {
-              room: message.room,
-              flipDeadline: flipInMs === null ? null : Date.now() + flipInMs,
-              ...(self && !self.hasVoted ? { myVote: null } : {}),
-            });
-            break;
+        /**
+         * Joins with the saved display name, e.g. right after creating the room or after a refresh.
+         * Without a saved name it sends nothing and switches to the name prompt instead.
+         */
+        enter(roomId: string): void {
+          const name = session.name();
+          if (!name) {
+            patchState(store, { awaitingName: true });
+            return;
           }
-          case 'error':
-            // Before the first state, only the join can have failed, and a gone room is gone at
-            // any time: the page shows a screen for both. Anything else concerns a single
-            // intent, so the room stays and a toast says what went wrong.
-            if (store.room() === null || message.code === 'ROOM_NOT_FOUND') {
-              patchState(store, { joinError: message.code });
-            } else {
-              toast.error(ERROR_MESSAGES[message.code]);
+          patchState(store, { roomId });
+          send({ type: 'join', roomId, name, sessionToken: session.token });
+        },
+
+        /** Picks a card, or withdraws the vote when the same card is picked again. */
+        vote(value: string): void {
+          send({ type: 'vote', value: store.myVote() === value ? null : value });
+        },
+
+        flip(): void {
+          send({ type: 'flip' });
+        },
+
+        /** Starts a new round. The server records the estimate and moves on to the next open issue. */
+        reset(): void {
+          send({ type: 'reset' });
+        },
+
+        selectIssue(id: string): void {
+          send({ type: 'selectIssue', issueId: id });
+        },
+
+        /** Quick add: one issue from a single line. */
+        addIssue(text: string): void {
+          const parsed = parseIssueTitle(text);
+          if (parsed) send({ type: 'addIssue', issue: parsed });
+        },
+
+        /** Adds an issue from the full dialog. A leading tracker key in the title is split off like in quick add. */
+        createIssue(details: IssueDetails): void {
+          const parsed = parseIssueTitle(details.title);
+          if (parsed) send({ type: 'addIssue', issue: { ...details, ...parsed } });
+        },
+
+        /** Facilitator. Starts a new round with the new deck, so every vote so far is cleared. */
+        setDeck(deckId: DeckId): void {
+          send({ type: 'setDeck', deckId });
+        },
+
+        /** Facilitator. Flip by itself, after a short countdown, once everyone has voted. */
+        setAutoFlip(enabled: boolean): void {
+          send({ type: 'setAutoFlip', enabled });
+        },
+
+        /** Facilitator. Whether only the facilitator, or everyone, may reveal the cards by hand. */
+        setOnlyFacilitatorCanFlip(enabled: boolean): void {
+          send({ type: 'setOnlyFacilitatorCanFlip', enabled });
+        },
+
+        /** Facilitator. Hands the role to another connected participant. */
+        transferFacilitator(participantId: string): void {
+          send({ type: 'transferFacilitator', participantId });
+        },
+
+        /** For ourselves: the name at the table. Saved for the next visit right away. */
+        rename(name: string): void {
+          session.setName(name);
+          send({ type: 'setName', name });
+        },
+
+        /** For ourselves: watch the round without a card. Becoming a spectator drops our vote. */
+        setSpectator(spectator: boolean): void {
+          send({ type: 'setSpectator', spectator });
+        },
+
+        /** Facilitator. Removing the current issue moves on to the next open one and starts a new round. */
+        removeIssue(id: string): void {
+          send({ type: 'removeIssue', issueId: id });
+        },
+
+        updateIssue(id: string, details: IssueDetails): void {
+          send({ type: 'updateIssue', issueId: id, changes: details });
+        },
+
+        /** After a reconnect: the same room, under the current name. Nothing when the join had failed. */
+        _rejoin(): void {
+          const roomId = store.roomId();
+          const name = session.name();
+          if (!roomId || !name || store.joinError()) return;
+          send({ type: 'join', roomId, name, sessionToken: session.token });
+        },
+
+        _handleRoomUpdate(message: ServerMessage): void {
+          switch (message.type) {
+            case 'welcome':
+              patchState(store, { participantId: message.participantId, myVote: message.myVote });
+              break;
+            case 'myVote':
+              patchState(store, { myVote: message.value });
+              break;
+            case 'state': {
+              // A new round clears every vote without a `myVote` message. The shared state shows it:
+              // once our seat says `hasVoted: false`, we have no vote either.
+              const self = message.room.participants.find((p) => p.id === store.participantId());
+              const { flipInMs } = message.room;
+              patchState(store, {
+                room: message.room,
+                flipDeadline: flipInMs === null ? null : Date.now() + flipInMs,
+                ...(self && !self.hasVoted ? { myVote: null } : {}),
+              });
+              break;
             }
-            break;
-        }
-      },
-    };
-  }),
+            case 'error':
+              // Before the first state, only the join can have failed, and a gone room is gone at
+              // any time: the page shows a screen for both. Anything else concerns a single
+              // intent, so the room stays and a toast says what went wrong.
+              if (store.room() === null || message.code === 'ROOM_NOT_FOUND') {
+                patchState(store, { joinError: message.code });
+              } else {
+                toast.error(transloco.translate(errorKey(message.code), ERROR_PARAMS));
+              }
+              break;
+          }
+        },
+      };
+    },
+  ),
   withHooks((store) => {
     const socket = inject(SocketService);
     let stopListening: (() => void) | undefined;

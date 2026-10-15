@@ -1,6 +1,8 @@
 import { Component, output, signal } from '@angular/core';
 import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
-import { lengthLimit } from '../../shared/length-limit';
+import { type FieldErrorText, fieldError, lengthLimit } from '../../shared/length-limit';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
@@ -8,7 +10,7 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { Logo } from '../../shared/logo';
 
-const NAME_MESSAGE = 'Enter the name the others will see.';
+const NAME_MESSAGE = marker('forms.nameRequired');
 
 /** Asks a visitor without a saved name for one before joining. Emits the trimmed name. */
 @Component({
@@ -21,6 +23,7 @@ const NAME_MESSAGE = 'Enter the name the others will see.';
     HlmFieldImports,
     HlmInputImports,
     Logo,
+    TranslocoPipe,
   ],
   host: { class: 'flex flex-1 flex-col items-center justify-center gap-8 px-4 py-12' },
   template: `
@@ -28,27 +31,27 @@ const NAME_MESSAGE = 'Enter the name the others will see.';
     <section hlmCard class="w-full max-w-sm shadow-table" aria-labelledby="join-room-title">
       <div hlmCardHeader>
         <h1 hlmCardTitle id="join-room-title" class="text-xl font-semibold tracking-tight">
-          Join the planning session
+          {{ 'room.join.title' | transloco }}
         </h1>
-        <p hlmCardDescription>
-          Pick a name for the table. This browser remembers it for next time.
-        </p>
+        <p hlmCardDescription>{{ 'room.join.description' | transloco }}</p>
       </div>
 
       <form hlmCardContent class="flex flex-col gap-6" [formRoot]="joinForm">
         <hlm-field>
-          <label hlmFieldLabel for="display-name">Your name</label>
+          <label hlmFieldLabel for="display-name">{{ 'forms.yourName' | transloco }}</label>
           <input
             hlmInput
             id="display-name"
             type="text"
             autocomplete="nickname"
-            placeholder="Ana"
+            [placeholder]="'forms.namePlaceholder' | transloco"
             [formField]="joinForm.name"
             [attr.aria-describedby]="nameInvalid() ? 'display-name-error' : null"
           />
-          @if (nameInvalid()) {
-            <hlm-field-error id="display-name-error" forceShow>{{ nameError() }}</hlm-field-error>
+          @if (nameError(); as error) {
+            <hlm-field-error id="display-name-error" forceShow>{{
+              error.key | transloco: error.params
+            }}</hlm-field-error>
           }
         </hlm-field>
 
@@ -57,7 +60,7 @@ const NAME_MESSAGE = 'Enter the name the others will see.';
           type="submit"
           class="w-full bg-brand text-brand-foreground hover:bg-brand-hover"
         >
-          Join room
+          {{ 'room.join.submit' | transloco }}
         </button>
       </form>
     </section>
@@ -74,11 +77,7 @@ export class JoinRoom {
       required(schemaPath.name, { message: NAME_MESSAGE });
       // `required` accepts a name of only spaces.
       pattern(schemaPath.name, /\S/, { message: NAME_MESSAGE });
-      lengthLimit(
-        schemaPath.name,
-        NAME_MAX_LENGTH,
-        `Names can have at most ${NAME_MAX_LENGTH} characters.`,
-      );
+      lengthLimit(schemaPath.name, NAME_MAX_LENGTH, marker('forms.nameTooLong'));
     },
     {
       submission: {
@@ -91,12 +90,11 @@ export class JoinRoom {
   );
 
   protected nameInvalid(): boolean {
-    const name = this.joinForm.name();
-    return (name.touched() || name.dirty()) && name.invalid();
+    return this.nameError() !== null;
   }
 
   /** The first error of the name field, e.g. too long, rather than one fixed text. */
-  protected nameError(): string {
-    return this.joinForm.name().errors()[0]?.message ?? NAME_MESSAGE;
+  protected nameError(): FieldErrorText | null {
+    return fieldError(this.joinForm.name);
   }
 }

@@ -7,6 +7,7 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmSheetImports } from '@spartan-ng/helm/sheet';
 import { HlmSwitchImports } from '@spartan-ng/helm/switch';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { DECK_OPTIONS } from '../../../shared/deck-options';
 
 /**
@@ -22,6 +23,7 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
     HlmSheetImports,
     HlmSwitchImports,
     HlmTooltipImports,
+    TranslocoPipe,
   ],
   providers: [provideIcons({ lucideCrown, lucideSlidersHorizontal, lucideTriangleAlert })],
   template: `
@@ -31,8 +33,8 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
         hlmBtn
         variant="ghost"
         size="icon"
-        aria-label="Room settings"
-        hlmTooltip="Room settings"
+        [attr.aria-label]="'room.settings.title' | transloco"
+        [hlmTooltip]="'room.settings.title' | transloco"
         position="bottom"
       >
         <ng-icon name="lucideSlidersHorizontal" />
@@ -40,13 +42,13 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
 
       <hlm-sheet-content *hlmSheetPortal class="gap-0 overflow-y-auto">
         <hlm-sheet-header>
-          <h2 hlmSheetTitle>Room settings</h2>
-          <p hlmSheetDescription>Changes apply to everyone in the room.</p>
+          <h2 hlmSheetTitle>{{ 'room.settings.title' | transloco }}</h2>
+          <p hlmSheetDescription>{{ 'room.settings.description' | transloco }}</p>
         </hlm-sheet-header>
 
         <div class="flex flex-col gap-8 p-4">
           <fieldset hlmFieldSet>
-            <legend hlmFieldLegend variant="label">Deck</legend>
+            <legend hlmFieldLegend variant="label">{{ 'room.settings.deck' | transloco }}</legend>
             <div class="grid gap-2">
               @for (deck of decks; track deck.id) {
                 <label
@@ -61,7 +63,7 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
                       [checked]="deck.id === shownDeckId()"
                       (change)="pickDeck(deck.id)"
                     />
-                    <span class="text-sm font-medium">{{ deck.name }}</span>
+                    <span class="text-sm font-medium">{{ deck.nameKey | transloco }}</span>
                   </span>
                   <span class="flex flex-wrap gap-1 pl-7" aria-hidden="true">
                     @for (card of deck.preview; track card) {
@@ -82,14 +84,17 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
               >
                 <p class="flex gap-2 text-sm">
                   <ng-icon name="lucideTriangleAlert" class="mt-0.5 shrink-0" aria-hidden="true" />
-                  <span>{{ switchWarning() }}</span>
+                  <span>{{
+                    'room.settings.switchWarning'
+                      | transloco: { phase: flipped() ? 'revealed' : 'voting', count: votedCount() }
+                  }}</span>
                 </p>
                 <div class="flex justify-end gap-2">
                   <button hlmBtn variant="ghost" size="sm" type="button" (click)="keepDeck()">
-                    Keep current deck
+                    {{ 'room.settings.keepDeck' | transloco }}
                   </button>
                   <button hlmBtn size="sm" type="button" (click)="confirmDeck()">
-                    Switch deck
+                    {{ 'room.settings.switchDeck' | transloco }}
                   </button>
                 </div>
               </div>
@@ -98,11 +103,10 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
 
           <div class="flex items-start justify-between gap-4">
             <label for="auto-flip" class="flex flex-col gap-1">
-              <span class="text-sm font-medium">Flip automatically</span>
-              <span class="text-sm text-muted-foreground">
-                Once everyone has voted, a short countdown starts and the cards flip by themselves.
-                Votes are locked during the countdown.
-              </span>
+              <span class="text-sm font-medium">{{ 'room.settings.autoFlip' | transloco }}</span>
+              <span class="text-sm text-muted-foreground">{{
+                'room.settings.autoFlipHint' | transloco
+              }}</span>
             </label>
             <hlm-switch
               inputId="auto-flip"
@@ -113,10 +117,12 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
 
           <div class="flex items-start justify-between gap-4">
             <label for="only-facilitator-can-flip" class="flex flex-col gap-1">
-              <span class="text-sm font-medium">Only facilitator can flip</span>
-              <span class="text-sm text-muted-foreground">
-                When enabled, only the facilitator can flip the cards manually.
-              </span>
+              <span class="text-sm font-medium">{{
+                'room.settings.onlyFacilitatorCanFlip' | transloco
+              }}</span>
+              <span class="text-sm text-muted-foreground">{{
+                'room.settings.onlyFacilitatorCanFlipHint' | transloco
+              }}</span>
             </label>
             <hlm-switch
               inputId="only-facilitator-can-flip"
@@ -127,13 +133,17 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
 
           <section class="flex flex-col gap-3" aria-labelledby="facilitator-heading">
             <div class="flex flex-col gap-1">
-              <h3 id="facilitator-heading" class="text-sm font-medium">Facilitator</h3>
+              <h3 id="facilitator-heading" class="text-sm font-medium">
+                {{ 'room.settings.facilitator' | transloco }}
+              </h3>
               <p class="text-sm text-muted-foreground">
-                Hand the role to someone else. You keep your seat and your vote.
+                {{ 'room.settings.facilitatorHint' | transloco }}
               </p>
             </div>
             @if (others().length === 0) {
-              <p class="text-sm text-muted-foreground">Nobody else is in the room yet.</p>
+              <p class="text-sm text-muted-foreground">
+                {{ 'room.settings.nobodyElse' | transloco }}
+              </p>
             } @else {
               <ul class="flex flex-col gap-1">
                 @for (participant of others(); track participant.id) {
@@ -141,7 +151,9 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
                     <span class="min-w-0 truncate text-sm">
                       {{ participant.name }}
                       @if (!participant.connected) {
-                        <span class="text-muted-foreground"> · away</span>
+                        <span class="text-muted-foreground">
+                          · {{ 'room.settings.away' | transloco }}</span
+                        >
                       }
                     </span>
                     <!-- Closes the sheet: the role, and with it these settings, moves to someone else. -->
@@ -152,11 +164,13 @@ import { DECK_OPTIONS } from '../../../shared/deck-options';
                       size="sm"
                       type="button"
                       [disabled]="!participant.connected"
-                      [attr.aria-label]="'Make ' + participant.name + ' facilitator'"
+                      [attr.aria-label]="
+                        'room.settings.makeFacilitatorLabel' | transloco: { name: participant.name }
+                      "
                       (click)="transferFacilitator.emit(participant.id)"
                     >
                       <ng-icon name="lucideCrown" aria-hidden="true" />
-                      Make facilitator
+                      {{ 'room.settings.makeFacilitator' | transloco }}
                     </button>
                   </li>
                 }
@@ -192,12 +206,6 @@ export class RoomSettings {
   protected readonly others = computed(() =>
     this.participants().filter((participant) => participant.id !== this.selfId()),
   );
-
-  protected readonly switchWarning = computed(() => {
-    if (this.flipped()) return 'Switching the deck ends this round and clears its result.';
-    const votes = this.votedCount();
-    return `Switching the deck starts a new round and clears ${votes} ${votes === 1 ? 'vote' : 'votes'}.`;
-  });
 
   protected pickDeck(deckId: DeckId): void {
     if (deckId === this.deckId()) {

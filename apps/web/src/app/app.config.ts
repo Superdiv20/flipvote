@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
+import { provideI18n } from './core/i18n';
 import { ThemeService } from './core/theme';
 
 export const appConfig: ApplicationConfig = {
@@ -18,5 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       inject(ThemeService);
     }),
+    // Translations (en, de), loaded before the first screen.
+    provideI18n(),
   ],
 };

@@ -3,6 +3,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideChevronsRight, lucideListChecks } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
+import { TranslocoPipe } from '@jsverse/transloco';
 import type { Issue } from '@flipvote/protocol';
 import { issueLabel, issueStatus } from './issue-types';
 
@@ -11,16 +12,22 @@ const TOOLTIP_TITLE_LENGTH = 32;
 /** The collapsed drawer: an expand button, the issue count and one dot per issue on a timeline. */
 @Component({
   selector: 'flipvote-issue-rail',
-  imports: [NgIcon, HlmButtonImports, HlmTooltipImports],
+  imports: [NgIcon, HlmButtonImports, HlmTooltipImports, TranslocoPipe],
   providers: [provideIcons({ lucideChevronsRight, lucideListChecks })],
   host: { class: 'flex flex-col items-center gap-3.5 py-2.5' },
   template: `
-    <button hlmBtn variant="ghost" size="icon" aria-label="Expand issues" (click)="expand.emit()">
+    <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      [attr.aria-label]="'room.issues.expand' | transloco"
+      (click)="expand.emit()"
+    >
       <ng-icon name="lucideChevronsRight" />
     </button>
     <div
       class="text-muted-foreground relative flex size-9 items-center justify-center"
-      [attr.aria-label]="issues().length + ' issues'"
+      [attr.aria-label]="'room.issues.count' | transloco: { count: issues().length }"
       role="img"
     >
       <ng-icon name="lucideListChecks" size="20px" aria-hidden="true" />
@@ -32,7 +39,10 @@ const TOOLTIP_TITLE_LENGTH = 32;
       </span>
     </div>
     <div class="bg-border h-px w-6" aria-hidden="true"></div>
-    <ul class="relative flex min-h-0 flex-col gap-1 overflow-y-auto" aria-label="Issues">
+    <ul
+      class="relative flex min-h-0 flex-col gap-1 overflow-y-auto"
+      [attr.aria-label]="'room.issues.title' | transloco"
+    >
       @if (issues().length > 1) {
         <li
           class="bg-border absolute inset-y-3 left-1/2 w-px -translate-x-1/2"

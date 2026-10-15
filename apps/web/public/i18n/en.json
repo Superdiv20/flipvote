@@ -1,0 +1,225 @@
+{
+  "account": {
+    "guest": "Guest",
+    "guestHint": "Guest · this browser only",
+    "language": "Language",
+    "languages": {
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "menu": "Account menu",
+    "profileSettings": "Profile settings",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signUp": "Sign up",
+    "soon": "Soon",
+    "theme": "Theme",
+    "themes": {
+      "dark": "Dark",
+      "light": "Light",
+      "system": "System"
+    }
+  },
+  "app": {
+    "title": "Flipvote"
+  },
+  "cards": {
+    "coffee": "Coffee break"
+  },
+  "common": {
+    "backToStart": "Back to start",
+    "cancel": "Cancel",
+    "createNewRoom": "Create a new room",
+    "save": "Save",
+    "tryAgain": "Try again"
+  },
+  "decks": {
+    "fibonacci": "Fibonacci",
+    "modified-fibonacci": "Modified Fibonacci",
+    "t-shirt": "T-shirt sizes"
+  },
+  "errors": {
+    "ALREADY_IN_ROOM": "This tab is already connected to another room.",
+    "ALREADY_REVEALED": "The cards are already revealed. Start a new round to vote again.",
+    "INVALID_CARD": "That card isn’t in this room’s deck.",
+    "INVALID_MESSAGE": "The server didn’t understand that. Reload the page and try again.",
+    "INVALID_SESSION": "Your session doesn’t match your seat. Reload the page and try again.",
+    "ISSUE_NOT_FOUND": "That issue was removed in the meantime.",
+    "ISSUE_TOO_LONG": "That issue is too long. Shorten the title, link or description.",
+    "NAME_REQUIRED": "Enter a name.",
+    "NAME_TOO_LONG": "Names can have at most {nameMax} characters.",
+    "NOT_FACILITATOR": "Only the facilitator can do that.",
+    "NOT_JOINED": "You’re no longer seated in this room. Reload the page to join again.",
+    "NOT_REVEALED": "The cards aren’t revealed yet.",
+    "NO_VOTES": "Nobody has voted yet, so there is nothing to reveal.",
+    "PARTICIPANT_NOT_CONNECTED": "That person is away right now. Try again once they’re back.",
+    "PARTICIPANT_NOT_FOUND": "That person has left the room.",
+    "ROOM_NAME_TOO_LONG": "Room names can have at most {roomNameMax} characters.",
+    "ROOM_NOT_FOUND": "This room doesn’t exist anymore.",
+    "SPECTATOR_CANNOT_VOTE": "You’re watching only. Turn off “Watch only” to vote.",
+    "TITLE_REQUIRED": "Give the issue a title.",
+    "TOO_MANY_ISSUES": "This room already has {maxIssues} issues. Remove some to add more.",
+    "UNKNOWN": "Something went wrong. Please try again.",
+    "VOTES_LOCKED": "Everyone has voted, so the votes are locked until the cards flip."
+  },
+  "forms": {
+    "namePlaceholder": "Ana",
+    "nameRequired": "Enter the name the others will see.",
+    "nameTooLong": "Names can have at most {max} characters.",
+    "roomNameRequired": "Give the room a name.",
+    "roomNameTooLong": "Room names can have at most {max} characters.",
+    "tooLong": "Keep it to {max} characters.",
+    "yourName": "Your name"
+  },
+  "landing": {
+    "anyoneCanJoin": "Anyone with the link can join.",
+    "create": "Create room",
+    "creating": "Creating room…",
+    "description": "Create a room, share the link, and vote with hidden cards. No account needed.",
+    "displayNamePlaceholder": "Your display name",
+    "errors": {
+      "INVALID_MESSAGE": "The server did not accept the room settings. Check the name and the deck.",
+      "INVALID_SESSION": "Your session could not be verified. Reload the page and try again.",
+      "NAME_REQUIRED": "Give the room a name.",
+      "failed": "The room could not be created. Please try again.",
+      "serverError": "The server ran into a problem. Try again in a moment.",
+      "unreachable": "Could not reach the server. Check your connection."
+    },
+    "roomName": "Room name",
+    "roomNamePlaceholder": "Sprint 42 planning",
+    "title": "Start a planning session"
+  },
+  "notFound": {
+    "description": "There's nothing at this address. To join a room, open the link you were sent.",
+    "pageTitle": "Page not found · Flipvote",
+    "title": "Page not found"
+  },
+  "profile": {
+    "description": "Only this browser remembers them.",
+    "nameHint": "Shown at the table and in the participant list."
+  },
+  "room": {
+    "connection": {
+      "lost": "Connection to the room lost. Reconnecting…",
+      "status": "{status, select, open {Connected} connecting {Connecting…} reconnecting {Reconnecting…} other {Disconnected}}"
+    },
+    "hand": {
+      "label": "Your cards",
+      "locked": "Round finished — start a new round to vote again",
+      "pick": "Pick your estimate",
+      "voteFor": "Vote {card}",
+      "yourVote": "Your vote: {card} · click again to withdraw"
+    },
+    "header": {
+      "invite": "Invite",
+      "linkCopied": "Link copied",
+      "noIssueSelected": "No issue selected"
+    },
+    "issueDialog": {
+      "add": "Add issue",
+      "addDescription": "Add a new issue with a link and a description.",
+      "addTitle": "Add issue",
+      "characterCount": "Characters: {count}/{max}",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Add your description here.",
+      "editDescription": "Change the title, link or description.",
+      "editTitle": "Edit issue",
+      "linkLabel": "Link",
+      "save": "Save changes",
+      "titleLabel": "Title"
+    },
+    "issues": {
+      "add": "Add issue",
+      "addPlaceholder": "Add issue…",
+      "collapse": "Collapse issues",
+      "count": "{count, plural, one {# issue} other {# issues}}",
+      "delete": "Delete {issue}",
+      "descriptionTooLong": "Descriptions can have at most {max} characters.",
+      "empty": "No issues yet. Add one below.",
+      "expand": "Expand issues",
+      "keyTooLong": "Keys can have at most {max} characters.",
+      "linkTooLong": "Links can have at most {max} characters.",
+      "open": "Open {issue}",
+      "openDialog": "Open Add Issue Dialog",
+      "rowLabel": "{issue}, {status, select, current {voting now} done {estimated {estimate}} other {vote on this issue}}",
+      "submit": "Submit",
+      "title": "Issues",
+      "titleRequired": "Give the issue a title.",
+      "titleTooLong": "Titles can have at most {max} characters.",
+      "voting": "Voting"
+    },
+    "join": {
+      "description": "Pick a name for the table. This browser remembers it for next time.",
+      "submit": "Join room",
+      "title": "Join the planning session"
+    },
+    "joinFailed": {
+      "reasons": {
+        "ALREADY_IN_ROOM": "This tab is already connected to another room.",
+        "INVALID_SESSION": "Your session doesn’t match your seat in this room.",
+        "NAME_REQUIRED": "The room needs a name to show at the table.",
+        "NAME_TOO_LONG": "That name is too long. Pick a shorter one.",
+        "UNKNOWN": "Something went wrong while joining. Please try again."
+      },
+      "title": "Couldn’t join the room"
+    },
+    "joining": {
+      "checkConnection": "Check your connection and try again.",
+      "connecting": "Connecting…",
+      "joining": "Joining the room…",
+      "retrying": "Trying again in a moment. Check your connection.",
+      "unreachable": "Can’t reach the server"
+    },
+    "notFound": {
+      "description": "The link may be mistyped, or the room has closed.",
+      "title": "Room not found"
+    },
+    "participants": {
+      "buttonLabel": "{count, plural, one {# participant} other {# participants}}, {status, select, open {connected} connecting {connecting} reconnecting {reconnecting} other {disconnected}}, show list",
+      "cardsRevealed": "Cards revealed",
+      "noVote": "No vote",
+      "title": "Participants",
+      "voted": "Voted",
+      "votedCount": "{voted} of {total} voted",
+      "votedFor": "Voted {card}",
+      "waiting": "Waiting",
+      "watchOnly": "Watch only",
+      "watchOnlyHint": "Follow the round without a card.",
+      "you": "(you)"
+    },
+    "results": {
+      "average": "Average",
+      "consensus": "Consensus!",
+      "distribution": "Distribution",
+      "everyoneVoted": "Everyone voted {card}",
+      "label": "Results",
+      "rowLabel": "{card}: {count, plural, one {# vote} other {# votes}}",
+      "voteCount": "{count, plural, one {# vote} other {# votes}}"
+    },
+    "settings": {
+      "autoFlip": "Flip automatically",
+      "autoFlipHint": "Once everyone has voted, a short countdown starts and the cards flip by themselves. Votes are locked during the countdown.",
+      "away": "away",
+      "deck": "Deck",
+      "description": "Changes apply to everyone in the room.",
+      "facilitator": "Facilitator",
+      "facilitatorHint": "Hand the role to someone else. You keep your seat and your vote.",
+      "keepDeck": "Keep current deck",
+      "makeFacilitator": "Make facilitator",
+      "makeFacilitatorLabel": "Make {name} facilitator",
+      "nobodyElse": "Nobody else is in the room yet.",
+      "onlyFacilitatorCanFlip": "Only facilitator can flip",
+      "onlyFacilitatorCanFlipHint": "When enabled, only the facilitator can flip the cards manually.",
+      "switchDeck": "Switch deck",
+      "switchWarning": "{phase, select, revealed {Switching the deck ends this round and clears its result.} other {Switching the deck starts a new round and clears {count, plural, one {# vote} other {# votes}}.}}",
+      "title": "Room settings"
+    },
+    "table": {
+      "countdownStarted": "Everyone has voted. The cards flip in a moment.",
+      "newRound": "New round",
+      "reveal": "Reveal cards",
+      "revealingIn": "Revealing in {seconds}…",
+      "seatLabel": "{name}{self, select, yes { (you)} other {}}{state, select, card {: {card}} noVote {: no vote} voted {: voted} other {: not voted yet}}"
+    }
+  }
+}

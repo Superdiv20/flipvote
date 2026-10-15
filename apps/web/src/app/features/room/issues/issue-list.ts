@@ -6,11 +6,12 @@ import type { Issue } from '@flipvote/protocol';
 import { issueLabel, issueStatus } from './issue-types';
 import { HlmItemImports } from '@spartan-ng/helm/item';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 /** The expanded list: finished issues with their estimate, the current one, then what's up next. */
 @Component({
   selector: 'flipvote-issue-list',
-  imports: [NgIcon, HlmButtonImports, HlmItemImports, HlmTooltipImports],
+  imports: [NgIcon, HlmButtonImports, HlmItemImports, HlmTooltipImports, TranslocoPipe],
   providers: [provideIcons({ lucideSquarePen, lucideTrash2 })],
   host: { class: 'block' },
   template: `
@@ -38,7 +39,10 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
             class="focus-visible:ring-ring/50 absolute inset-0 rounded-md outline-none focus-visible:ring-3"
             [class]="status === 'current' ? 'cursor-default' : 'cursor-pointer'"
             [attr.aria-current]="status === 'current' ? 'true' : null"
-            [attr.aria-label]="ariaLabel(issue, status)"
+            [attr.aria-label]="
+              'room.issues.rowLabel'
+                | transloco: { issue: issueLabel(issue), status, estimate: issue.estimate ?? '' }
+            "
             (click)="status !== 'current' && selectIssue.emit(issue.id)"
           ></button>
           <hlm-item-media>
@@ -65,7 +69,7 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
                 @if (status === 'current') {
                   <span class="text-brand flex items-center gap-1.5 text-xs font-semibold">
                     <span class="bg-brand size-1 rounded-full" aria-hidden="true"></span>
-                    Voting
+                    {{ 'room.issues.voting' | transloco }}
                   </span>
                 }
               </div>
@@ -93,7 +97,7 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
                 hlmBtn
                 variant="ghost"
                 size="icon-sm"
-                [attr.aria-label]="'Open ' + issueLabel(issue)"
+                [attr.aria-label]="'room.issues.open' | transloco: { issue: issueLabel(issue) }"
                 (click)="open.emit(issue)"
               >
                 <ng-icon name="lucideSquarePen" />
@@ -105,7 +109,7 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
                   variant="ghost"
                   size="icon-sm"
                   class="hover:text-destructive"
-                  [attr.aria-label]="'Delete ' + issueLabel(issue)"
+                  [attr.aria-label]="'room.issues.delete' | transloco: { issue: issueLabel(issue) }"
                   (click)="remove.emit(issue.id)"
                 >
                   <ng-icon name="lucideTrash2" />
@@ -116,7 +120,7 @@ import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
         </hlm-item>
       } @empty {
         <li class="text-muted-foreground px-3 py-6 text-center text-sm">
-          No issues yet. Add one below.
+          {{ 'room.issues.empty' | transloco }}
         </li>
       }
     </hlm-item-group>
@@ -135,12 +139,5 @@ export class IssueList {
 
   protected statusOf(issue: Issue) {
     return issueStatus(issue, this.currentId());
-  }
-
-  protected ariaLabel(issue: Issue, status: ReturnType<typeof issueStatus>): string {
-    const label = issueLabel(issue);
-    if (status === 'current') return `${label}, voting now`;
-    if (status === 'done') return `${label}, estimated ${issue.estimate}`;
-    return `${label}, vote on this issue`;
   }
 }

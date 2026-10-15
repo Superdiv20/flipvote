@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot, required } from '@angular/forms/signals';
 import { ISSUE_LIMITS } from '@flipvote/protocol';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import {
@@ -40,6 +42,7 @@ export interface AddIssueDialogContext {
     HlmFieldImports,
     HlmTextareaImports,
     HlmButtonImports,
+    TranslocoPipe,
   ],
   host: {
     class: 'flex flex-col gap-4',
@@ -47,12 +50,13 @@ export interface AddIssueDialogContext {
   selector: 'flipvote-add-issue-dialog',
   template: `
     <hlm-dialog-header>
-      <h3 hlmDialogTitle>{{ editing ? 'Edit issue' : 'Add issue' }}</h3>
+      <h3 hlmDialogTitle>
+        {{ (editing ? 'room.issueDialog.editTitle' : 'room.issueDialog.addTitle') | transloco }}
+      </h3>
       <p hlmDialogDescription>
         {{
-          editing
-            ? 'Change the title, link or description.'
-            : 'Add a new issue with a link and a description.'
+          (editing ? 'room.issueDialog.editDescription' : 'room.issueDialog.addDescription')
+            | transloco
         }}
       </p>
     </hlm-dialog-header>
@@ -60,7 +64,7 @@ export interface AddIssueDialogContext {
     <form class="flex flex-col gap-4" [formRoot]="fullIssueForm">
       <hlm-field-group>
         <hlm-field>
-          <label hlmFieldLabel for="title">Title</label>
+          <label hlmFieldLabel for="title">{{ 'room.issueDialog.titleLabel' | transloco }}</label>
           <input
             hlmInput
             id="title"
@@ -68,12 +72,14 @@ export interface AddIssueDialogContext {
             [formField]="fullIssueForm.title"
             [attr.aria-describedby]="fieldError(fullIssueForm.title) ? 'title-error' : null"
           />
-          @if (fieldError(fullIssueForm.title); as message) {
-            <hlm-field-error id="title-error" forceShow>{{ message }}</hlm-field-error>
+          @if (fieldError(fullIssueForm.title); as error) {
+            <hlm-field-error id="title-error" forceShow>{{
+              error.key | transloco: error.params
+            }}</hlm-field-error>
           }
         </hlm-field>
         <hlm-field>
-          <label hlmFieldLabel for="link">Link</label>
+          <label hlmFieldLabel for="link">{{ 'room.issueDialog.linkLabel' | transloco }}</label>
           <input
             hlmInput
             id="link"
@@ -81,16 +87,20 @@ export interface AddIssueDialogContext {
             [formField]="fullIssueForm.link"
             [attr.aria-describedby]="fieldError(fullIssueForm.link) ? 'link-error' : null"
           />
-          @if (fieldError(fullIssueForm.link); as message) {
-            <hlm-field-error id="link-error" forceShow>{{ message }}</hlm-field-error>
+          @if (fieldError(fullIssueForm.link); as error) {
+            <hlm-field-error id="link-error" forceShow>{{
+              error.key | transloco: error.params
+            }}</hlm-field-error>
           }
         </hlm-field>
         <hlm-field>
-          <label hlmFieldLabel for="description">Description</label>
+          <label hlmFieldLabel for="description">{{
+            'room.issueDialog.descriptionLabel' | transloco
+          }}</label>
           <textarea
             hlmTextarea
             id="description"
-            placeholder="Add your description here."
+            [placeholder]="'room.issueDialog.descriptionPlaceholder' | transloco"
             [formField]="fullIssueForm.description"
             [attr.aria-describedby]="
               fieldError(fullIssueForm.description)
@@ -98,8 +108,10 @@ export interface AddIssueDialogContext {
                 : 'description-count'
             "
           ></textarea>
-          @if (fieldError(fullIssueForm.description); as message) {
-            <hlm-field-error id="description-error" forceShow>{{ message }}</hlm-field-error>
+          @if (fieldError(fullIssueForm.description); as error) {
+            <hlm-field-error id="description-error" forceShow>{{
+              error.key | transloco: error.params
+            }}</hlm-field-error>
           }
           <p
             hlmFieldDescription
@@ -109,16 +121,25 @@ export interface AddIssueDialogContext {
               DESCRIPTION_FIELD_MAX_LENGTH
             "
           >
-            Characters: {{ fullIssueForm.description().value()?.length || 0 }}/{{
-              DESCRIPTION_FIELD_MAX_LENGTH
+            {{
+              'room.issueDialog.characterCount'
+                | transloco
+                  : {
+                      count: fullIssueForm.description().value()?.length || 0,
+                      max: DESCRIPTION_FIELD_MAX_LENGTH,
+                    }
             }}
           </p>
         </hlm-field>
       </hlm-field-group>
 
       <hlm-dialog-footer>
-        <button hlmBtn type="button" variant="outline" hlmDialogClose>Cancel</button>
-        <button hlmBtn type="submit">{{ editing ? 'Save changes' : 'Add issue' }}</button>
+        <button hlmBtn type="button" variant="outline" hlmDialogClose>
+          {{ 'common.cancel' | transloco }}
+        </button>
+        <button hlmBtn type="submit">
+          {{ (editing ? 'room.issueDialog.save' : 'room.issueDialog.add') | transloco }}
+        </button>
       </hlm-dialog-footer>
     </form>
   `,
@@ -141,20 +162,16 @@ export class AddIssueDialog {
   public readonly fullIssueForm = form(
     this._model,
     (schemaPath) => {
-      required(schemaPath.title, { message: 'Give the issue a title.' });
+      required(schemaPath.title, { message: marker('room.issues.titleRequired') });
       // The same limits as the server, so the form says what's too long and doesn't submit; the
       // server's ISSUE_TOO_LONG stays as the fallback. The title may start with a tracker key,
       // which is measured on its own.
       issueTitleLimits(schemaPath.title);
-      lengthLimit(
-        schemaPath.link,
-        ISSUE_LIMITS.link,
-        `Links can have at most ${ISSUE_LIMITS.link} characters.`,
-      );
+      lengthLimit(schemaPath.link, ISSUE_LIMITS.link, marker('room.issues.linkTooLong'));
       lengthLimit(
         schemaPath.description,
         ISSUE_LIMITS.description,
-        `Descriptions can have at most ${ISSUE_LIMITS.description} characters.`,
+        marker('room.issues.descriptionTooLong'),
       );
     },
     {

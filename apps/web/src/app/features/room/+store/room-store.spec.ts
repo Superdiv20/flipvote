@@ -10,7 +10,6 @@ import {
 import { SessionService } from '../../../core/session';
 import { type ConnectionStatus, SocketService } from '../../../core/socket';
 import { toast } from '@spartan-ng/brain/sonner';
-import { ERROR_MESSAGES } from '../../../shared/error-messages';
 import { RoomStore } from './room-store';
 
 /** Records what the store sends and lets a test deliver server messages by hand. */
@@ -359,7 +358,7 @@ describe('RoomStore', () => {
         message: 'Only the facilitator can do that.',
       });
       expect(store.view()).toBe('room');
-      expect(toastError).toHaveBeenCalledWith(ERROR_MESSAGES.NOT_FACILITATOR);
+      expect(toastError).toHaveBeenCalledWith('Only the facilitator can do that.');
     });
 
     it('shows the client’s wording, not the server’s', () => {
@@ -367,7 +366,9 @@ describe('RoomStore', () => {
       const toastError = vi.spyOn(toast, 'error').mockImplementation(() => '');
       socket.receive({ type: 'state', room: shared([seat('ana', false)]) });
       socket.receive({ type: 'error', code: 'NO_VOTES', message: 'server text' });
-      expect(toastError).toHaveBeenCalledWith(ERROR_MESSAGES.NO_VOTES);
+      expect(toastError).toHaveBeenCalledWith(
+        'Nobody has voted yet, so there is nothing to reveal.',
+      );
       expect(toastError).not.toHaveBeenCalledWith('server text');
     });
 

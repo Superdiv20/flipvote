@@ -1,10 +1,12 @@
 import { inject } from '@angular/core';
-import type { DeckId, ErrorCode } from '@flipvote/protocol';
+import type { DeckId } from '@flipvote/protocol';
+import { TranslocoService } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { toast } from '@spartan-ng/brain/sonner';
 import { RoomApiError, RoomApiService } from '../../core/room-api';
-import { ERROR_MESSAGES } from '../../shared/error-messages';
 import { SessionService } from '../../core/session';
+import { ERROR_PARAMS, errorKey } from '../../shared/error-keys';
 import { CREATE_ROOM_ERRORS } from './create-room-error-types';
 
 type RoomCreateStoreState = {
@@ -18,35 +20,42 @@ const initialState: RoomCreateStoreState = {
 export const CreateRoomStore = signalStore(
   withState(initialState),
   // this withMethods block is for handling simple api requests that don't require socket or session injection
-  withMethods((store, roomApi = inject(RoomApiService), session = inject(SessionService)) => ({
-    /** Resolves with the new room's id, or `null` when it failed (a toast has told the user). */
-    async createRoom(
-      name: string,
-      displayName: string,
-      deckId: DeckId,
-      sessionToken: string,
-    ): Promise<string | null> {
-      patchState(store, { createRoomLoading: true });
-      try {
-        const roomId = await roomApi.createRoom({ name, deckId }, sessionToken);
-        patchState(store, { createRoomLoading: false });
-        session.setName(displayName);
-        return roomId;
-      } catch (error) {
-        patchState(store, { createRoomLoading: false });
-        toast.error(createRoomErrorMessage(error));
-        return null;
-      } finally {
-        patchState(store, { createRoomLoading: false });
-      }
-    },
-  })),
+  withMethods(
+    (
+      store,
+      roomApi = inject(RoomApiService),
+      session = inject(SessionService),
+      transloco = inject(TranslocoService),
+    ) => ({
+      /** Resolves with the new room's id, or `null` when it failed (a toast has told the user). */
+      async createRoom(
+        name: string,
+        displayName: string,
+        deckId: DeckId,
+        sessionToken: string,
+      ): Promise<string | null> {
+        patchState(store, { createRoomLoading: true });
+        try {
+          const roomId = await roomApi.createRoom({ name, deckId }, sessionToken);
+          patchState(store, { createRoomLoading: false });
+          session.setName(displayName);
+          return roomId;
+        } catch (error) {
+          patchState(store, { createRoomLoading: false });
+          toast.error(transloco.translate(createRoomErrorKey(error), ERROR_PARAMS));
+          return null;
+        } finally {
+          patchState(store, { createRoomLoading: false });
+        }
+      },
+    }),
+  ),
 );
 
-function createRoomErrorMessage(error: unknown): string {
+function createRoomErrorKey(error: unknown): string {
   // `fetch` rejects with a TypeError when the request never reached the server.
-  if (!(error instanceof RoomApiError)) return 'Could not reach the server. Check your connection.';
-  if (error.code) return CREATE_ROOM_ERRORS[error.code] ?? ERROR_MESSAGES[error.code];
-  if (error.status >= 500) return 'The server ran into a problem. Try again in a moment.';
-  return 'The room could not be created. Please try again.';
+  if (!(error instanceof RoomApiError)) return marker('landing.errors.unreachable');
+  if (error.code) return CREATE_ROOM_ERRORS[error.code] ?? errorKey(error.code);
+  if (error.status >= 500) return marker('landing.errors.serverError');
+  return marker('landing.errors.failed');
 }

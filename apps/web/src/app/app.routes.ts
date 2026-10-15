@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { CreateRoomStore } from './features/landing/create-room.store';
 
 export const routes: Routes = [
@@ -18,7 +19,8 @@ export const routes: Routes = [
   {
     // Last, as the router takes the first match: everything no route above knows.
     path: '**',
-    title: 'Page not found · Flipvote',
+    // Route titles are translation keys, see TranslatedTitleStrategy.
+    title: marker('notFound.pageTitle'),
     loadComponent: () => import('./features/not-found/not-found-page').then((m) => m.NotFoundPage),
   },
 ];

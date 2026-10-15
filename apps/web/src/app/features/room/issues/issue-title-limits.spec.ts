@@ -10,20 +10,20 @@ describe('issueTitleTooLong', () => {
   });
 
   it('rejects a title over its limit, with no key in front', () => {
-    expect(issueTitleTooLong(x(ISSUE_LIMITS.title + 1))?.message).toContain(
-      `Titles can have at most ${ISSUE_LIMITS.title}`,
-    );
+    expect(issueTitleTooLong(x(ISSUE_LIMITS.title + 1))?.message).toBe('room.issues.titleTooLong');
   });
 
   it('measures the title without the key in front', () => {
     expect(issueTitleTooLong(`ATL-209 ${x(ISSUE_LIMITS.title)}`)).toBeNull();
-    expect(issueTitleTooLong(`ATL-209 ${x(ISSUE_LIMITS.title + 1)}`)?.message).toContain('Titles');
+    expect(issueTitleTooLong(`ATL-209 ${x(ISSUE_LIMITS.title + 1)}`)?.message).toBe(
+      'room.issues.titleTooLong',
+    );
   });
 
   it('measures the key on its own', () => {
     expect(issueTitleTooLong(`${key(ISSUE_LIMITS.key)} Export`)).toBeNull();
-    expect(issueTitleTooLong(`${key(ISSUE_LIMITS.key + 1)} Export`)?.message).toContain(
-      `Keys can have at most ${ISSUE_LIMITS.key}`,
+    expect(issueTitleTooLong(`${key(ISSUE_LIMITS.key + 1)} Export`)?.message).toBe(
+      'room.issues.keyTooLong',
     );
   });
 

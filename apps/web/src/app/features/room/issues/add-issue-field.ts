@@ -8,7 +8,8 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 import { AddIssueDialog, type AddIssueDialogContext } from './add-issue-dialog';
-import { fieldError } from '../../../shared/length-limit';
+import { type FieldErrorText, fieldError } from '../../../shared/length-limit';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { issueTitleLimits } from './issue-title-limits';
 import type { IssueDetails } from './issue-types';
 
@@ -22,26 +23,28 @@ import type { IssueDetails } from './issue-types';
     NgIcon,
     HlmButtonImports,
     HlmTooltipImports,
+    TranslocoPipe,
   ],
   providers: [provideIcons({ lucideArrowRight, lucidePlus, lucideShieldAlert })],
   host: { class: 'flex flex-col gap-1.5' },
   template: `
     <div class="flex items center gap-2">
       <hlm-input-group>
-        <label for="add-issue" class="sr-only">Add issue</label>
+        <label for="add-issue" class="sr-only">{{ 'room.issues.add' | transloco }}</label>
         <input
           [formField]="quickIssueForm.title"
           hlmInputGroupInput
           id="add-issue"
           class="h-8 text-sm"
-          placeholder="Add issue…"
+          [placeholder]="'room.issues.addPlaceholder' | transloco"
           autocomplete="off"
           [attr.aria-invalid]="error() ? 'true' : null"
           [attr.aria-describedby]="error() ? 'add-issue-error' : null"
           (keydown.enter)="submit()"
         />
         <hlm-input-group-addon align="inline-end">
-          @if (error(); as message) {
+          @if (error(); as error) {
+            @let message = error.key | transloco: error.params;
             <!-- The icon shows the reason on hover; the hidden text says it to screen readers. -->
             <ng-icon
               name="lucideShieldAlert"
@@ -55,8 +58,8 @@ import type { IssueDetails } from './issue-types';
             <button
               hlmInputGroupButton
               type="submit"
-              aria-label="Submit"
-              title="Submit"
+              [attr.aria-label]="'room.issues.submit' | transloco"
+              [title]="'room.issues.submit' | transloco"
               size="icon-xs"
               (click)="submit()"
             >
@@ -68,8 +71,8 @@ import type { IssueDetails } from './issue-types';
       <button
         hlmBtn
         variant="outline"
-        aria-label="Open Add Issue Dialog"
-        title="Open Add Issue Dialog"
+        [attr.aria-label]="'room.issues.openDialog' | transloco"
+        [title]="'room.issues.openDialog' | transloco"
         size="icon"
         (click)="openAddIssueDialog()"
       >
@@ -93,7 +96,7 @@ export class AddIssueField {
     issueTitleLimits(schemaPath.title);
   });
 
-  protected error(): string | null {
+  protected error(): FieldErrorText | null {
     return fieldError(this.quickIssueForm.title);
   }
 

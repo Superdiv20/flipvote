@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
-import { lengthLimit } from '../../shared/length-limit';
+import { type FieldErrorText, fieldError, lengthLimit } from '../../shared/length-limit';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { Router } from '@angular/router';
 import { type DeckId, NAME_MAX_LENGTH, ROOM_NAME_MAX_LENGTH } from '@flipvote/protocol';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -13,7 +15,8 @@ import { DECK_OPTIONS } from '../../shared/deck-options';
 import { Logo } from '../../shared/logo';
 import { CreateRoomStore } from './create-room.store';
 
-const NAME_MESSAGE = 'Give the room a name.';
+const NAME_MESSAGE = marker('forms.roomNameRequired');
+const DISPLAY_NAME_MESSAGE = marker('forms.nameRequired');
 
 /** Landing page: name the room, pick a deck, and go straight into the new room. */
 @Component({
@@ -27,6 +30,7 @@ const NAME_MESSAGE = 'Give the room a name.';
     HlmFieldImports,
     HlmInputImports,
     HlmSpinnerImports,
+    TranslocoPipe,
   ],
   host: {
     class:
@@ -56,54 +60,52 @@ const NAME_MESSAGE = 'Give the room a name.';
     <section hlmCard class="w-full max-w-md shadow-table" aria-labelledby="create-room-title">
       <div hlmCardHeader>
         <h1 hlmCardTitle id="create-room-title" class="text-xl font-semibold tracking-tight">
-          Start a planning session
+          {{ 'landing.title' | transloco }}
         </h1>
-        <p hlmCardDescription>
-          Create a room, share the link, and vote with hidden cards. No account needed.
-        </p>
+        <p hlmCardDescription>{{ 'landing.description' | transloco }}</p>
       </div>
 
       <form hlmCardContent class="flex flex-col gap-6" [formRoot]="createForm">
         <hlm-field>
-          <label hlmFieldLabel for="room-name">Room name</label>
+          <label hlmFieldLabel for="room-name">{{ 'landing.roomName' | transloco }}</label>
           <input
             hlmInput
             id="room-name"
             type="text"
             autocomplete="off"
-            placeholder="Sprint 42 planning"
+            [placeholder]="'landing.roomNamePlaceholder' | transloco"
             [formField]="createForm.roomName"
             [attr.aria-describedby]="nameInvalid('roomName') ? 'room-name-error' : null"
           />
-          @if (nameInvalid('roomName')) {
+          @if (errorOf('roomName'); as error) {
             <hlm-field-error id="room-name-error" forceShow>{{
-              fieldError('roomName')
+              error.key | transloco: error.params
             }}</hlm-field-error>
           }
         </hlm-field>
 
         <hlm-field>
-          <label hlmFieldLabel for="user-display-name">User name</label>
+          <label hlmFieldLabel for="user-display-name">{{ 'forms.yourName' | transloco }}</label>
           <input
             hlmInput
             id="user-display-name"
             type="text"
             autocomplete="off"
-            placeholder="Your display name"
+            [placeholder]="'landing.displayNamePlaceholder' | transloco"
             [formField]="createForm.userDisplayName"
             [attr.aria-describedby]="
               nameInvalid('userDisplayName') ? 'user-display-name-error' : null
             "
           />
-          @if (nameInvalid('userDisplayName')) {
+          @if (errorOf('userDisplayName'); as error) {
             <hlm-field-error id="user-display-name-error" forceShow>{{
-              fieldError('userDisplayName')
+              error.key | transloco: error.params
             }}</hlm-field-error>
           }
         </hlm-field>
 
         <fieldset hlmFieldSet>
-          <legend hlmFieldLegend variant="label">Deck</legend>
+          <legend hlmFieldLegend variant="label">{{ 'room.settings.deck' | transloco }}</legend>
           <div class="grid gap-2">
             @for (deck of decks; track deck.id) {
               <label
@@ -116,7 +118,7 @@ const NAME_MESSAGE = 'Give the room a name.';
                     [value]="deck.id"
                     [formField]="createForm.deck"
                   />
-                  <span class="text-sm font-medium">{{ deck.name }}</span>
+                  <span class="text-sm font-medium">{{ deck.nameKey | transloco }}</span>
                 </span>
                 <span class="flex flex-wrap gap-1 pl-7" aria-hidden="true">
                   @for (card of deck.preview; track card) {
@@ -139,15 +141,17 @@ const NAME_MESSAGE = 'Give the room a name.';
         >
           @if (store.createRoomLoading()) {
             <hlm-spinner class="size-4" aria-hidden="true" />
-            Creating room…
+            {{ 'landing.creating' | transloco }}
           } @else {
-            Create room
+            {{ 'landing.create' | transloco }}
           }
         </button>
       </form>
     </section>
 
-    <p class="text-center text-sm text-muted-foreground">Anyone with the link can join.</p>
+    <p class="text-center text-sm text-muted-foreground">
+      {{ 'landing.anyoneCanJoin' | transloco }}
+    </p>
   `,
 })
 export class CreateRoomPage {
@@ -167,21 +171,13 @@ export class CreateRoomPage {
     this._model,
     (schemaPath) => {
       required(schemaPath.roomName, { message: NAME_MESSAGE });
-      required(schemaPath.userDisplayName, { message: 'Display name is required.' });
+      required(schemaPath.userDisplayName, { message: DISPLAY_NAME_MESSAGE });
       // `required` accepts a name of only spaces.
-      pattern(schemaPath.userDisplayName, /\S/, { message: 'Display name is required.' });
-      lengthLimit(
-        schemaPath.userDisplayName,
-        NAME_MAX_LENGTH,
-        `Names can have at most ${NAME_MAX_LENGTH} characters.`,
-      );
+      pattern(schemaPath.userDisplayName, /\S/, { message: DISPLAY_NAME_MESSAGE });
+      lengthLimit(schemaPath.userDisplayName, NAME_MAX_LENGTH, marker('forms.nameTooLong'));
       // `required` accepts a name of only spaces.
       pattern(schemaPath.roomName, /\S/, { message: NAME_MESSAGE });
-      lengthLimit(
-        schemaPath.roomName,
-        ROOM_NAME_MAX_LENGTH,
-        `Room names can have at most ${ROOM_NAME_MAX_LENGTH} characters.`,
-      );
+      lengthLimit(schemaPath.roomName, ROOM_NAME_MAX_LENGTH, marker('forms.roomNameTooLong'));
     },
     {
       submission: {
@@ -201,12 +197,12 @@ export class CreateRoomPage {
   );
 
   protected nameInvalid(fieldName: 'roomName' | 'userDisplayName'): boolean {
-    const field = this.createForm[fieldName]();
-    return (field.touched() || field.dirty()) && field.invalid();
+    return this.errorOf(fieldName) !== null;
   }
 
   /** The first error of that field, so each field shows its own message. */
-  protected fieldError(fieldName: 'roomName' | 'userDisplayName'): string {
-    return this.createForm[fieldName]().errors()[0]?.message ?? NAME_MESSAGE;
+  /** The field's first error as a translation key, once it was changed or left. */
+  protected errorOf(fieldName: 'roomName' | 'userDisplayName'): FieldErrorText | null {
+    return fieldError(this.createForm[fieldName]);
   }
 }

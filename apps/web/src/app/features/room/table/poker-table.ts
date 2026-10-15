@@ -3,6 +3,7 @@ import type { Participant } from '@flipvote/protocol';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideEye, lucideRotateCcw } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { Seat } from './seat';
 
 // The table is a stadium (a pill) with this width:height ratio. Seats are spread evenly along its edge.
@@ -11,7 +12,7 @@ const TABLE_HEIGHT = 300;
 
 @Component({
   selector: 'flipvote-poker-table',
-  imports: [HlmButtonImports, NgIcon, Seat],
+  imports: [HlmButtonImports, NgIcon, Seat, TranslocoPipe],
   providers: [provideIcons({ lucideEye, lucideRotateCcw })],
   host: { class: 'relative block aspect-[64/30] w-full' },
   template: `
@@ -25,10 +26,12 @@ const TABLE_HEIGHT = 300;
         @if (canReset()) {
           <button hlmBtn size="lg" class="px-4" (click)="reset.emit()">
             <ng-icon name="lucideRotateCcw" data-icon="inline-start" />
-            New round
+            {{ 'room.table.newRound' | transloco }}
           </button>
         }
-        <span class="text-muted-foreground text-sm" role="status">Cards revealed</span>
+        <span class="text-muted-foreground text-sm" role="status">{{
+          'room.participants.cardsRevealed' | transloco
+        }}</span>
       } @else {
         <!-- Only for those who may flip: the facilitator, or everyone when the room allows it. -->
         @if (canFlip()) {
@@ -40,23 +43,26 @@ const TABLE_HEIGHT = 300;
             (click)="flip.emit()"
           >
             <ng-icon name="lucideEye" data-icon="inline-start" />
-            Reveal cards
+            {{ 'room.table.reveal' | transloco }}
           </button>
         }
         @if (countdown(); as seconds) {
           <span class="text-brand text-sm font-medium tabular-nums" aria-hidden="true">
-            Revealing in {{ seconds }}…
+            {{ 'room.table.revealingIn' | transloco: { seconds } }}
           </span>
           <!-- Announced once, not every second. -->
-          <span class="sr-only" role="status">Everyone has voted. The cards flip in a moment.</span>
+          <span class="sr-only" role="status">{{ 'room.table.countdownStarted' | transloco }}</span>
         } @else {
           <span class="text-muted-foreground text-sm" role="status">
-            {{ votedCount() }} of {{ participants().length }} voted
+            {{
+              'room.participants.votedCount'
+                | transloco: { voted: votedCount(), total: participants().length }
+            }}
           </span>
         }
       }
     </div>
-    <div role="list" aria-label="Participants">
+    <div role="list" [attr.aria-label]="'room.participants.title' | transloco">
       @for (seat of seats(); track seat.participant.id) {
         <flipvote-seat
           class="absolute -translate-x-1/2 -translate-y-1/2"

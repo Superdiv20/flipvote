@@ -67,6 +67,20 @@ apps/web/src/app/
 - Never name an output after a native DOM event (`select`, `reset`, `submit`, `input`, `change`, …). A bubbling DOM event of that name reaches the parent's `(name)` binding as well, so the handler gets an `Event` instead of the output's value.
 - Move something into `shared/` only when a second feature needs it. Split `features/room/` into subfolders only once it grows past ~15 files.
 - The WebSocket service in `core/` knows nothing about rooms; it sends `ClientMessage`s and exposes incoming `ServerMessage`s.
+- `SessionService` in `core/` is the only code that touches `localStorage` (guest token, name, language, theme). Everything else goes through it.
+
+### i18n
+
+- Runtime translation with Transloco (English and German), set up in `core/i18n.ts`. `LanguageService` picks the language (the stored choice, else German if the browser is German, else English), switches it without a reload, and keeps `<html lang>` in sync.
+- Translation files are `apps/web/public/i18n/en.json` and `de.json`, loaded over HTTP. English is the fallback. Add every key to both files.
+- Keys are nested by feature and component, English and descriptive: `room.issues.addPlaceholder`, `room.results.average`, `common.cancel`. Shared wording goes under `common.`, form validation under `forms.`.
+- No hardcoded user-facing text in `src/app`, including aria-labels, tooltips, placeholders and toasts. Templates use `| transloco`. Host bindings and TS code use `translateSignal()` or `TranslocoService.translate()`.
+- Keys that are built in TS (lookup tables, validator messages) are wrapped in `marker()` from `@jsverse/transloco-keys-manager/marker`, so the keys manager can find them. Validators put the **key** into `message`; the template translates it.
+- Messages use ICU syntax (MessageFormat plugin): `{count, plural, one {# vote} other {# votes}}`, `{status, select, …}`. Never build sentences by concatenating strings. Transloco also reads `{{x}}` as its own interpolation, so never write `{{` inside an ICU message.
+- Numbers are formatted per language with `translocoDecimal` or ICU `{n, number}`, not Angular's `DecimalPipe`.
+- Server error codes map to `errors.<CODE>`, with `errors.UNKNOWN` as the fallback (`shared/error-keys.ts`). The server and the protocol stay language-agnostic.
+- Card values are not translated; the labels around them are.
+- `bun run i18n:check` (in `apps/web`) fails on missing or unused keys. Specs get the real translations through `src/test-providers.ts`.
 
 ## UI
 

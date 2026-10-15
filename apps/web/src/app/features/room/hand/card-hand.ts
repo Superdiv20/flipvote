@@ -1,15 +1,28 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { CardValue } from './card-value';
-import { cardLabel } from './card-label';
+import { CardNamePipe } from './card-name';
 
 /** The deck in front of the current user. Picking a card votes, picking it again withdraws. */
 @Component({
   selector: 'flipvote-card-hand',
-  imports: [CardValue],
+  imports: [CardValue, TranslocoPipe, CardNamePipe],
   host: { class: 'flex flex-col items-center gap-4' },
   template: `
-    <p class="text-muted-foreground text-sm font-medium" aria-live="polite">{{ status() }}</p>
-    <div class="flex flex-wrap justify-center gap-2 pt-2.5" role="group" aria-label="Your cards">
+    <p class="text-muted-foreground text-sm font-medium" aria-live="polite">
+      @if (locked()) {
+        {{ 'room.hand.locked' | transloco }}
+      } @else if (selectedValue(); as value) {
+        {{ 'room.hand.yourVote' | transloco: { card: value | cardName } }}
+      } @else {
+        {{ 'room.hand.pick' | transloco }}
+      }
+    </p>
+    <div
+      class="flex flex-wrap justify-center gap-2 pt-2.5"
+      role="group"
+      [attr.aria-label]="'room.hand.label' | transloco"
+    >
       @for (value of deck(); track value) {
         @let selected = value === selectedValue();
         <button
@@ -17,7 +30,7 @@ import { cardLabel } from './card-label';
           class="focus-visible:ring-ring/50 flex h-17.5 w-12 items-center justify-center rounded-lg outline-none focus-visible:ring-3 disabled:cursor-default"
           [class]="selected ? selectedClass : locked() ? lockedClass : idleClass"
           [attr.aria-pressed]="selected"
-          [attr.aria-label]="label(value)"
+          [attr.aria-label]="'room.hand.voteFor' | transloco: { card: value | cardName }"
           [disabled]="locked()"
           (click)="pick.emit(value)"
         >
@@ -41,16 +54,4 @@ export class CardHand {
     'bg-brand text-brand-foreground cursor-pointer -translate-y-2.5 inset-ring inset-ring-brand shadow-[0_8px_16px_-6px_var(--brand)] transition-transform duration-180 motion-reduce:transition-none';
   protected readonly lockedClass =
     'bg-background text-foreground inset-ring inset-ring-border opacity-50';
-
-  protected readonly status = computed(() => {
-    if (this.locked()) return 'Round finished — start a new round to vote again';
-    const value = this.selectedValue();
-    return value === null
-      ? 'Pick your estimate'
-      : `Your vote: ${cardLabel(value)} · click again to withdraw`;
-  });
-
-  protected label(value: string): string {
-    return `Vote ${cardLabel(value)}`;
-  }
 }
