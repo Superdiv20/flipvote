@@ -41,14 +41,14 @@
   "errors": {
     "ALREADY_IN_ROOM": "Dieser Tab ist schon mit einem anderen Raum verbunden.",
     "ALREADY_REVEALED": "Die Karten sind schon aufgedeckt. Starte eine neue Runde, um wieder abzustimmen.",
-    "INVALID_CARD": "Diese Karte gibt es im Kartenset dieses Raums nicht.",
+    "INVALID_CARD": "Diese Karte gibt es im Deck dieses Raums nicht.",
     "INVALID_MESSAGE": "Der Server hat das nicht verstanden. Lade die Seite neu und versuch es noch einmal.",
     "INVALID_SESSION": "Deine Sitzung passt nicht zu deinem Platz. Lade die Seite neu und versuch es noch einmal.",
-    "ISSUE_NOT_FOUND": "Dieses Issue wurde inzwischen entfernt.",
-    "ISSUE_TOO_LONG": "Dieses Issue ist zu lang. Kürze Titel, Link oder Beschreibung.",
+    "ISSUE_NOT_FOUND": "Dieses Thema wurde inzwischen entfernt.",
+    "ISSUE_TOO_LONG": "Dieses Thema ist zu lang. Kürze Titel, Link oder Beschreibung.",
     "NAME_REQUIRED": "Gib einen Namen ein.",
     "NAME_TOO_LONG": "Namen dürfen höchstens {nameMax} Zeichen haben.",
-    "NOT_FACILITATOR": "Das kann nur der Facilitator.",
+    "NOT_FACILITATOR": "Das kann nur der Moderator.",
     "NOT_JOINED": "Du sitzt nicht mehr in diesem Raum. Lade die Seite neu, um wieder beizutreten.",
     "NOT_REVEALED": "Die Karten sind noch nicht aufgedeckt.",
     "NO_VOTES": "Noch hat niemand abgestimmt, es gibt also nichts aufzudecken.",
@@ -57,8 +57,8 @@
     "ROOM_NAME_TOO_LONG": "Raumnamen dürfen höchstens {roomNameMax} Zeichen haben.",
     "ROOM_NOT_FOUND": "Diesen Raum gibt es nicht mehr.",
     "SPECTATOR_CANNOT_VOTE": "Du schaust nur zu. Schalte „Nur zuschauen“ aus, um abzustimmen.",
-    "TITLE_REQUIRED": "Gib dem Issue einen Titel.",
-    "TOO_MANY_ISSUES": "Dieser Raum hat schon {maxIssues} Issues. Entferne welche, um neue hinzuzufügen.",
+    "TITLE_REQUIRED": "Gib dem Thema einen Titel.",
+    "TOO_MANY_ISSUES": "Dieser Raum hat schon {maxIssues} Themen. Entferne welche, um neue hinzuzufügen.",
     "UNKNOWN": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
     "VOTES_LOCKED": "Alle haben abgestimmt, deshalb sind die Stimmen bis zum Aufdecken gesperrt."
   },
@@ -72,13 +72,13 @@
     "yourName": "Dein Name"
   },
   "landing": {
-    "anyoneCanJoin": "Alle mit dem Link können beitreten.",
+    "anyoneCanJoin": "Alle mit Link können beitreten.",
     "create": "Raum erstellen",
     "creating": "Raum wird erstellt…",
-    "description": "Erstelle einen Raum, teile den Link und stimmt verdeckt ab. Ganz ohne Konto.",
+    "description": "Erstelle einen Raum, teile den Link und stimme verdeckt ab. Ganz ohne Konto.",
     "displayNamePlaceholder": "Dein Anzeigename",
     "errors": {
-      "INVALID_MESSAGE": "Der Server hat die Raumeinstellungen nicht akzeptiert. Prüfe Name und Kartenset.",
+      "INVALID_MESSAGE": "Der Server hat die Raumeinstellungen nicht akzeptiert. Prüfe Name und Deck.",
       "INVALID_SESSION": "Deine Sitzung konnte nicht bestätigt werden. Lade die Seite neu und versuch es noch einmal.",
       "NAME_REQUIRED": "Gib dem Raum einen Namen.",
       "failed": "Der Raum konnte nicht erstellt werden. Bitte versuch es noch einmal.",
@@ -86,7 +86,7 @@
       "unreachable": "Der Server ist nicht erreichbar. Prüfe deine Verbindung."
     },
     "roomName": "Raumname",
-    "roomNamePlaceholder": "Sprint-42-Planning",
+    "roomNamePlaceholder": "Sprint 42 Planning",
     "title": "Starte eine Planning-Session"
   },
   "notFound": {
@@ -95,7 +95,7 @@
     "title": "Seite nicht gefunden"
   },
   "profile": {
-    "description": "Nur dieser Browser merkt sie sich.",
+    "description": "Nur in diesem Browser gespeichert.",
     "nameHint": "Wird am Tisch und in der Teilnehmerliste angezeigt."
   },
   "room": {
@@ -113,38 +113,38 @@
     "header": {
       "invite": "Einladen",
       "linkCopied": "Link kopiert",
-      "noIssueSelected": "Kein Issue ausgewählt"
+      "noIssueSelected": "Kein Thema ausgewählt"
     },
     "issueDialog": {
-      "add": "Issue hinzufügen",
-      "addDescription": "Füge ein neues Issue mit Link und Beschreibung hinzu.",
-      "addTitle": "Issue hinzufügen",
+      "add": "Thema hinzufügen",
+      "addDescription": "Füge ein neues Thema mit Link und Beschreibung hinzu.",
+      "addTitle": "Thema hinzufügen",
       "characterCount": "Zeichen: {count}/{max}",
       "descriptionLabel": "Beschreibung",
       "descriptionPlaceholder": "Beschreibung hier eingeben.",
       "editDescription": "Ändere Titel, Link oder Beschreibung.",
-      "editTitle": "Issue bearbeiten",
+      "editTitle": "Thema bearbeiten",
       "linkLabel": "Link",
       "save": "Änderungen speichern",
       "titleLabel": "Titel"
     },
     "issues": {
-      "add": "Issue hinzufügen",
-      "addPlaceholder": "Issue hinzufügen…",
-      "collapse": "Issues einklappen",
-      "count": "{count, plural, one {# Issue} other {# Issues}}",
+      "add": "Thema hinzufügen",
+      "addPlaceholder": "Thema hinzufügen…",
+      "collapse": "Themen einklappen",
+      "count": "{count, plural, one {# Thema} other {# Themen}}",
       "delete": "{issue} löschen",
       "descriptionTooLong": "Beschreibungen dürfen höchstens {max} Zeichen haben.",
-      "empty": "Noch keine Issues. Füge unten eines hinzu.",
-      "expand": "Issues ausklappen",
+      "empty": "Noch keine Themen. Füge unten eines hinzu.",
+      "expand": "Themen ausklappen",
       "keyTooLong": "Keys dürfen höchstens {max} Zeichen haben.",
       "linkTooLong": "Links dürfen höchstens {max} Zeichen haben.",
       "open": "{issue} öffnen",
       "openDialog": "Dialog zum Hinzufügen öffnen",
-      "rowLabel": "{issue}, {status, select, current {wird gerade geschätzt} done {geschätzt mit {estimate}} other {dieses Issue schätzen}}",
+      "rowLabel": "{issue}, {status, select, current {wird gerade geschätzt} done {geschätzt mit {estimate}} other {dieses Thema schätzen}}",
       "submit": "Hinzufügen",
-      "title": "Issues",
-      "titleRequired": "Gib dem Issue einen Titel.",
+      "title": "Themen",
+      "titleRequired": "Gib dem Thema einen Titel.",
       "titleTooLong": "Titel dürfen höchstens {max} Zeichen haben.",
       "voting": "Wird geschätzt"
     },
@@ -184,7 +184,7 @@
       "votedFor": "Hat {card} gewählt",
       "waiting": "Wartet",
       "watchOnly": "Nur zuschauen",
-      "watchOnlyHint": "Verfolge die Runde ohne eigene Karte.",
+      "watchOnlyHint": "Verfolge die Runde ohne selbst abzustimmen.",
       "you": "(du)"
     },
     "results": {
@@ -200,18 +200,18 @@
       "autoFlip": "Automatisch aufdecken",
       "autoFlipHint": "Sobald alle abgestimmt haben, startet ein kurzer Countdown und die Karten werden von selbst aufgedeckt. Während des Countdowns sind die Stimmen gesperrt.",
       "away": "abwesend",
-      "deck": "Kartenset",
+      "deck": "Deck",
       "description": "Änderungen gelten für alle im Raum.",
-      "facilitator": "Facilitator",
+      "facilitator": "Moderator",
       "facilitatorHint": "Gib die Rolle an jemand anderen ab. Du behältst deinen Platz und deine Stimme.",
-      "keepDeck": "Aktuelles Kartenset behalten",
-      "makeFacilitator": "Zum Facilitator machen",
-      "makeFacilitatorLabel": "{name} zum Facilitator machen",
-      "nobodyElse": "Sonst ist noch niemand im Raum.",
-      "onlyFacilitatorCanFlip": "Nur der Facilitator deckt auf",
-      "onlyFacilitatorCanFlipHint": "Wenn aktiv, kann nur der Facilitator die Karten von Hand aufdecken.",
-      "switchDeck": "Kartenset wechseln",
-      "switchWarning": "{phase, select, revealed {Ein Wechsel des Kartensets beendet diese Runde und löscht ihr Ergebnis.} other {Ein Wechsel des Kartensets startet eine neue Runde und löscht {count, plural, one {# Stimme} other {# Stimmen}}.}}",
+      "keepDeck": "Aktuelles Deck behalten",
+      "makeFacilitator": "Zum Moderator machen",
+      "makeFacilitatorLabel": "{name} zum Moderator machen",
+      "nobodyElse": "Es ist sonst noch niemand im Raum.",
+      "onlyFacilitatorCanFlip": "Nur der Moderator deckt auf",
+      "onlyFacilitatorCanFlipHint": "Wenn aktiv, kann nur der Moderator die Karten von Hand aufdecken.",
+      "switchDeck": "Deck wechseln",
+      "switchWarning": "{phase, select, revealed {Ein Wechsel des Decks beendet diese Runde und löscht ihr Ergebnis.} other {Ein Wechsel des Decks startet eine neue Runde und löscht {count, plural, one {# Stimme} other {# Stimmen}}.}}",
       "title": "Raumeinstellungen"
     },
     "table": {

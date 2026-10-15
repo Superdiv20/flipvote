@@ -3,14 +3,14 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck } from '@ng-icons/lucide';
 import { CardValue } from '../hand/card-value';
 import { COFFEE_CARD } from '@flipvote/protocol';
-import { translateSignal } from '@jsverse/transloco';
+import { TranslocoPipe, translateSignal } from '@jsverse/transloco';
 import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { cardText } from '../hand/card-label';
 
 /** One participant at the table: their card (empty, face down, or flipped) and name. */
 @Component({
   selector: 'flipvote-seat',
-  imports: [NgIcon, CardValue],
+  imports: [NgIcon, CardValue, TranslocoPipe],
   providers: [provideIcons({ lucideCheck })],
   host: {
     class: 'flex flex-col items-center gap-2',
@@ -79,7 +79,7 @@ import { cardText } from '../hand/card-label';
     >
       {{ name() }}
       @if (isSelf()) {
-        <span class="text-muted-foreground text-xs">(you)</span>
+        <span class="text-muted-foreground text-xs">{{ 'room.participants.you' | transloco }}</span>
       }
     </span>
   `,
