@@ -196,6 +196,14 @@ describe('RoomPage', () => {
       expect(page.querySelector('flipvote-poker-table')).toBeNull();
     });
 
+    it('animates the mark and says it is connecting while the socket opens', async () => {
+      const fixture = render('connecting');
+      await fixture.whenStable();
+      const page = fixture.nativeElement as HTMLElement;
+      expect(page.querySelector('flipvote-logo-mark')?.classList.contains('animated')).toBe(true);
+      expect(page.querySelector('[role="status"]')?.textContent).toContain('Connecting');
+    });
+
     it('says it is trying again while the connection reconnects', async () => {
       const fixture = render('reconnecting');
       await fixture.whenStable();
