@@ -150,7 +150,7 @@ describe('RoomPage', () => {
 
     const page = fixture.nativeElement as HTMLElement;
     expect(page.querySelector('h1')?.textContent).toContain('Room not found');
-    expect(page.querySelector('a[href="/"]')?.textContent).toContain('Create a new room');
+    expect(page.querySelector('a[href="/createRoom"]')?.textContent).toContain('Create a new room');
     expect(page.querySelector('flipvote-poker-table')).toBeNull();
     expect(page.querySelector('flipvote-card-hand')).toBeNull();
   });

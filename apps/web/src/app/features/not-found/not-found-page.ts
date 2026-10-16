@@ -27,7 +27,11 @@ import { Logo } from '../../shared/logo';
         <p hlmEmptyDescription>{{ 'notFound.description' | transloco }}</p>
       </div>
       <div hlmEmptyContent>
-        <a hlmBtn routerLink="/" class="bg-brand text-brand-foreground hover:bg-brand-hover">
+        <a
+          hlmBtn
+          routerLink="/createRoom"
+          class="bg-brand text-brand-foreground hover:bg-brand-hover"
+        >
           {{ 'common.createNewRoom' | transloco }}
         </a>
       </div>

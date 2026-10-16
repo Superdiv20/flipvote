@@ -3,7 +3,13 @@ import { marker } from '@jsverse/transloco-keys-manager/marker';
 import { CreateRoomStore } from './features/landing/create-room.store';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'createRoom' },
+  {
+    path: '',
+    pathMatch: 'full',
+    // Route titles are translation keys, see TranslatedTitleStrategy.
+    title: marker('landing.meta.title'),
+    loadComponent: () => import('./features/landing/landing-page').then((m) => m.LandingPage),
+  },
   {
     path: 'createRoom',
     loadComponent: () =>

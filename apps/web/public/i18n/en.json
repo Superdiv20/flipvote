@@ -30,6 +30,7 @@
     "backToStart": "Back to start",
     "cancel": "Cancel",
     "createNewRoom": "Create a new room",
+    "createRoom": "Create a room",
     "save": "Save",
     "tryAgain": "Try again"
   },
@@ -84,6 +85,106 @@
       "failed": "The room could not be created. Please try again.",
       "serverError": "The server ran into a problem. Try again in a moment.",
       "unreachable": "Could not reach the server. Check your connection."
+    },
+    "faq": {
+      "items": {
+        "account": {
+          "answer": "No. Create a room, share the link, and everyone joins with just a name.",
+          "question": "Do I need an account?"
+        },
+        "free": {
+          "answer": "Yes. Flipvote is free to use.",
+          "question": "Is it free?"
+        },
+        "hiddenVotes": {
+          "answer": "No. Votes stay hidden until the facilitator flips the cards. Until then, others only see that you have voted.",
+          "question": "Can others see my vote before the flip?"
+        },
+        "refresh": {
+          "answer": "You rejoin your seat with your vote.",
+          "question": "What happens if I refresh the page?"
+        }
+      },
+      "title": "Frequently asked questions"
+    },
+    "features": {
+      "items": {
+        "decks": {
+          "text": "Fibonacci, modified Fibonacci, T-shirt sizes.",
+          "title": "Decks"
+        },
+        "hidden": {
+          "text": "Nobody sees votes early.",
+          "title": "Hidden until the flip"
+        },
+        "issues": {
+          "text": "Line up stories, record the final estimate per issue.",
+          "title": "Issue list"
+        },
+        "noSignup": {
+          "text": "Join with just a name.",
+          "title": "No signup"
+        },
+        "results": {
+          "text": "Average, distribution, consensus.",
+          "title": "Results at a glance"
+        },
+        "roles": {
+          "text": "One person leads, others can just watch.",
+          "title": "Facilitator and spectators"
+        }
+      },
+      "lead": "What you get in every room.",
+      "title": "Features"
+    },
+    "finalCta": {
+      "title": "Ready for your next estimation session?"
+    },
+    "footer": {
+      "copyright": "© {year} Flipvote"
+    },
+    "header": {
+      "features": "Features",
+      "how": "How it works",
+      "menu": "Menu",
+      "nav": "Sections",
+      "switchTheme": "{to, select, light {Light mode} other {Dark mode}}",
+      "toggleTheme": "Toggle theme"
+    },
+    "hero": {
+      "badge": "Free, no signup",
+      "github": "View on GitHub",
+      "replay": "Flip again",
+      "subtitle": "Free planning poker without the overhead. Create a room, share the link, flip the cards.",
+      "title": "Estimate together, reveal at once.",
+      "you": "You"
+    },
+    "howItWorks": {
+      "lead": "Three steps, no setup.",
+      "steps": {
+        "create": {
+          "text": "Pick a name and a deck.",
+          "title": "Create a room"
+        },
+        "flip": {
+          "text": "Cards stay hidden until the facilitator flips them.",
+          "title": "Vote and flip"
+        },
+        "share": {
+          "text": "Teammates join with just their name.",
+          "title": "Share the link"
+        }
+      },
+      "title": "How it works"
+    },
+    "languageMenu": {
+      "de": "Deutsch",
+      "en": "English",
+      "label": "Language"
+    },
+    "meta": {
+      "description": "Free planning poker without the overhead. Create a room, share the link, flip the cards. No signup.",
+      "title": "Flipvote – free planning poker for agile teams"
     },
     "roomName": "Room name",
     "roomNamePlaceholder": "Sprint 42 planning",

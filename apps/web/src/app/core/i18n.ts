@@ -1,4 +1,3 @@
-import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
 import {
   DOCUMENT,
   effect,
@@ -21,17 +20,23 @@ import {
 import { provideTranslocoLocale } from '@jsverse/transloco-locale';
 import { provideTranslocoMessageformat } from '@jsverse/transloco-messageformat';
 import { firstValueFrom } from 'rxjs';
-import { FALLBACK_LANGUAGE, type Language, LANGUAGES } from './languages';
+import { FALLBACK_LANGUAGE, isLanguage, type Language, LANGUAGES } from './languages';
 import { SessionService } from './session';
 import { provideTranslatedTitles } from './translated-title';
 
-/** Loads `public/i18n/<lang>.json`, relative to the base href. */
-@Injectable({ providedIn: 'root' })
-class HttpTranslationLoader implements TranslocoLoader {
-  private readonly http = inject(HttpClient);
+const TRANSLATIONS: Record<Language, () => Promise<Translation>> = {
+  en: () => import('../../../public/i18n/en.json').then((m) => m.default),
+  de: () => import('../../../public/i18n/de.json').then((m) => m.default),
+};
 
+/**
+ * Bundles `public/i18n/<lang>.json` as lazy chunks instead of fetching them over HTTP: the landing
+ * page is prerendered at build time, and a relative URL has nothing to resolve against there.
+ */
+@Injectable({ providedIn: 'root' })
+class BundledTranslationLoader implements TranslocoLoader {
   getTranslation(lang: string) {
-    return this.http.get<Translation>(`i18n/${lang}.json`);
+    return TRANSLATIONS[isLanguage(lang) ? lang : FALLBACK_LANGUAGE]();
   }
 }
 
@@ -81,7 +86,6 @@ export class LanguageService {
 
 export function provideI18n(): (Provider | EnvironmentProviders)[] {
   return [
-    provideHttpClient(withFetch()),
     provideTransloco({
       config: {
         availableLangs: [...LANGUAGES],
@@ -91,7 +95,7 @@ export function provideI18n(): (Provider | EnvironmentProviders)[] {
         missingHandler: { useFallbackTranslation: true, logMissingKey: isDevMode() },
         prodMode: !isDevMode(),
       },
-      loader: HttpTranslationLoader,
+      loader: BundledTranslationLoader,
     }),
     // ICU syntax for plurals and selects, e.g. `{count, plural, one {# vote} other {# votes}}`.
     provideTranslocoMessageformat(),

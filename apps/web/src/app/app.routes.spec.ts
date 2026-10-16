@@ -79,7 +79,9 @@ describe('unknown addresses', () => {
     async (url) => {
       const page = await visit(url);
       expect(page.querySelector('h1')?.textContent).toContain('Page not found');
-      expect(page.querySelector('a[href="/"]')?.textContent).toContain('Create a new room');
+      expect(page.querySelector('a[href="/createRoom"]')?.textContent).toContain(
+        'Create a new room',
+      );
     },
   );
 
@@ -90,6 +92,7 @@ describe('unknown addresses', () => {
   });
 
   it.each([
+    ['/', 'flipvote-landing-page'],
     ['/createRoom', 'flipvote-create-room-page'],
     ['/r/abc', 'flipvote-room-page'],
   ])('leaves %p to its own page', async (url, selector) => {
