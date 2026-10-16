@@ -1,5 +1,5 @@
 {
-  "componentsPath": "shared/ui",
+  "componentsPath": "libs/ui",
   "importAlias": "@spartan-ng/helm",
   "style": "vega"
 }
