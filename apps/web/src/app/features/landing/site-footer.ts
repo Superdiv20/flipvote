@@ -1,4 +1,5 @@
 import { Component, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { simpleGithub } from '@ng-icons/simple-icons';
@@ -7,10 +8,10 @@ import type { Language } from '../../core/languages';
 import { LanguageMenu } from './language-menu';
 import { Logo } from '../../shared/logo';
 
-/** Logo and copyright, the GitHub link and a second language switch. */
+/** Logo and copyright, the legal pages, the GitHub link and a second language switch. */
 @Component({
   selector: 'flipvote-site-footer',
-  imports: [NgIcon, HlmButtonImports, LanguageMenu, Logo, TranslocoPipe],
+  imports: [RouterLink, NgIcon, HlmButtonImports, LanguageMenu, Logo, TranslocoPipe],
   providers: [provideIcons({ simpleGithub })],
   host: { class: 'block shadow-[inset_0_1px_0_var(--border)]' },
   template: `
@@ -23,7 +24,13 @@ import { Logo } from '../../shared/logo';
           {{ 'landing.footer.copyright' | transloco: { year } }}
         </span>
       </div>
-      <div class="flex items-center gap-1">
+      <div class="flex flex-wrap items-center gap-1">
+        <a hlmBtn variant="ghost" size="lg" routerLink="/imprint">{{
+          'legal.imprint.link' | transloco
+        }}</a>
+        <a hlmBtn variant="ghost" size="lg" routerLink="/privacy">{{
+          'legal.privacy.link' | transloco
+        }}</a>
         <a
           hlmBtn
           variant="ghost"

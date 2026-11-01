@@ -17,6 +17,16 @@ export const routes: Routes = [
     providers: [CreateRoomStore],
   },
   {
+    path: 'imprint',
+    title: marker('legal.imprint.pageTitle'),
+    loadComponent: () => import('./features/legal/imprint-page').then((m) => m.ImprintPage),
+  },
+  {
+    path: 'privacy',
+    title: marker('legal.privacy.pageTitle'),
+    loadComponent: () => import('./features/legal/privacy-page').then((m) => m.PrivacyPage),
+  },
+  {
     path: 'r/:roomId',
     // RoomPage provides its own RoomStore. Route providers live as long as the router, so they
     // would hand the next visit the previous room's store.

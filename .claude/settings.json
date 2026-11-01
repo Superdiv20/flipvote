@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/operator.local.ts)",
+      "Edit(**/operator.local.ts)",
+      "Write(**/operator.local.ts)",
+      "Read(**/web/dist/**)",
+      "Read(**/web/.angular/cache/**)"
+    ]
+  }
+}

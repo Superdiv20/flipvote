@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Operator details for the imprint, see src/app/features/legal/operator.ts
+src/app/features/legal/operator.local.ts
