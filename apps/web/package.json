@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "bun scripts/ensure-operator.ts && ng serve",
-    "dev": "bun scripts/ensure-operator.ts && ng serve",
-    "build": "bun scripts/ensure-operator.ts && ng build",
-    "watch": "bun scripts/ensure-operator.ts && ng build --watch --configuration development",
-    "test": "bun scripts/ensure-operator.ts && ng test",
+    "start": "ng serve",
+    "dev": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
     "i18n:check": "transloco-keys-manager find --input src/app --translations-path public/i18n --langs en de --unflat --emit-error-on-extra-keys"
   },
   "private": true,

@@ -62,15 +62,13 @@ apps/web/src/app/
   shared/        # used by 2+ features only (playing card, logo, deck definitions)
 ```
 
-- Only `/` (the landing page) and the legal pages (`/imprint`, `/privacy`) are prerendered at build time; every other route renders in the browser (`app.routes.server.ts`, `outputMode: "static"`). Code that runs on prerendered pages or at app start must not assume a browser: no `window`, `localStorage` or `matchMedia` without a guard (`SessionService` and `ThemeService` already handle this). Browser-only work goes in `afterNextRender`.
+- Only `/` (the landing page) is prerendered at build time; every other route renders in the browser (`app.routes.server.ts`, `outputMode: "static"`). Code that runs on prerendered pages or at app start must not assume a browser: no `window`, `localStorage` or `matchMedia` without a guard (`SessionService` and `ThemeService` already handle this). Browser-only work goes in `afterNextRender`.
 - `RoomStore` is provided in `RoomPage`'s `providers`, not in the route or in root, so each room visit gets a fresh store. Route `providers` live as long as the router does, so the next visit would get the previous room's store.
 - `room-page` is the only room component that injects the store. Child components are presentational (inputs/outputs only).
 - Never name an output after a native DOM event (`select`, `reset`, `submit`, `input`, `change`, …). A bubbling DOM event of that name reaches the parent's `(name)` binding as well, so the handler gets an `Event` instead of the output's value.
 - Move something into `shared/` only when a second feature needs it. Split `features/room/` into subfolders only once it grows past ~15 files.
 - The WebSocket service in `core/` knows nothing about rooms; it sends `ClientMessage`s and exposes incoming `ServerMessage`s.
 - `SessionService` in `core/` is the only code that touches `localStorage` (guest token, name, language, theme). Everything else goes through it.
-
-- The operator's real details for the imprint live in `features/legal/operator.local.ts` (gitignored, created with placeholders by `scripts/ensure-operator.ts`). Never read, print, grep or edit it, nor the build output (`dist/`, `.angular/cache/`) that contains them. Change the shape in `operator.ts` and the placeholders in the script; the operator updates their local file themselves.
 
 ### i18n
 
@@ -106,6 +104,5 @@ apps/web/src/app/
 ## Docker
 
 - Multi-stage build: build Angular, then copy the static output (`dist/web/browser`) into an `oven/bun` runtime image.
-- Bun serves the prerendered pages as they are: `index.html` (the landing page) for `/`, `imprint/index.html` and `privacy/index.html` for the legal pages. The SPA fallback for every other path must be `index.csr.html`, not `index.html`, or the browser tries to hydrate the landing page's markup on a room page.
+- Bun serves the prerendered landing page (`index.html`) for `/`. The SPA fallback for every other path must be `index.csr.html`, not `index.html`, or the browser tries to hydrate the landing page's markup on a room page.
 - The image must include `packages/protocol` alongside `apps/server`, since the server resolves it via `tsconfig` paths.
-- The Angular build needs `operator.local.ts` with the real operator details; without it the imprint shows placeholders.

@@ -190,19 +190,6 @@
     "roomNamePlaceholder": "Sprint 42 Planning",
     "title": "Starte eine Planning-Session"
   },
-  "legal": {
-    "germanOnly": "Dieser Text ist nur auf Deutsch verfügbar.",
-    "home": "Zur Startseite",
-    "imprint": {
-      "link": "Impressum",
-      "pageTitle": "Impressum · Flipvote"
-    },
-    "nav": "Rechtliches",
-    "privacy": {
-      "link": "Datenschutz",
-      "pageTitle": "Datenschutzerklärung · Flipvote"
-    }
-  },
   "notFound": {
     "description": "Unter dieser Adresse gibt es nichts. Um einem Raum beizutreten, öffne den Link, den du bekommen hast.",
     "pageTitle": "Seite nicht gefunden · Flipvote",
