@@ -72,7 +72,7 @@ apps/web/src/app/
 
 ### i18n
 
-- Runtime translation with Transloco (English and German), set up in `core/i18n.ts`. `LanguageService` picks the language (the stored choice, else German if the browser is German, else English), switches it without a reload, and keeps `<html lang>` in sync.
+- Runtime translation with Transloco (English and German), set up in `core/i18n.ts`. `LanguageService` picks the language (the stored choice, else English), switches it without a reload, and keeps `<html lang>` in sync.
 - Translation files are `apps/web/public/i18n/en.json` and `de.json`, bundled as lazy chunks (not fetched over HTTP, so they also work while prerendering). English is the fallback. Add every key to both files.
 - Keys are nested by feature and component, English and descriptive: `room.issues.addPlaceholder`, `room.results.average`, `common.cancel`. Shared wording goes under `common.`, form validation under `forms.`.
 - No hardcoded user-facing text in `src/app`, including aria-labels, tooltips, placeholders and toasts. Templates use `| transloco`. Host bindings and TS code use `translateSignal()` or `TranslocoService.translate()`.

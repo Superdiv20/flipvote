@@ -19,19 +19,19 @@ describe('LanguageService', () => {
     expect(document.documentElement.lang).toBe('en');
   });
 
-  it('starts in German when the browser is set to German', () => {
-    expect(create('de-DE').language()).toBe('de');
-    expect(TestBed.inject(TranslocoService).getActiveLang()).toBe('de');
+  it('starts in English even when the browser is set to German', () => {
+    expect(create('de-DE').language()).toBe('en');
+    expect(TestBed.inject(TranslocoService).getActiveLang()).toBe('en');
   });
 
-  it('switches at once, and remembers the choice over the browser language', () => {
+  it('switches at once, and remembers the choice', () => {
     const languages = create();
     languages.use('de');
     TestBed.tick();
     expect(TestBed.inject(TranslocoService).translate('common.cancel')).toBe('Abbrechen');
     expect(document.documentElement.lang).toBe('de');
 
-    expect(create('fr-FR').language()).toBe('de');
+    expect(create().language()).toBe('de');
     languages.use('en');
   });
 });

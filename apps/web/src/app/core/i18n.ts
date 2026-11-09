@@ -11,7 +11,6 @@ import {
   signal,
 } from '@angular/core';
 import {
-  getBrowserLang,
   provideTransloco,
   type Translation,
   type TranslocoLoader,
@@ -41,7 +40,7 @@ class BundledTranslationLoader implements TranslocoLoader {
 }
 
 /**
- * The active language: the user's stored choice, else the browser's if it's German, else English.
+ * The active language: the user's stored choice, else English.
  * Switching keeps everything running (no reload, the socket stays open) and keeps `<html lang>`
  * in step, so screen readers pronounce the text in the right language.
  */
@@ -78,9 +77,7 @@ export class LanguageService {
   }
 
   private initialLanguage(): Language {
-    const stored = this.session.language();
-    if (stored) return stored;
-    return getBrowserLang() === 'de' ? 'de' : FALLBACK_LANGUAGE;
+    return this.session.language() ?? FALLBACK_LANGUAGE;
   }
 }
 
