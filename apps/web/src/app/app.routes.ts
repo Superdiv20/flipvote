@@ -1,19 +1,15 @@
 import { Routes } from '@angular/router';
 import { marker } from '@jsverse/transloco-keys-manager/marker';
-import { CreateRoomStore } from './features/landing/create-room.store';
+import { CreateRoomStore } from './features/create-room/create-room.store';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
     // Route titles are translation keys, see TranslatedTitleStrategy.
-    title: marker('landing.meta.title'),
-    loadComponent: () => import('./features/landing/landing-page').then((m) => m.LandingPage),
-  },
-  {
-    path: 'createRoom',
+    title: marker('createRoom.pageTitle'),
     loadComponent: () =>
-      import('./features/landing/create-room-page').then((m) => m.CreateRoomPage),
+      import('./features/create-room/create-room-page').then((m) => m.CreateRoomPage),
     providers: [CreateRoomStore],
   },
   {

@@ -59,12 +59,12 @@ Run from the repo root:
 apps/web/src/app/
   core/          # app-wide singletons without UI (socket, session, config)
   features/
-    landing/     # landing page (`/`), create-room form
+    create-room/ # start page (`/`): create-room form, language and theme switch
     room/        # room page, room store, table, seats, card hand, results
-  shared/        # used by 2+ features only (playing card, logo, deck definitions)
+  shared/        # used by 2+ features only (logo, GitHub link, deck definitions)
 ```
 
-- Only `/` (the landing page) is prerendered at build time; every other route renders in the browser (`app.routes.server.ts`, `outputMode: "static"`). Code that runs on prerendered pages or at app start must not assume a browser: no `window`, `localStorage` or `matchMedia` without a guard (`SessionService` and `ThemeService` already handle this). Browser-only work goes in `afterNextRender`.
+- The app renders in the browser only: no SSR, no prerendering. The build is a plain SPA with a single `index.html`.
 - `RoomStore` is provided in `RoomPage`'s `providers`, not in the route or in root, so each room visit gets a fresh store. Route `providers` live as long as the router does, so the next visit would get the previous room's store.
 - `room-page` is the only room component that injects the store. Child components are presentational (inputs/outputs only).
 - Never name an output after a native DOM event (`select`, `reset`, `submit`, `input`, `change`, …). A bubbling DOM event of that name reaches the parent's `(name)` binding as well, so the handler gets an `Event` instead of the output's value.
@@ -75,7 +75,7 @@ apps/web/src/app/
 ### i18n
 
 - Runtime translation with Transloco (English and German), set up in `core/i18n.ts`. `LanguageService` picks the language (the stored choice, else English), switches it without a reload, and keeps `<html lang>` in sync.
-- Translation files are `apps/web/public/i18n/en.json` and `de.json`, bundled as lazy chunks (not fetched over HTTP, so they also work while prerendering). English is the fallback. Add every key to both files.
+- Translation files are `apps/web/public/i18n/en.json` and `de.json`, bundled as lazy chunks with content hashes (not fetched over HTTP). English is the fallback. Add every key to both files.
 - Keys are nested by feature and component, English and descriptive: `room.issues.addPlaceholder`, `room.results.average`, `common.cancel`. Shared wording goes under `common.`, form validation under `forms.`.
 - No hardcoded user-facing text in `src/app`, including aria-labels, tooltips, placeholders and toasts. Templates use `| transloco`. Host bindings and TS code use `translateSignal()` or `TranslocoService.translate()`.
 - Keys that are built in TS (lookup tables, validator messages) are wrapped in `marker()` from `@jsverse/transloco-keys-manager/marker`, so the keys manager can find them. Validators put the **key** into `message`; the template translates it.
@@ -109,5 +109,5 @@ The old marketing landing page is preserved at tag archive/landing-page
 ## Docker
 
 - Multi-stage build: build Angular, then copy the static output (`dist/web/browser`) into an `oven/bun` runtime image.
-- Bun serves the prerendered landing page (`index.html`) for `/`. The SPA fallback for every other path must be `index.csr.html`, not `index.html`, or the browser tries to hydrate the landing page's markup on a room page.
+- Static files from `dist/web/browser` are served as they are; every other path (except `/api` and `/ws`) gets `index.html`, the SPA fallback.
 - The image must include `packages/protocol` alongside `apps/server`, since the server resolves it via `tsconfig` paths.

@@ -13,6 +13,7 @@ import type { Language } from '../../../core/languages';
 import type { ConnectionStatus } from '../../../core/socket';
 import type { Theme, ThemePreference } from '../../../core/theme';
 import { AccountMenu } from './account-menu';
+import { GithubLink } from '../../../shared/github-link';
 import { Logo } from '../../../shared/logo';
 import { ParticipantList } from './participant-list';
 
@@ -26,6 +27,7 @@ import { ParticipantList } from './participant-list';
     Logo,
     ParticipantList,
     AccountMenu,
+    GithubLink,
     RoomSettings,
     TranslocoPipe,
     ProfileSettings,
@@ -133,6 +135,7 @@ import { ParticipantList } from './participant-list';
       }}</span>
     </button>
     <div class="bg-border h-5 w-px" aria-hidden="true"></div>
+    <flipvote-github-link class="max-sm:hidden" />
     <flipvote-account-menu
       [account]="account()"
       [guestName]="guestName()"

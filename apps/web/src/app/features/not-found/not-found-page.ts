@@ -29,7 +29,7 @@ import { Logo } from '../../shared/logo';
       <div hlmEmptyContent>
         <a
           hlmBtn
-          routerLink="/createRoom"
+          routerLink="/"
           class="bg-brand text-brand-foreground hover:bg-brand-hover"
         >
           {{ 'common.createNewRoom' | transloco }}

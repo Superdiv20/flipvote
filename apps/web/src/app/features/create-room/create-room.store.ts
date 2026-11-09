@@ -54,8 +54,8 @@ export const CreateRoomStore = signalStore(
 
 function createRoomErrorKey(error: unknown): string {
   // `fetch` rejects with a TypeError when the request never reached the server.
-  if (!(error instanceof RoomApiError)) return marker('landing.errors.unreachable');
+  if (!(error instanceof RoomApiError)) return marker('createRoom.errors.unreachable');
   if (error.code) return CREATE_ROOM_ERRORS[error.code] ?? errorKey(error.code);
-  if (error.status >= 500) return marker('landing.errors.serverError');
-  return marker('landing.errors.failed');
+  if (error.status >= 500) return marker('createRoom.errors.serverError');
+  return marker('createRoom.errors.failed');
 }

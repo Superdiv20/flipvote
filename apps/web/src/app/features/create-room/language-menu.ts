@@ -20,7 +20,7 @@ import type { Language } from '../../core/languages';
       variant="ghost"
       size="lg"
       class="gap-1.5 px-2.5"
-      [attr.aria-label]="'landing.languageMenu.label' | transloco"
+      [attr.aria-label]="'createRoom.languageMenu.label' | transloco"
       [hlmDropdownMenuTrigger]="menu"
       [align]="align()"
     >
@@ -56,6 +56,6 @@ export class LanguageMenu {
 
 /** Each language named in itself, so everyone finds theirs whatever is active. */
 const LANGUAGE_OPTIONS: { value: Language; labelKey: string }[] = [
-  { value: 'en', labelKey: marker('landing.languageMenu.en') },
-  { value: 'de', labelKey: marker('landing.languageMenu.de') },
+  { value: 'en', labelKey: marker('createRoom.languageMenu.en') },
+  { value: 'de', labelKey: marker('createRoom.languageMenu.de') },
 ];

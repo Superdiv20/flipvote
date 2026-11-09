@@ -5,7 +5,7 @@
     <title>Flipvote</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Before first paint, so a dark visitor doesn't see the prerendered landing page flash light. Mirrors ThemeService. -->
+    <!-- Before first paint, so a dark visitor doesn't see a light page while the app loads. Mirrors ThemeService. -->
     <script>
       try {
         var theme = localStorage.getItem('flipvote.theme');

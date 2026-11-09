@@ -29,8 +29,8 @@ const TRANSLATIONS: Record<Language, () => Promise<Translation>> = {
 };
 
 /**
- * Bundles `public/i18n/<lang>.json` as lazy chunks instead of fetching them over HTTP: the landing
- * page is prerendered at build time, and a relative URL has nothing to resolve against there.
+ * Bundles `public/i18n/<lang>.json` as lazy chunks instead of fetching them over HTTP, so they get
+ * content hashes like every other chunk and a new release never pairs with a cached old file.
  */
 @Injectable({ providedIn: 'root' })
 class BundledTranslationLoader implements TranslocoLoader {

@@ -26,9 +26,7 @@
                 "ignore": ["i18n/**"]
               }
             ],
-            "styles": ["src/styles.css"],
-            "server": "src/main.server.ts",
-            "outputMode": "static"
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {

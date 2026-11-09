@@ -49,8 +49,8 @@ describe('room route', () => {
     });
     expect(first.view()).toBe('notFound');
 
-    // "Create a new room" goes to the landing page, then on to the new room.
-    await harness.navigateByUrl('/createRoom');
+    // "Create a new room" goes to the start page, then on to the new room.
+    await harness.navigateByUrl('/');
     await harness.navigateByUrl('/r/new-room');
     const second = harness.routeDebugElement!.injector.get(RoomStore);
 
@@ -74,14 +74,12 @@ describe('unknown addresses', () => {
     return harness.routeNativeElement as HTMLElement;
   }
 
-  it.each(['/does-not-exist', '/r', '/r/abc/extra', '/createRoom/again'])(
+  it.each(['/does-not-exist', '/r', '/r/abc/extra', '/createRoom'])(
     'shows the 404 page for %p',
     async (url) => {
       const page = await visit(url);
       expect(page.querySelector('h1')?.textContent).toContain('Page not found');
-      expect(page.querySelector('a[href="/createRoom"]')?.textContent).toContain(
-        'Create a new room',
-      );
+      expect(page.querySelector('a[href="/"]')?.textContent).toContain('Create a new room');
     },
   );
 
@@ -92,8 +90,7 @@ describe('unknown addresses', () => {
   });
 
   it.each([
-    ['/', 'flipvote-landing-page'],
-    ['/createRoom', 'flipvote-create-room-page'],
+    ['/', 'flipvote-create-room-page'],
     ['/r/abc', 'flipvote-room-page'],
   ])('leaves %p to its own page', async (url, selector) => {
     const page = await visit(url);

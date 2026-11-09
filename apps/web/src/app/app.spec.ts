@@ -28,7 +28,7 @@ describe('app start', () => {
   });
 
   it('applies the system theme before any page has asked for it', async () => {
-    // A fresh start, e.g. a reload of the landing page, on a system set to dark.
+    // A fresh start, e.g. a reload of the not-found page, on a system set to dark.
     localStorage.clear();
     document.documentElement.classList.remove('dark');
     vi.stubGlobal('matchMedia', () => ({

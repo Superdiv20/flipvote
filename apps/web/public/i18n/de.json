@@ -30,9 +30,36 @@
     "backToStart": "Zurück zum Start",
     "cancel": "Abbrechen",
     "createNewRoom": "Neuen Raum erstellen",
-    "createRoom": "Raum erstellen",
     "save": "Speichern",
-    "tryAgain": "Erneut versuchen"
+    "tryAgain": "Erneut versuchen",
+    "viewOnGitHub": "Auf GitHub ansehen"
+  },
+  "createRoom": {
+    "anyoneCanJoin": "Alle mit Link können beitreten.",
+    "create": "Raum erstellen",
+    "creating": "Raum wird erstellt…",
+    "description": "Erstelle einen Raum, teile den Link und stimme verdeckt ab. Ganz ohne Konto.",
+    "displayNamePlaceholder": "Dein Anzeigename",
+    "errors": {
+      "INVALID_MESSAGE": "Der Server hat die Raumeinstellungen nicht akzeptiert. Prüfe Name und Deck.",
+      "INVALID_SESSION": "Deine Sitzung konnte nicht bestätigt werden. Lade die Seite neu und versuch es noch einmal.",
+      "NAME_REQUIRED": "Gib dem Raum einen Namen.",
+      "failed": "Der Raum konnte nicht erstellt werden. Bitte versuch es noch einmal.",
+      "serverError": "Beim Server ist ein Problem aufgetreten. Versuch es gleich noch einmal.",
+      "unreachable": "Der Server ist nicht erreichbar. Prüfe deine Verbindung."
+    },
+    "header": {
+      "toggleTheme": "Design wechseln"
+    },
+    "languageMenu": {
+      "de": "Deutsch",
+      "en": "English",
+      "label": "Sprache"
+    },
+    "pageTitle": "Flipvote · Planning Poker",
+    "roomName": "Raumname",
+    "roomNamePlaceholder": "Sprint 42 Planning",
+    "title": "Starte eine Planning-Session"
   },
   "decks": {
     "fibonacci": "Fibonacci",
@@ -71,124 +98,6 @@
     "roomNameTooLong": "Raumnamen dürfen höchstens {max} Zeichen haben.",
     "tooLong": "Höchstens {max} Zeichen.",
     "yourName": "Dein Name"
-  },
-  "landing": {
-    "anyoneCanJoin": "Alle mit Link können beitreten.",
-    "create": "Raum erstellen",
-    "creating": "Raum wird erstellt…",
-    "description": "Erstelle einen Raum, teile den Link und stimme verdeckt ab. Ganz ohne Konto.",
-    "displayNamePlaceholder": "Dein Anzeigename",
-    "errors": {
-      "INVALID_MESSAGE": "Der Server hat die Raumeinstellungen nicht akzeptiert. Prüfe Name und Deck.",
-      "INVALID_SESSION": "Deine Sitzung konnte nicht bestätigt werden. Lade die Seite neu und versuch es noch einmal.",
-      "NAME_REQUIRED": "Gib dem Raum einen Namen.",
-      "failed": "Der Raum konnte nicht erstellt werden. Bitte versuch es noch einmal.",
-      "serverError": "Beim Server ist ein Problem aufgetreten. Versuch es gleich noch einmal.",
-      "unreachable": "Der Server ist nicht erreichbar. Prüfe deine Verbindung."
-    },
-    "faq": {
-      "items": {
-        "account": {
-          "answer": "Nein. Raum erstellen, Link teilen, und alle treten nur mit einem Namen bei.",
-          "question": "Brauche ich ein Konto?"
-        },
-        "free": {
-          "answer": "Ja. Flipvote ist kostenlos.",
-          "question": "Ist es kostenlos?"
-        },
-        "hiddenVotes": {
-          "answer": "Nein. Die Stimmen bleiben verdeckt, bis der Moderator die Karten aufdeckt. Bis dahin sehen andere nur, dass du abgestimmt hast.",
-          "question": "Können andere meine Stimme vor dem Aufdecken sehen?"
-        },
-        "refresh": {
-          "answer": "Du kehrst mit deiner Stimme an deinen Platz zurück.",
-          "question": "Was passiert, wenn ich die Seite neu lade?"
-        }
-      },
-      "title": "Häufige Fragen"
-    },
-    "features": {
-      "items": {
-        "decks": {
-          "text": "Fibonacci, modifiziertes Fibonacci, T-Shirt-Größen.",
-          "title": "Decks"
-        },
-        "hidden": {
-          "text": "Niemand sieht die Stimmen vorab.",
-          "title": "Verdeckt bis zum Aufdecken"
-        },
-        "issues": {
-          "text": "Stories vorbereiten und die finale Schätzung pro Thema festhalten.",
-          "title": "Themenliste"
-        },
-        "noSignup": {
-          "text": "Beitreten nur mit einem Namen.",
-          "title": "Ohne Anmeldung"
-        },
-        "results": {
-          "text": "Durchschnitt, Verteilung, Konsens.",
-          "title": "Ergebnisse auf einen Blick"
-        },
-        "roles": {
-          "text": "Eine Person leitet, andere schauen einfach zu.",
-          "title": "Moderator und Zuschauer"
-        }
-      },
-      "lead": "Das steckt in jedem Raum.",
-      "title": "Features"
-    },
-    "finalCta": {
-      "title": "Bereit für die nächste Schätzrunde?"
-    },
-    "footer": {
-      "copyright": "© {year} Flipvote"
-    },
-    "header": {
-      "features": "Features",
-      "how": "So funktioniert’s",
-      "menu": "Menü",
-      "nav": "Bereiche",
-      "switchTheme": "{to, select, light {Heller Modus} other {Dunkler Modus}}",
-      "toggleTheme": "Design wechseln"
-    },
-    "hero": {
-      "badge": "Kostenlos, ohne Anmeldung",
-      "github": "Auf GitHub ansehen",
-      "replay": "Erneut aufdecken",
-      "subtitle": "Kostenloses Planning Poker ohne Overhead. Raum erstellen, Link teilen, Karten aufdecken.",
-      "title": "Gemeinsam schätzen, gleichzeitig aufdecken.",
-      "you": "Du"
-    },
-    "howItWorks": {
-      "lead": "Drei Schritte, keine Einrichtung.",
-      "steps": {
-        "create": {
-          "text": "Namen und Deck wählen.",
-          "title": "Raum erstellen"
-        },
-        "flip": {
-          "text": "Die Karten bleiben verdeckt, bis der Moderator sie aufdeckt.",
-          "title": "Abstimmen und aufdecken"
-        },
-        "share": {
-          "text": "Dein Team tritt nur mit seinem Namen bei.",
-          "title": "Link teilen"
-        }
-      },
-      "title": "So funktioniert’s"
-    },
-    "languageMenu": {
-      "de": "Deutsch",
-      "en": "English",
-      "label": "Sprache"
-    },
-    "meta": {
-      "description": "Kostenloses Planning Poker ohne Overhead. Raum erstellen, Link teilen, Karten aufdecken. Ohne Anmeldung.",
-      "title": "Flipvote – kostenloses Planning Poker für agile Teams"
-    },
-    "roomName": "Raumname",
-    "roomNamePlaceholder": "Sprint 42 Planning",
-    "title": "Starte eine Planning-Session"
   },
   "notFound": {
     "description": "Unter dieser Adresse gibt es nichts. Um einem Raum beizutreten, öffne den Link, den du bekommen hast.",
