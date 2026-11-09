@@ -1,6 +1,8 @@
 # Flipvote
 
-Realtime planning poker for agile teams. Users create a room, share the link, vote with hidden cards, and the facilitator flips them. No account needed. Hosted as a SaaS and self-hostable via Docker.
+Realtime planning poker for agile teams. Users create a room, share the link, vote with hidden
+cards, and the facilitator flips them. No account needed. Open source (Apache-2.0), self-hosted
+via Docker.
 
 ## Stack
 
@@ -99,7 +101,10 @@ apps/web/src/app/
 
 1. **MVP:** create room without account, join via link, vote, flip, new round. Fibonacci, modified Fibonacci and T-shirt decks. Facilitator role, spectator mode. Results: average, distribution, consensus indicator.
 2. **Usability:** issue list per session with final estimates, round timer, custom decks, CSV export, robust reconnect.
-3. **SaaS:** accounts, persistent teams, session history, billing (feature-flagged off in self-hosted builds).
+3. **Persistence (self-hosted):** optional accounts, persistent teams, session history. SQLite in
+a Docker volume, sign-in via email and later OIDC, instance settings via environment variables.
+Anonymous rooms keep working without an account.
+The old marketing landing page is preserved at tag archive/landing-page
 
 ## Docker
 
